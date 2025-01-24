@@ -3,5 +3,5 @@ uvicorn==0.22.0
 requests==2.31.0
 pydantic==1.10.9
 pandas==1.5.3
-pvlib==0.9.7
-python-dotenv==1.0.0
+pvlib
+python-dotenv
