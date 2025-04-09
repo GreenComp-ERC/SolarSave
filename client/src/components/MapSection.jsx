@@ -220,7 +220,7 @@ const MapSection = () => {
     const map = L.map("map", {
       zoomControl: false, // 禁用默认缩放控件
       attributionControl: false // 禁用归属控件
-    }).setView([31.2992, 120.7467], 13);
+    }).setView([31, 120], 13);
 
     // 使用深色地图主题
     L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {

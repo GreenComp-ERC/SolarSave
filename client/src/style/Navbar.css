@@ -1,134 +1,487 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+/* Navbar.css - 为升级后的导航栏提供炫酷现代的样式 */
 
-/* 全局样式 */
-.global-styles {
-  --primary-gradient: linear-gradient(to right, #3b82f6, #8b5cf6, #d946ef);
-  --navbar-bg: rgba(0, 0, 0, 0.9);
-  --card-bg: linear-gradient(to bottom right, #111827, #030712);
-  --button-hover: linear-gradient(to right, #2563eb, #7c3aed, #c026d3);
-  --glow-shadow: 0 0 15px rgba(79, 70, 229, 0.5);
-  --text-primary: #f3f4f6;
-  --text-secondary: #9ca3af;
+:root {
+  --primary: #2952e3;
+  --secondary: #ffcc00;
+  --accent: #00eeff;
+  --dark: #0c0c14;
+  --darker: #070711;
+  --light: #f0f0f0;
+  --success: #00cc66;
+  --warning: #ffcc00;
+  --error: #ff3366;
+  --glow: 0 0 10px rgba(0, 238, 255, 0.7);
+  --navbar-height: 70px;
 }
 
-body {
-  font-family: 'Inter', sans-serif;
-  background-color: #000;
-  color: var(--text-primary);
+.cyberpunk-navbar {
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: var(--navbar-height);
+  background: linear-gradient(90deg, var(--darker) 0%, var(--dark) 100%);
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.5);
+  z-index: 10001;
+  transition: all 0.3s ease;
 }
 
-/* 导航栏动画 */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+.cyberpunk-navbar.scrolled {
+  background: rgba(7, 7, 17, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.7);
+  height: 60px;
 }
 
-@keyframes pulse {
-  0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4); }
-  70% { box-shadow: 0 0 0 10px rgba(79, 70, 229, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
+.navbar-content {
+  max-width: 1440px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  padding: 0 2rem;
 }
 
-/* 导航栏特殊效果 */
-.nav-neon-glow {
-  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5), 0 0 20px rgba(139, 92, 246, 0.3);
+/* Logo Section */
+.logo-section {
+  display: flex;
+  align-items: center;
 }
 
-.gradient-text {
-  background: var(--primary-gradient);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.modal-appear {
-  animation: fadeIn 0.3s ease-out forwards;
-}
-
-/* 炫酷悬停效果 */
-.hover-glow:hover {
-  box-shadow: var(--glow-shadow);
-}
-
-.logo-pulse:hover {
-  animation: pulse 1.5s infinite;
-}
-
-/* 滚动条样式 */
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(31, 41, 55, 0.5);
-}
-
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #3b82f6, #8b5cf6);
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to bottom, #2563eb, #7c3aed);
-}
-
-/* 背景模糊效果 */
-.backdrop-blur {
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-
-/* 悬停项目动画 */
-.menu-item {
+.logo-wrapper {
+  display: flex;
+  align-items: center;
   position: relative;
-  overflow: hidden;
 }
 
-.menu-item::after {
+.logo-icon {
+  color: var(--secondary);
+  margin-right: 0.5rem;
+  filter: drop-shadow(0 0 5px rgba(255, 204, 0, 0.5));
+  transition: all 0.3s ease;
+}
+
+.logo-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 1px;
+}
+
+.logo-text .highlight {
+  color: var(--secondary);
+  position: relative;
+}
+
+.logo-text .highlight::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--accent);
+  box-shadow: var(--glow);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.3s ease;
+}
+
+.logo-wrapper:hover .highlight::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.logo-wrapper:hover .logo-icon {
+  transform: rotate(20deg);
+}
+
+/* Navigation Links */
+.nav-links {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  margin: 0 0.75rem;
+  padding: 0.5rem 0.75rem;
+  color: white;
+  cursor: pointer;
+  position: relative;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.nav-item span {
+  margin-left: 0.5rem;
+}
+
+.nav-item:hover {
+  background: rgba(41, 82, 227, 0.1);
+  transform: translateY(-2px);
+}
+
+.nav-item::after {
   content: '';
   position: absolute;
   bottom: 0;
-  left: 0;
+  left: 50%;
   width: 0;
   height: 2px;
-  background: var(--primary-gradient);
+  background: var(--accent);
+  transform: translateX(-50%);
   transition: width 0.3s ease;
-  border-radius: 1px;
+  box-shadow: var(--glow);
 }
 
-.menu-item:hover::after {
-  width: 100%;
+.nav-item:hover::after {
+  width: 70%;
 }
 
-/* 连接钱包按钮特效 */
-.wallet-button {
+/* Dropdown Menu */
+.dropdown {
   position: relative;
-  overflow: hidden;
-  z-index: 1;
 }
 
-.wallet-button::before {
-  content: '';
+.dropdown-trigger {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.dropdown-arrow {
+  margin-left: 0.5rem;
+  transition: transform 0.3s ease;
+}
+
+.dropdown-arrow.active {
+  transform: rotate(180deg);
+}
+
+.dropdown-menu {
   position: absolute;
+  top: 100%;
+  left: 0;
+  width: 200px;
+  background: rgba(12, 12, 20, 0.95);
+  border-radius: 6px;
+  padding: 0.5rem 0;
+  list-style: none;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  transform-origin: top center;
+  animation: dropdownFadeIn 0.2s ease forwards;
+  z-index: 10002;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-menu li {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dropdown-menu li span {
+  margin-left: 0.75rem;
+}
+
+.dropdown-menu li:hover {
+  background: rgba(41, 82, 227, 0.2);
+  color: var(--accent);
+}
+
+/* Wallet Section */
+.wallet-section {
+  display: flex;
+  align-items: center;
+}
+
+.connect-wallet-btn, .wallet-address-btn {
+  display: flex;
+  align-items: center;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.connect-wallet-btn {
+  background: linear-gradient(135deg, var(--primary) 0%, #1a3ad3 100%);
+  color: white;
+}
+
+.connect-wallet-btn:hover {
+  background: linear-gradient(135deg, #1a3ad3 0%, var(--primary) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(41, 82, 227, 0.4);
+}
+
+.wallet-address-btn {
+  background: rgba(41, 82, 227, 0.1);
+  border: 1px solid rgba(41, 82, 227, 0.5);
+  color: white;
+}
+
+.wallet-address-btn:hover {
+  background: rgba(41, 82, 227, 0.2);
+  border-color: var(--primary);
+}
+
+.connect-wallet-btn span, .wallet-address-btn span {
+  margin-left: 0.5rem;
+}
+
+/* Mobile Menu */
+.mobile-menu-btn {
+  display: none;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.mobile-menu-btn:hover {
+  color: var(--accent);
+}
+
+.mobile-nav {
+  display: none;
+  position: fixed;
+  top: var(--navbar-height);
+  left: 0;
+  width: 100%;
+  background: rgba(7, 7, 17, 0.98);
+  backdrop-filter: blur(10px);
+  z-index: 10000;
+  animation: slideDown 0.3s ease forwards;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mobile-nav-list {
+  list-style: none;
+  padding: 1rem 0;
+  margin: 0;
+}
+
+.mobile-nav-item {
+  display: flex;
+  align-items: center;
+  padding: 1rem 2rem;
+  color: white;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mobile-nav-item span {
+  margin-left: 1rem;
+}
+
+.mobile-nav-item:hover {
+  background: rgba(41, 82, 227, 0.1);
+  color: var(--accent);
+}
+
+.mobile-connect-wallet {
+  padding: 1rem 2rem;
+}
+
+.mobile-connect-wallet button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0.8rem 1.5rem;
+  background: linear-gradient(135deg, var(--primary) 0%, #1a3ad3 100%);
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.mobile-connect-wallet button:hover {
+  background: linear-gradient(135deg, #1a3ad3 0%, var(--primary) 100%);
+}
+
+.mobile-connect-wallet button span {
+  margin-left: 0.75rem;
+}
+
+/* Modals */
+.modal-overlay {
+  position: fixed;
   top: 0;
-  left: -100%;
+  left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.7s;
-  z-index: -1;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10005;
+  animation: fadeIn 0.3s ease;
 }
 
-.wallet-button:hover::before {
-  left: 100%;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
-/* 模态框动画 */
-@keyframes modalFadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+.modal-container {
+  background: #0f0f1a;
+  border-radius: 10px;
+  padding: 2rem;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(41, 82, 227, 0.3);
+  animation: modalSlideUp 0.3s ease forwards;
 }
 
-.modal-content {
-  animation: modalFadeIn 0.4s ease-out;
+.modal-container.large {
+  max-width: 900px;
+  width: 90%;
+  height: 80vh;
+}
+
+@keyframes modalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-close-btn:hover {
+  background: rgba(255, 51, 102, 0.2);
+  color: var(--error);
+  transform: rotate(90deg);
+}
+
+/* Media Queries */
+@media screen and (max-width: 1024px) {
+  .nav-links {
+    display: none;
+  }
+
+  .mobile-menu-btn {
+    display: block;
+  }
+
+  .mobile-nav {
+    display: block;
+  }
+
+  .navbar-content {
+    padding: 0 1.5rem;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .logo-text {
+    font-size: 1.25rem;
+  }
+
+  .wallet-address-btn span {
+    display: none;
+  }
+
+  .connect-wallet-btn {
+    padding: 0.5rem 1rem;
+  }
+
+  .navbar-content {
+    padding: 0 1rem;
+  }
+
+  .cyberpunk-navbar {
+    height: 60px;
+  }
+
+  .cyberpunk-navbar.scrolled {
+    height: 50px;
+  }
+
+  :root {
+    --navbar-height: 60px;
+  }
+}
+
+/* 滚动条样式 */
+.modal-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+.modal-container::-webkit-scrollbar-thumb {
+  background: rgba(41, 82, 227, 0.5);
+  border-radius: 10px;
+}
+
+.modal-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(41, 82, 227, 0.7);
 }

@@ -6,6 +6,7 @@
   position: relative;
   overflow: hidden;
   font-family: 'Roboto', sans-serif;
+  padding-top: 60px;
   --primary-color: #3498db;
   --accent-color: #2ecc71;
   --dark-bg: #1a1a2e;
@@ -14,6 +15,7 @@
   --text-accent: #4cd137;
   --danger-color: #e74c3c;
 }
+
 
 /* Base Map Container */
 .map-container {
@@ -409,6 +411,7 @@
     right: 20px;
     flex-direction: column;
   }
+
 
   .header-title {
     font-size: 1.5rem;

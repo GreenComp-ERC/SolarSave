@@ -1,128 +1,179 @@
-import React, { useContext, useState } from "react";
-import { HiMenuAlt4 } from "react-icons/hi";
-import { AiOutlineClose } from "react-icons/ai";
+import React, { useContext, useState, useEffect } from "react";
 import { TransactionContext } from "../context/TransactionContext";
-import logo from "../../images/logo.png";
 import { shortenAddress } from "../utils/shortenAddress";
 import SolarToken from "./Wallet";
 import Store from "./Store";
 import TestPanels from "./TestPanels";
+import "../style/Navbar.css"; // 引入新的 CSS 文件
 
-const NavBarItem = ({ title, classprops, onClick }) => (
+// 替换图标导入，使用更现代的图标
+import {
+  Menu, X, Sun, ChevronDown, Wallet,
+  Settings, Info, BookOpen, Globe,
+  ShoppingCart, Activity, User
+} from "lucide-react";
+
+const NavBarItem = ({ title, icon, classprops, onClick }) => (
   <li
-    className={`mx-4 cursor-pointer text-lg text-white transition-all duration-300 hover:text-[#ffcc00] ${classprops}`}
+    className={`nav-item ${classprops}`}
     onClick={onClick}
   >
-    {title}
+    {icon}
+    <span>{title}</span>
   </li>
 );
 
 const Navbar = ({ logoSize = "w-16" }) => {
   const [toggleMenu, setToggleMenu] = useState(false);
-
   const [isTokenModalOpen, setIsTokenModalOpen] = useState(false);
   const [isStoreModalOpen, setIsStoreModalOpen] = useState(false);
   const [isTestPanelsModalOpen, setIsTestPanelsModalOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [toolsDropdown, setToolsDropdown] = useState(false);
 
   const { currentAccount, connectWallet } = useContext(TransactionContext);
 
+  // 监听滚动事件，控制导航栏样式
+  useEffect(() => {
+    const handleScroll = () => {
+      const offset = window.scrollY;
+      if (offset > 50) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
   return (
-    <nav className="w-full flex md:justify-between justify-between items-center p-4 bg-black shadow-lg relative z-[10001] navbar">
-      <div className="md:flex-[0.5] flex-initial justify-center items-center">
-        <img
-          src={logo}
-          alt="logo"
-          className={`${logoSize} cursor-pointer hover:scale-105 transition-transform duration-300`}
-        />
-      </div>
+    <nav className={`cyberpunk-navbar ${scrolled ? "scrolled" : ""}`}>
+      <div className="navbar-content">
+        <div className="logo-section">
+          <div className="logo-wrapper">
+            <Sun className="logo-icon" />
+            <span className="logo-text">Solar<span className="highlight">Chain</span></span>
+          </div>
+        </div>
 
-        <ul className="text-white md:flex hidden list-none flex-row justify-between items-center flex-initial">
-            {["关于", "博客", "通讯", "文档", "区块浏览器"].map((item, index) => (
-                <NavBarItem key={item + index} title={item}/>
-            ))}
+        <ul className="nav-links">
+          <NavBarItem title="关于" icon={<Info size={18} />} />
+          <NavBarItem title="博客" icon={<BookOpen size={18} />} />
+          <NavBarItem title="通讯" icon={<Activity size={18} />} />
+          <NavBarItem title="文档" icon={<BookOpen size={18} />} />
+          <NavBarItem title="区块浏览器" icon={<Globe size={18} />} />
 
-            <li className="relative group cursor-pointer mx-4 text-lg text-white transition-all duration-300 hover:text-[#ffcc00]">
-                测试工具
-                <ul
-                    className="absolute left-0 mt-2 w-32 bg-black shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300"
-                >
-                    <li
-                        className="px-4 py-2 hover:bg-gray-700 cursor-pointer"
-                        onClick={() => setIsTokenModalOpen(true)}
-                    >
-                        代币测试
-                    </li>
-                    <li
-                        className="px-4 py-2 hover:bg-gray-700 cursor-pointer"
-                        onClick={() => setIsStoreModalOpen(true)}
-                    >
-                        商店测试
-                    </li>
-                    <li
-                        className="px-4 py-2 hover:bg-gray-700 cursor-pointer"
-                        onClick={() => setIsTestPanelsModalOpen(true)}
-                    >
-                        交易测试
-                    </li>
-                </ul>
-            </li>
+          <li className="nav-item dropdown">
+            <div
+              className="dropdown-trigger"
+              onClick={() => setToolsDropdown(!toolsDropdown)}
+            >
+              <Settings size={18} />
+              <span>测试工具</span>
+              <ChevronDown
+                size={14}
+                className={`dropdown-arrow ${toolsDropdown ? "active" : ""}`}
+              />
+            </div>
 
-
-            {!currentAccount ? (
-                <li
-                    className="bg-[#2952e3] py-2 px-7 mx-4 rounded-full cursor-pointer hover:bg-[#2546bd] transition-all duration-300"
-                    onClick={connectWallet}
-                >
-                    连接钱包
+            {toolsDropdown && (
+              <ul className="dropdown-menu">
+                <li onClick={() => {
+                  setIsTokenModalOpen(true);
+                  setToolsDropdown(false);
+                }}>
+                  <Wallet size={16} />
+                  <span>代币测试</span>
                 </li>
-            ) : (
-                <li
-                    className="text-white bg-[#2952e3] py-2 px-7 mx-4 rounded-full cursor-pointer hover:bg-[#2546bd] transition-all duration-300"
-                    onClick={() => setIsTokenModalOpen(true)}
-                >
-                    {shortenAddress(currentAccount)}
+                <li onClick={() => {
+                  setIsStoreModalOpen(true);
+                  setToolsDropdown(false);
+                }}>
+                  <ShoppingCart size={16} />
+                  <span>商店测试</span>
                 </li>
+                <li onClick={() => {
+                  setIsTestPanelsModalOpen(true);
+                  setToolsDropdown(false);
+                }}>
+                  <Activity size={16} />
+                  <span>交易测试</span>
+                </li>
+              </ul>
             )}
+          </li>
         </ul>
 
-        <div className="flex relative">
-            {!toggleMenu && (
-                <HiMenuAlt4
-                    fontSize={28}
-                    className="text-white md:hidden cursor-pointer hover:text-[#ffcc00]"
-                    onClick={() => setToggleMenu(true)}
-                />
-            )}
-            {toggleMenu && (
-                <>
-                    <AiOutlineClose
-                        fontSize={28}
-                        className="text-white md:hidden cursor-pointer hover:text-[#ffcc00]"
-                        onClick={() => setToggleMenu(false)}
-                    />
-                    <ul
-                        className="z-10 fixed top-0 right-0 p-3 w-[70vw] h-screen bg-black shadow-2xl md:hidden list-none
-              flex flex-col justify-start items-end rounded-md text-white animate-slide-in"
-                    >
-                    <li className="text-xl w-full my-2">
-                <AiOutlineClose onClick={() => setToggleMenu(false)} />
-              </li>
-              {["关于", "博客", "通讯", "文档", "区块浏览器"].map((item, index) => (
-                <NavBarItem key={item + index} title={item} classprops="my-2 text-lg" />
-              ))}
-            </ul>
-          </>
-        )}
+        <div className="wallet-section">
+          {!currentAccount ? (
+            <button className="connect-wallet-btn" onClick={connectWallet}>
+              <Wallet size={18} />
+              <span>连接钱包</span>
+            </button>
+          ) : (
+            <button
+              className="wallet-address-btn"
+              onClick={() => setIsTokenModalOpen(true)}
+            >
+              <User size={18} />
+              <span>{shortenAddress(currentAccount)}</span>
+            </button>
+          )}
+        </div>
+
+        <div className="mobile-menu-btn" onClick={() => setToggleMenu(!toggleMenu)}>
+          {toggleMenu ? <X size={24} /> : <Menu size={24} />}
+        </div>
       </div>
 
+      {toggleMenu && (
+        <div className="mobile-nav">
+          <ul className="mobile-nav-list">
+            <NavBarItem title="关于" icon={<Info size={18} />} />
+            <NavBarItem title="博客" icon={<BookOpen size={18} />} />
+            <NavBarItem title="通讯" icon={<Activity size={18} />} />
+            <NavBarItem title="文档" icon={<BookOpen size={18} />} />
+            <NavBarItem title="区块浏览器" icon={<Globe size={18} />} />
+
+            <li className="mobile-nav-item" onClick={() => setIsTokenModalOpen(true)}>
+              <Wallet size={18} />
+              <span>代币测试</span>
+            </li>
+            <li className="mobile-nav-item" onClick={() => setIsStoreModalOpen(true)}>
+              <ShoppingCart size={18} />
+              <span>商店测试</span>
+            </li>
+            <li className="mobile-nav-item" onClick={() => setIsTestPanelsModalOpen(true)}>
+              <Activity size={18} />
+              <span>交易测试</span>
+            </li>
+
+            {!currentAccount && (
+              <li className="mobile-connect-wallet">
+                <button onClick={connectWallet}>
+                  <Wallet size={18} />
+                  <span>连接钱包</span>
+                </button>
+              </li>
+            )}
+          </ul>
+        </div>
+      )}
+
+      {/* Modals */}
       {isTokenModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-[10003]">
-          <div className="bg-white p-6 rounded-lg shadow-2xl w-96 relative z-[10004]">
+        <div className="modal-overlay">
+          <div className="modal-container">
             <button
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
+              className="modal-close-btn"
               onClick={() => setIsTokenModalOpen(false)}
             >
-              ✖
+              <X size={20} />
             </button>
             <SolarToken />
           </div>
@@ -130,13 +181,13 @@ const Navbar = ({ logoSize = "w-16" }) => {
       )}
 
       {isStoreModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-[10003]">
-          <div className="bg-white p-6 rounded-lg shadow-2xl w-[80%] h-[80%] relative z-[10004] overflow-auto">
+        <div className="modal-overlay">
+          <div className="modal-container large">
             <button
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
+              className="modal-close-btn"
               onClick={() => setIsStoreModalOpen(false)}
             >
-              ✖
+              <X size={20} />
             </button>
             <Store />
           </div>
@@ -144,13 +195,13 @@ const Navbar = ({ logoSize = "w-16" }) => {
       )}
 
       {isTestPanelsModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-[10003]">
-          <div className="bg-white p-6 rounded-lg shadow-2xl w-[80%] h-[80%] relative z-[10004] overflow-auto">
+        <div className="modal-overlay">
+          <div className="modal-container large">
             <button
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
+              className="modal-close-btn"
               onClick={() => setIsTestPanelsModalOpen(false)}
             >
-              ✖
+              <X size={20} />
             </button>
             <TestPanels />
           </div>

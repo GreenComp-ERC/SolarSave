@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Chart from "react-google-charts";
 import Draggable from "react-draggable";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import "../style/PanelWindows.css";
 
 const PanelWindows = ({ panel, closeWindow }) => {
@@ -9,6 +10,7 @@ const PanelWindows = ({ panel, closeWindow }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [expanded, setExpanded] = useState(false);
+  const [activeTab, setActiveTab] = useState('summary');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -27,10 +29,10 @@ const PanelWindows = ({ panel, closeWindow }) => {
         if (response.data.status === "success") {
           setData(response.data.data);
         } else {
-          setError("API returned an error: " + response.data.message);
+          setError("API返回错误: " + response.data.message);
         }
       } catch (err) {
-        setError("Failed to fetch data: " + err.message);
+        setError("获取数据失败: " + err.message);
       } finally {
         setLoading(false);
       }
@@ -39,82 +41,196 @@ const PanelWindows = ({ panel, closeWindow }) => {
     fetchData();
   }, [panel.lat, panel.lng]);
 
-  const transformDataForChart = (dataKey) => {
+  const transformDataForRecharts = (dataKey) => {
     if (!data || !data[dataKey]) return [];
 
-    const chartData = [["Time", dataKey]];
+    const chartData = [];
     const timestamps = Object.keys(data[dataKey]);
 
     if (typeof data[dataKey][timestamps[0]] === "object") {
-      const subKeys = Object.keys(data[dataKey][timestamps[0]]);
-      subKeys.forEach((subKey) => chartData[0].push(subKey));
-
       timestamps.forEach((timestamp) => {
-        const row = [new Date(timestamp).toLocaleTimeString()];
-        subKeys.forEach((subKey) => row.push(data[dataKey][timestamp][subKey]));
-        chartData.push(row);
+        const item = {
+          time: new Date(timestamp).toLocaleTimeString()
+        };
+
+        const subKeys = Object.keys(data[dataKey][timestamp]);
+        subKeys.forEach((subKey) => {
+          item[subKey] = data[dataKey][timestamp][subKey];
+        });
+
+        chartData.push(item);
       });
     } else {
       timestamps.forEach((timestamp) => {
-        chartData.push([
-          new Date(timestamp).toLocaleTimeString(),
-          data[dataKey][timestamp],
-        ]);
+        chartData.push({
+          time: new Date(timestamp).toLocaleTimeString(),
+          value: data[dataKey][timestamp]
+        });
       });
     }
 
     return chartData;
   };
 
+  const getLineColors = (index) => {
+    const colors = ['#2196F3', '#FF5722', '#4CAF50', '#9C27B0', '#FFEB3B', '#E91E63'];
+    return colors[index % colors.length];
+  };
+
+  const renderRechartsGraph = (dataKey) => {
+    const chartData = transformDataForRecharts(dataKey);
+    if (chartData.length === 0) return null;
+
+    // Determine if we have multiple series or just one
+    const firstItem = chartData[0];
+    const keys = Object.keys(firstItem).filter(key => key !== 'time');
+
+    return (
+      <div className="chart-container">
+        <h4>{dataKey}</h4>
+        <ResponsiveContainer width="100%" height={280}>
+          <LineChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+            <XAxis dataKey="time" tick={{ fill: '#fff' }} />
+            <YAxis tick={{ fill: '#fff' }} />
+            <Tooltip contentStyle={{ backgroundColor: '#333', border: 'none' }} />
+            <Legend />
+            {keys.length > 1 ? (
+              keys.map((key, index) => (
+                <Line
+                  key={key}
+                  type="monotone"
+                  dataKey={key}
+                  stroke={getLineColors(index)}
+                  activeDot={{ r: 8 }}
+                  dot={{ r: 4 }}
+                  strokeWidth={2}
+                />
+              ))
+            ) : (
+              <Line
+                type="monotone"
+                dataKey="value"
+                stroke="#2196F3"
+                activeDot={{ r: 8 }}
+                dot={{ r: 4 }}
+                strokeWidth={2}
+              />
+            )}
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  };
+
+  // Calculate efficiency
+  const efficiency = panel.acPower > 0 && panel.dcPower > 0
+    ? ((panel.acPower / panel.dcPower) * 100).toFixed(1)
+    : 'N/A';
+
   return (
     <Draggable cancel=".no-drag">
-      <div className="panel-window">
+      <div className={`panel-window ${expanded ? 'expanded' : ''}`}>
         <div className="panel-header">
-          <h3>更多信息</h3>
-          <button className="close-button no-drag" onClick={closeWindow}>
-            X
+          <div className="window-controls">
+            <span className="control red" onClick={closeWindow}></span>
+            <span className="control yellow" onClick={() => {
+              setActiveTab('charts');
+              setExpanded((prev) => prev);
+            }}></span>
+
+            <span className="control green" onClick={() => setExpanded(!expanded)}></span>
+          </div>
+          <h3>太阳能面板信息</h3>
+        </div>
+
+        <div className="panel-tabs">
+          <button
+            className={`tab ${activeTab === 'summary' ? 'active' : ''}`}
+            onClick={() => {
+              setActiveTab('summary');
+              setExpanded((prev) => !prev);
+            }
+            }
+          >
+            概览
+          </button>
+          <button
+            className={`tab ${activeTab === 'charts' ? 'active' : ''}`}
+            onClick={() => {
+            setActiveTab('charts');
+            setExpanded((prev) => !prev);
+          }
+            }
+          >
+            图表
           </button>
         </div>
 
-        <p>纬度: {panel.lat}</p>
-        <p>经度: {panel.lng}</p>
-        <p>电池温度: {panel.batteryTemp}°C</p>
-        <p>直流功率: {panel.dcPower} W</p>
-        <p>交流功率: {panel.acPower} W</p>
-        <p>占有状态: {panel.occupied ? "是" : "否"}</p>
+        <div className="panel-content">
+          {activeTab === 'summary' && (
+            <div className="summary-content">
+              <div className="panel-stats">
+                <div className="stat-card">
+                  <div className="stat-icon location-icon"></div>
+                  <div className="stat-info">
+                    <h4>位置</h4>
+                    <p>纬度: {panel.lat.toFixed(4)}</p>
+                    <p>经度: {panel.lng.toFixed(4)}</p>
+                  </div>
+                </div>
 
-        {loading && <p>加载数据中...</p>}
-        {error && <p style={{ color: "red" }}>{error}</p>}
+                <div className="stat-card">
+                  <div className="stat-icon power-icon"></div>
+                  <div className="stat-info">
+                    <h4>功率</h4>
+                    <p>直流: <span className="highlight">{panel.dcPower} W</span></p>
+                    <p>交流: <span className="highlight">{panel.acPower} W</span></p>
+                    <p>效率: <span className="highlight">{efficiency}%</span></p>
+                  </div>
+                </div>
 
-        {data && (
-          <div>
-            {Object.keys(data).map((key) => (
-              <div key={key} style={{ marginBottom: "20px" }}>
-                <h4>{key} 图表</h4>
-                <Chart
-                  className="no-drag"
-                  chartType="LineChart"
-                  data={transformDataForChart(key)}
-                  options={{
-                    title: `${key} 随时间变化`,
-                    hAxis: { title: "时间" },
-                    vAxis: { title: key },
-                    legend: { position: "bottom" },
-                  }}
-                  width="100%"
-                  height="300px"
-                />
+                <div className="stat-card">
+                  <div className="stat-icon temp-icon"></div>
+                  <div className="stat-info">
+                    <h4>温度</h4>
+                    <p><span className="highlight">{panel.batteryTemp}°C</span></p>
+                    <p className={panel.batteryTemp > 40 ? 'warning' : ''}>
+                      {panel.batteryTemp > 40 ? '温度偏高' : '正常范围'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="stat-card">
+                  <div className={`stat-icon ${panel.occupied ? 'occupied-icon' : 'vacant-icon'}`}></div>
+                  <div className="stat-info">
+                    <h4>状态</h4>
+                    <p className={panel.occupied ? 'occupied' : 'vacant'}>
+                      {panel.occupied ? '已占用' : '空闲'}
+                    </p>
+                  </div>
+                </div>
               </div>
-            ))}
-          </div>
-        )}
+            </div>
+          )}
 
-        <button
-          className="expand-button no-drag"
-          onClick={() => setExpanded(!expanded)}
-        >
-          {expanded ? "收回" : "展开"}
-        </button>
+          {activeTab === 'charts' && (
+            <div className="charts-content">
+              {loading && <div className="loading-spinner">加载数据中...</div>}
+              {error && <div className="error-message">{error}</div>}
+
+              {data && Object.keys(data).length === 0 && (
+                <div className="no-data">无可用数据</div>
+              )}
+
+              {data && Object.keys(data).map((key) => (
+                <div key={key} className="chart-wrapper">
+                  {renderRechartsGraph(key)}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </Draggable>
   );

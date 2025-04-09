@@ -17,8 +17,17 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [notification, setNotification] = useState({ show: false, message: "", type: "" });
 
+    // 获取导航栏高度来计算侧边栏的顶部偏移
+    const [navbarHeight, setNavbarHeight] = useState(64); // 默认值
+
     useEffect(() => {
         connectWallet();
+
+        // 获取实际的navbar高度
+        const navbar = document.querySelector('.navbar');
+        if (navbar) {
+            setNavbarHeight(navbar.offsetHeight);
+        }
     }, []);
 
     useEffect(() => {
@@ -109,7 +118,14 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
 
     return (
         <>
-            <div className={`cyberpunk-sidebar ${sidebarOpen ? "open" : "closed"}`}>
+            <div
+                className={`cyberpunk-sidebar ${sidebarOpen ? "open" : "closed"}`}
+                style={{
+                    top: `${navbarHeight}px`,
+                    height: `calc(100vh - ${navbarHeight}px)`,
+                    zIndex: 1000 // 确保低于navbar的z-index
+                }}
+            >
                 {sidebarOpen && (
                     <div className="sidebar-content">
                         <div className="sidebar-header">
@@ -247,6 +263,10 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
                 className={`sidebar-toggle-btn ${sidebarOpen ? "open" : "closed"}`}
                 onClick={toggleSidebar}
                 aria-label={sidebarOpen ? "关闭侧边栏" : "打开侧边栏"}
+                style={{
+                    top: `${navbarHeight + 10}px`, // 调整位置以适应navbar
+                    zIndex: 1001 // 确保按钮可点击
+                }}
             >
                 {sidebarOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
             </button>
