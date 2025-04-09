@@ -1,0 +1,109 @@
+/* 🌞 SolarPanels 组件的整体容器 */
+.panel-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(8px);
+    color: white;
+}
+
+/* 账号文本 */
+.account-text {
+    font-size: 16px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* 🌟 太阳能板卡片 */
+.panel-card {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 16px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* 🔘 按钮 */
+.button {
+    background: #ffcc00;
+    color: black;
+    border: none;
+    padding: 10px 16px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+
+.button:hover {
+    background: #ffdb4d;
+    transform: scale(1.05);
+}
+
+/* 🔄 刷新按钮 */
+.refresh-button {
+    background: #2c82c9;
+    color: white;
+}
+
+.refresh-button:hover {
+    background: #1e6aa8;
+}
+
+/* 🔄 更新按钮 */
+.update-button {
+    background: #ff5722;
+    color: white;
+}
+
+.update-button:hover {
+    background: #e64a19;
+}
+
+/* 📋 太阳能板列表 */
+.panel-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* 🌍 单个太阳能板项 */
+.panel-item {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: transform 0.3s ease-in-out;
+}
+
+.panel-item:hover {
+    transform: scale(1.02);
+}
+
+/* 📌 太阳能板文本 */
+.panel-item p {
+    margin: 4px 0;
+    font-size: 14px;
+}
+
+/* 🌟 输入框 */
+input {
+    width: 100%;
+    padding: 8px;
+    margin-top: 6px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.9); /* 使背景更清晰 */
+    color: black; /* ✅ 字体颜色改为黑色 */
+    font-size: 14px;
+    outline: none;
+}
+
+input::placeholder {
+    color: rgba(0, 0, 0, 0.6); /* ✅ 使占位符字体颜色变为浅黑色 */
+}

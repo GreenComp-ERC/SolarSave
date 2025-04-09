@@ -1,0 +1,271 @@
+/* Transactions.css - 修复排版问题的简洁样式 */
+
+/* 全局样式 */
+.solar-transactions {
+  padding: 2rem 0;
+  background: #0f172a;
+  min-height: 100vh;
+}
+
+.container-solar {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* 卡片基础样式 */
+.solar-card {
+  background-color: rgba(30, 41, 59, 0.8);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+
+.solar-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* 标题样式 */
+.solar-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.solar-subtitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #94a3b8;
+  margin-bottom: 1rem;
+}
+
+/* 布局容器 */
+.solar-layout {
+  display: flex;
+  flex-direction: column;
+}
+
+.solar-layout-left {
+  width: 100%;
+  margin-bottom: 2rem;
+}
+
+.solar-layout-right {
+  width: 100%;
+}
+
+/* 数据项样式 */
+.solar-data-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.solar-data-label {
+  color: #94a3b8;
+  font-size: 0.875rem;
+}
+
+.solar-data-value {
+  color: #e2e8f0;
+  font-weight: 500;
+}
+
+/* 电量显示 */
+.solar-power-bar {
+  height: 8px;
+  background-color: rgba(100, 116, 139, 0.3);
+  border-radius: 4px;
+  margin: 8px 0;
+  overflow: hidden;
+}
+
+.solar-power-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%);
+}
+
+.solar-power-fill-ac {
+  background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+}
+
+/* 按钮样式 */
+.solar-button {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.solar-button:hover {
+  background-color: #2563eb;
+}
+
+.solar-button-red {
+  background-color: #ef4444;
+}
+
+.solar-button-red:hover {
+  background-color: #dc2626;
+}
+
+/* 状态指示器 */
+.solar-status {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.solar-status-active {
+  background-color: #10b981;
+  box-shadow: 0 0 5px #10b981;
+}
+
+.solar-status-inactive {
+  background-color: #ef4444;
+  box-shadow: 0 0 5px #ef4444;
+}
+
+/* 模态框样式 */
+.solar-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.solar-modal {
+  background-color: #1e293b;
+  border-radius: 12px;
+  padding: 1.5rem;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.solar-modal-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  text-align: center;
+  color: #60a5fa;
+}
+
+.solar-modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+/* 分页控件 */
+.solar-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1.5rem;
+}
+
+.solar-pagination-button {
+  background-color: rgba(51, 65, 85, 0.5);
+  border: none;
+  border-radius: 6px;
+  color: white;
+  padding: 0.5rem 1rem;
+  margin: 0 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.solar-pagination-button:hover:not(:disabled) {
+  background-color: rgba(71, 85, 105, 0.7);
+}
+
+.solar-pagination-button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.solar-pagination-info {
+  color: white;
+  padding: 0.5rem 1rem;
+}
+
+/* 加载动画 */
+.solar-loading {
+  padding: 2rem;
+  text-align: center;
+  color: #94a3b8;
+}
+
+/* 响应式布局 */
+@media (min-width: 768px) {
+  .solar-layout {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 2rem;
+  }
+
+  .solar-layout-left {
+    width: calc(35% - 1rem);
+    margin-bottom: 0;
+  }
+
+  .solar-layout-right {
+    width: calc(65% - 1rem);
+  }
+
+  .solar-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+}
+
+/* 价格输入框 */
+.solar-price-input {
+  display: flex;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.solar-price-input input {
+  flex-grow: 1;
+  background-color: #334155;
+  border: none;
+  padding: 0.75rem;
+  color: white;
+  outline: none;
+}
+
+.solar-price-input span {
+  background-color: #475569;
+  padding: 0.75rem;
+  color: #e2e8f0;
+}

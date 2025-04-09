@@ -1,0 +1,132 @@
+.footer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding: 1rem;
+}
+
+.footer-content {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 1rem 0;
+}
+
+.logo-container {
+  flex: 0.5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo {
+  width: 8rem;
+  transition: transform 0.3s;
+}
+
+.logo:hover {
+  transform: scale(1.1) rotate(3deg);
+}
+
+.nav-links {
+  flex: 1;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.nav-link {
+  color: white;
+  font-size: 1rem;
+  text-align: center;
+  margin: 0 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.nav-link:hover {
+  color: #ffcc00;
+  transform: scale(1.05);
+  text-decoration: underline;
+}
+
+.footer-info {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin-top: 1.25rem;
+}
+
+.footer-text {
+  color: white;
+  font-size: 0.875rem;
+  text-align: center;
+  font-style: italic;
+  opacity: 0.8;
+  transition: opacity 0.3s;
+}
+
+.footer-text:hover {
+  opacity: 1;
+}
+
+.footer-email {
+  color: white;
+  font-size: 0.875rem;
+  text-align: center;
+  font-weight: 500;
+  margin-top: 0.5rem;
+  text-decoration: underline;
+  transition: color 0.3s;
+}
+
+.footer-email:hover {
+  color: #ffcc00;
+}
+
+.footer-divider {
+  width: 90%;
+  height: 1px;
+  background: linear-gradient(to right, #6b7280, #d1d5db);
+  margin-top: 1.25rem;
+  animation: pulse 2s infinite;
+}
+
+.footer-copyright {
+  width: 90%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.75rem;
+}
+
+.copyright-text {
+  color: white;
+  font-size: 0.75rem;
+  transition: opacity 0.3s;
+}
+
+.copyright-text:hover {
+  opacity: 0.8;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@media (max-width: 640px) {
+  .footer-content {
+    flex-direction: column;
+  }
+  
+  .nav-links {
+    margin-top: 1.25rem;
+  }
+} 

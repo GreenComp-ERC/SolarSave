@@ -1,0 +1,79 @@
+{
+  "name": "wave-app",
+  "version": "0.0.0",
+  "homepage": ".",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "vite",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
+    "deploy:prod": "npm run build && git checkout production && cp -r dist/* . && git add . && git commit -m \"Update production build\" && git push origin production"
+  },
+  "files": [
+    "build"
+  ],
+  "main": "main.js",
+  "dependencies": {
+    "@tailwindcss/forms": "^0.3.4",
+    "@vitejs/plugin-react": "^4.3.4",
+    "@vitejs/plugin-vue-jsx": "^4.1.1",
+    "autoprefixer": "^10.4.0",
+    "axios": "^1.7.8",
+    "eth-revert-reason": "^1.0.3",
+    "ethers": "^5.7.2",
+    "framer-motion": "^5.3.1",
+    "html-webpack-plugin": "^5.6.3",
+    "leaflet": "^1.9.4",
+    "lucide-react": "^0.487.0",
+    "postcss": "^8.3.11",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-draggable": "^4.4.6",
+    "react-google-charts": "^5.1.0",
+    "react-icons": "^4.3.1",
+    "react-leaflet": "^4.2.1",
+    "react-modal": "^3.16.1",
+    "react-router-dom": "^6.27.0",
+    "vite": "^6.0.7",
+    "web3": "^4.15.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.26.7",
+    "@babel/preset-env": "^7.26.7",
+    "@babel/preset-react": "^7.26.3",
+    "@electron-forge/cli": "^7.6.0",
+    "babel-loader": "^9.2.1",
+    "css-loader": "^7.1.2",
+    "electron": "^11.5.0",
+    "eslint-webpack-plugin": "^4.2.0",
+    "gh-pages": "^6.3.0",
+    "mini-css-extract-plugin": "^2.9.2",
+    "style-loader": "^4.0.0",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.0"
+  },
+  "build": {
+    "appId": "com.solar.save",
+    "productName": "SolarSave",
+    "files": [
+      "build/**/*",
+      "main.js",
+      "node_modules/**/*"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "icon.ico"
+    }
+  },
+  "description": "npm install \r npm run dev\r thats like all you have to do.",
+  "author": "",
+  "license": "ISC"
+}

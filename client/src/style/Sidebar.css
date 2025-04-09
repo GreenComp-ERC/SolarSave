@@ -1,0 +1,532 @@
+/* Cyberpunk Solar Theme Sidebar CSS */
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+:root {
+  --solar-yellow: #FFD600;
+  --solar-orange: #FF7A00;
+  --solar-accent: #00F0FF;
+  --dark-bg: #0F1218;
+  --dark-card: #161C26;
+  --dark-border: #1F2937;
+  --panel-glow: rgba(255, 214, 0, 0.15);
+  --success: #00E676;
+  --error: #FF1744;
+  --cyberpunk-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+  --neon-border: 1px solid rgba(0, 240, 255, 0.3);
+  --transition-speed: 0.3s;
+}
+
+/* Base Styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Rajdhani', sans-serif;
+  color: #ffffff;
+  background-color: var(--dark-bg);
+}
+
+/* Cyberpunk Sidebar */
+.cyberpunk-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 320px;
+  background: var(--dark-bg);
+  border-right: var(--neon-border);
+  box-shadow: var(--cyberpunk-shadow);
+  transition: transform var(--transition-speed);
+  z-index: 100;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.cyberpunk-sidebar.closed {
+  transform: translateX(-320px);
+}
+
+.cyberpunk-sidebar.open {
+  transform: translateX(0);
+}
+
+.sidebar-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  height: 100%;
+}
+
+.sidebar-header {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--dark-border);
+  margin-bottom: 8px;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo-container h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 1px;
+}
+
+.logo-container h1 span {
+  color: var(--solar-yellow);
+}
+
+.sun-icon {
+  color: var(--solar-yellow);
+  filter: drop-shadow(0 0 5px rgba(255, 214, 0, 0.5));
+}
+
+/* Account Card */
+.account-card {
+  background: var(--dark-card);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 8px;
+  border: 1px solid var(--dark-border);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.account-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.account-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: rgba(255, 214, 0, 0.1);
+  border-radius: 4px;
+  color: var(--solar-yellow);
+}
+
+.account-header h2 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.account-details {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.address {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  border: 1px solid var(--dark-border);
+}
+
+.status {
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.status.connected {
+  background: rgba(0, 230, 118, 0.15);
+  color: var(--success);
+  border: 1px solid rgba(0, 230, 118, 0.3);
+}
+
+.connect-button {
+  width: 100%;
+  background: linear-gradient(90deg, var(--solar-yellow), var(--solar-orange));
+  color: var(--dark-bg);
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Rajdhani', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.2s;
+}
+
+.connect-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(255, 214, 0, 0.3);
+}
+
+/* Create Panel Form */
+.create-panel-card {
+  background: var(--dark-card);
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid var(--dark-border);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: var(--solar-accent);
+}
+
+.card-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.form-group {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.input-group {
+  flex: 1;
+}
+
+.input-group input {
+  width: 100%;
+  background: rgba(15, 18, 24, 0.8);
+  border: 1px solid var(--dark-border);
+  color: white;
+  padding: 10px;
+  border-radius: 4px;
+  font-family: 'Share Tech Mono', monospace;
+  transition: all 0.2s;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: var(--solar-accent);
+  box-shadow: 0 0 0 1px var(--solar-accent);
+}
+
+.input-group input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.create-button {
+  width: 100%;
+  background: linear-gradient(90deg, #00B8D4, var(--solar-accent));
+  color: var(--dark-bg);
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Rajdhani', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.2s;
+}
+
+.create-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+}
+
+.create-button.loading {
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
+/* Panel Display Controls */
+.switch-controls {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.switch-button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--dark-card);
+  border: 1px solid var(--dark-border);
+  color: rgba(255, 255, 255, 0.7);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.switch-button:hover {
+  background: rgba(31, 41, 55, 0.8);
+}
+
+.switch-button.active {
+  background: rgba(0, 240, 255, 0.1);
+  border-color: var(--solar-accent);
+  color: var(--solar-accent);
+}
+
+/* Panels Section */
+.panels-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--dark-card);
+  border-radius: 8px;
+  border: 1px solid var(--dark-border);
+  overflow: hidden;
+}
+
+.panels-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--dark-border);
+}
+
+.panels-header h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.panel-count {
+  background: rgba(15, 18, 24, 0.8);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.panel-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 150px;
+  color: rgba(255, 255, 255, 0.5);
+  gap: 12px;
+}
+
+.panel-item {
+  background: rgba(15, 18, 24, 0.8);
+  border: 1px solid var(--dark-border);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.panel-item:hover {
+  border-color: var(--solar-accent);
+  box-shadow: 0 0 10px var(--panel-glow);
+}
+
+.panel-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--solar-yellow), var(--solar-orange));
+}
+
+.panel-id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.panel-id .value {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 14px;
+  background: rgba(255, 214, 0, 0.1);
+  color: var(--solar-yellow);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.panel-detail {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.panel-metrics {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding: 8px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.metric {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.panel-owner {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  padding-top: 6px;
+  border-top: 1px solid var(--dark-border);
+}
+
+.label {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+}
+
+.value {
+  color: white;
+}
+
+/* Sidebar Toggle Button */
+.sidebar-toggle-btn {
+  position: fixed;
+  top: 20px;
+  left: 320px;
+  width: 36px;
+  height: 36px;
+  background: var(--dark-card);
+  border: var(--neon-border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 101;
+  transition: all var(--transition-speed);
+  color: var(--solar-accent);
+  box-shadow: var(--cyberpunk-shadow);
+}
+
+.sidebar-toggle-btn:hover {
+  background: var(--dark-border);
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+}
+
+.sidebar-toggle-btn.closed {
+  left: 20px;
+}
+
+/* Notification */
+.notification {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s;
+  z-index: 1000;
+}
+
+.notification.success {
+  background: rgba(0, 230, 118, 0.1);
+  border: 1px solid rgba(0, 230, 118, 0.3);
+  color: var(--success);
+}
+
+.notification.error {
+  background: rgba(255, 23, 68, 0.1);
+  border: 1px solid rgba(255, 23, 68, 0.3);
+  color: var(--error);
+}
+
+/* Animations */
+@keyframes slideIn {
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--dark-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--dark-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--solar-accent);
+}
+
+/* Media Queries for Responsiveness */
+@media screen and (max-width: 768px) {
+  .cyberpunk-sidebar {
+    width: 280px;
+  }
+  
+  .sidebar-toggle-btn.closed {
+    left: 16px;
+  }
+  
+  .sidebar-toggle-btn {
+    left: 280px;
+  }
+  
+  .form-group {
+    flex-direction: column;
+  }
+}
