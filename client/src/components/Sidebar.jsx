@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
-import { Sun, List, ChevronLeft, ChevronRight, Zap, Thermometer, Globe, Lock, PlusCircle } from "lucide-react";
+import {
+  Sun, List, ChevronLeft, ChevronRight, Zap, Thermometer,
+  Globe, Lock, PlusCircle, Search, Filter, ChevronsLeft,
+  ChevronsRight, ArrowUpDown
+} from "lucide-react";
 import SolarPanels from "../utils/SolarPanels.json";
 import "../style/Sidebar.css";
 
 const contractAddress = "0x9C29EE061119e730a1ba4EcdB71Bb00C01BF5aE9";
+const PANELS_PER_PAGE = 5; // 每页显示的面板数量
 
 const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
     const [contract, setContract] = useState(null);
@@ -16,6 +21,13 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
     const [newPanel, setNewPanel] = useState({ lat: "", lng: "" });
     const [isLoading, setIsLoading] = useState(false);
     const [notification, setNotification] = useState({ show: false, message: "", type: "" });
+
+    // 分页状态
+    const [currentPage, setCurrentPage] = useState(1);
+    // 搜索和过滤
+    const [searchTerm, setSearchTerm] = useState("");
+    const [sortOrder, setSortOrder] = useState({ field: "id", ascending: true });
+    const [expandedPanelId, setExpandedPanelId] = useState(null);
 
     // 获取导航栏高度来计算侧边栏的顶部偏移
     const [navbarHeight, setNavbarHeight] = useState(64); // 默认值
@@ -35,6 +47,11 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
             setAccountShort(`${account.substring(0, 6)}...${account.substring(account.length - 4)}`);
         }
     }, [account]);
+
+    // 重置页码当视图改变时
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [showMyPanels, searchTerm]);
 
     const showNotification = (message, type = "success") => {
         setNotification({ show: true, message, type });
@@ -116,6 +133,82 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
         }
     };
 
+    // 过滤面板
+    const filterPanels = (panelsData) => {
+        if (!searchTerm) return panelsData;
+
+        return panelsData.filter(panel =>
+            panel.id.toString().includes(searchTerm) ||
+            panel.owner.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            panel.latitude.toString().includes(searchTerm) ||
+            panel.longitude.toString().includes(searchTerm)
+        );
+    };
+
+    // 排序面板
+    const sortPanels = (panelsData) => {
+        return [...panelsData].sort((a, b) => {
+            let compareA, compareB;
+
+            switch (sortOrder.field) {
+                case 'id':
+                    compareA = parseInt(a.id.toString());
+                    compareB = parseInt(b.id.toString());
+                    break;
+                case 'temperature':
+                    compareA = parseInt(a.batteryTemperature.toString());
+                    compareB = parseInt(b.batteryTemperature.toString());
+                    break;
+                case 'power':
+                    compareA = parseInt(a.dcPower.toString());
+                    compareB = parseInt(b.dcPower.toString());
+                    break;
+                default:
+                    compareA = a.id.toString();
+                    compareB = b.id.toString();
+            }
+
+            if (sortOrder.ascending) {
+                return compareA - compareB;
+            } else {
+                return compareB - compareA;
+            }
+        });
+    };
+
+    // 处理排序点击
+    const handleSortClick = (field) => {
+        if (sortOrder.field === field) {
+            setSortOrder({ field, ascending: !sortOrder.ascending });
+        } else {
+            setSortOrder({ field, ascending: true });
+        }
+    };
+
+    // 分页控制
+    const handlePageChange = (newPage) => {
+        setCurrentPage(newPage);
+    };
+
+    // 准备显示的面板
+    const currentData = showMyPanels ? myPanels : panels;
+    const filteredData = filterPanels(currentData);
+    const sortedData = sortPanels(filteredData);
+
+    const totalPages = Math.ceil(sortedData.length / PANELS_PER_PAGE);
+    const indexOfLastPanel = currentPage * PANELS_PER_PAGE;
+    const indexOfFirstPanel = indexOfLastPanel - PANELS_PER_PAGE;
+    const currentPanels = sortedData.slice(indexOfFirstPanel, indexOfLastPanel);
+
+    // 展开和收缩面板详情
+    const togglePanelExpand = (id) => {
+        if (expandedPanelId === id) {
+            setExpandedPanelId(null);
+        } else {
+            setExpandedPanelId(id);
+        }
+    };
+
     return (
         <>
             <div
@@ -123,7 +216,7 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
                 style={{
                     top: `${navbarHeight}px`,
                     height: `calc(100vh - ${navbarHeight}px)`,
-                    zIndex: 1000 // 确保低于navbar的z-index
+                    zIndex: 1000
                 }}
             >
                 {sidebarOpen && (
@@ -215,45 +308,151 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
                                     )}
                                 </h3>
                                 <span className="panel-count">
-                                    {(showMyPanels ? myPanels.length : panels.length)}个
+                                    {filteredData.length}个
                                 </span>
                             </div>
 
+                            {/* 搜索和筛选 */}
+                            <div className="panel-controls">
+                                <div className="search-box">
+                                    <Search size={14} />
+                                    <input
+                                        type="text"
+                                        placeholder="搜索面板ID、位置..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
+                                    {searchTerm && (
+                                        <button
+                                            className="clear-search"
+                                            onClick={() => setSearchTerm("")}
+                                        >
+                                            ×
+                                        </button>
+                                    )}
+                                </div>
+                                <div className="sort-controls">
+                                    <button
+                                        className={`sort-button ${sortOrder.field === 'id' ? 'active' : ''}`}
+                                        onClick={() => handleSortClick('id')}
+                                        title="按ID排序"
+                                    >
+                                        ID {sortOrder.field === 'id' && (sortOrder.ascending ? '↑' : '↓')}
+                                    </button>
+                                    <button
+                                        className={`sort-button ${sortOrder.field === 'temperature' ? 'active' : ''}`}
+                                        onClick={() => handleSortClick('temperature')}
+                                        title="按温度排序"
+                                    >
+                                        <Thermometer size={12} /> {sortOrder.field === 'temperature' && (sortOrder.ascending ? '↑' : '↓')}
+                                    </button>
+                                    <button
+                                        className={`sort-button ${sortOrder.field === 'power' ? 'active' : ''}`}
+                                        onClick={() => handleSortClick('power')}
+                                        title="按功率排序"
+                                    >
+                                        <Zap size={12} /> {sortOrder.field === 'power' && (sortOrder.ascending ? '↑' : '↓')}
+                                    </button>
+                                </div>
+                            </div>
+
                             <div className="panel-list">
-                                {(showMyPanels ? myPanels : panels).length === 0 ? (
+                                {currentPanels.length === 0 ? (
                                     <div className="empty-state">
                                         <List size={32} />
-                                        <p>暂无太阳能板数据</p>
+                                        <p>
+                                            {searchTerm ? '没有匹配的太阳能板' : '暂无太阳能板数据'}
+                                        </p>
                                     </div>
                                 ) : (
-                                    (showMyPanels ? myPanels : panels).map((panel, index) => (
-                                        <div key={index} className="panel-item">
-                                            <div className="panel-id">
-                                                <span className="label">ID</span>
-                                                <span className="value">{panel.id.toString()}</span>
-                                            </div>
-                                            <div className="panel-detail location">
-                                                <span className="label">位置</span>
-                                                <span className="value">{panel.latitude.toString()}°, {panel.longitude.toString()}°</span>
-                                            </div>
-                                            <div className="panel-metrics">
-                                                <div className="metric">
-                                                    <Thermometer size={14} />
-                                                    <span>{panel.batteryTemperature.toString()}°C</span>
+                                    currentPanels.map((panel) => (
+                                        <div
+                                            key={panel.id.toString()}
+                                            className={`panel-item ${expandedPanelId === panel.id.toString() ? 'expanded' : ''}`}
+                                            onClick={() => togglePanelExpand(panel.id.toString())}
+                                        >
+                                            <div className="panel-summary">
+                                                <div className="panel-id">
+                                                    <span className="label">ID</span>
+                                                    <span className="value">{panel.id.toString()}</span>
                                                 </div>
-                                                <div className="metric">
-                                                    <Zap size={14} />
-                                                    <span>{panel.dcPower.toString()}W / {panel.acPower.toString()}W</span>
+                                                <div className="panel-metrics">
+                                                    <div className="metric">
+                                                        <Thermometer size={14} />
+                                                        <span>{panel.batteryTemperature.toString()}°C</span>
+                                                    </div>
+                                                    <div className="metric">
+                                                        <Zap size={14} />
+                                                        <span>{panel.dcPower.toString()}W</span>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div className="panel-owner" title={panel.owner}>
-                                                <span className="label">所有者</span>
-                                                <span className="value">{`${panel.owner.substring(0, 6)}...${panel.owner.substring(panel.owner.length - 4)}`}</span>
-                                            </div>
+
+                                            {expandedPanelId === panel.id.toString() && (
+                                                <div className="panel-details">
+                                                    <div className="panel-detail location">
+                                                        <span className="label">位置</span>
+                                                        <span className="value">{panel.latitude.toString()}°, {panel.longitude.toString()}°</span>
+                                                    </div>
+                                                    <div className="panel-detail">
+                                                        <span className="label">DC功率</span>
+                                                        <span className="value">{panel.dcPower.toString()}W</span>
+                                                    </div>
+                                                    <div className="panel-detail">
+                                                        <span className="label">AC功率</span>
+                                                        <span className="value">{panel.acPower.toString()}W</span>
+                                                    </div>
+                                                    <div className="panel-owner" title={panel.owner}>
+                                                        <span className="label">所有者</span>
+                                                        <span className="value">{`${panel.owner.substring(0, 6)}...${panel.owner.substring(panel.owner.length - 4)}`}</span>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     ))
                                 )}
                             </div>
+
+                            {/* 分页控件 */}
+                            {totalPages > 1 && (
+                                <div className="pagination-controls">
+                                    <button
+                                        onClick={() => handlePageChange(1)}
+                                        disabled={currentPage === 1}
+                                        className="page-button"
+                                        title="第一页"
+                                    >
+                                        <ChevronsLeft size={16} />
+                                    </button>
+                                    <button
+                                        onClick={() => handlePageChange(currentPage - 1)}
+                                        disabled={currentPage === 1}
+                                        className="page-button"
+                                        title="上一页"
+                                    >
+                                        <ChevronLeft size={16} />
+                                    </button>
+
+                                    <span className="page-info">{currentPage}/{totalPages}</span>
+
+                                    <button
+                                        onClick={() => handlePageChange(currentPage + 1)}
+                                        disabled={currentPage === totalPages}
+                                        className="page-button"
+                                        title="下一页"
+                                    >
+                                        <ChevronRight size={16} />
+                                    </button>
+                                    <button
+                                        onClick={() => handlePageChange(totalPages)}
+                                        disabled={currentPage === totalPages}
+                                        className="page-button"
+                                        title="最后一页"
+                                    >
+                                        <ChevronsRight size={16} />
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}
@@ -264,8 +463,8 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
                 onClick={toggleSidebar}
                 aria-label={sidebarOpen ? "关闭侧边栏" : "打开侧边栏"}
                 style={{
-                    top: `${navbarHeight + 10}px`, // 调整位置以适应navbar
-                    zIndex: 1001 // 确保按钮可点击
+                    top: `${navbarHeight + 10}px`,
+                    zIndex: 1001
                 }}
             >
                 {sidebarOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}

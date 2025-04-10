@@ -1,6 +1,9 @@
+// SolarSave 交易脚本 - 中文化版本
+
 import React, { useEffect, useState } from "react";
 import { SiEthereum } from "react-icons/si";
-import { BsInfoCircle } from "react-icons/bs";
+import { BsInfoCircle, BsLightningChargeFill } from "react-icons/bs";
+import { FaSolarPanel, FaLocationArrow } from "react-icons/fa";
 import { ethers } from "ethers";
 import SolarPanels from "../utils/SolarPanels.json";
 import "../style/TradeScript.css";
@@ -16,6 +19,8 @@ const TradeScript = ({ close, lat, lng, sandiaModuleName, cecInverterName }) => 
   const [contract, setContract] = useState(null);
   const [tokenContract, setTokenContract] = useState(null);
   const [currentAccount, setCurrentAccount] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [transactionStatus, setTransactionStatus] = useState("");
 
   useEffect(() => {
     if (window.ethereum) {
@@ -31,63 +36,113 @@ const TradeScript = ({ close, lat, lng, sandiaModuleName, cecInverterName }) => 
 
   const handleSubmit = async () => {
     if (!contract || !tokenContract || !signer) return;
+
+    setIsProcessing(true);
+    setTransactionStatus("正在初始化交易...");
+
     try {
-      // 将坐标转换为整数
       const intLat = Math.floor(lat);
       const intLng = Math.floor(lng);
 
-      // 发送 ERC20 代币
+      setTransactionStatus("正在发送 SOLR 代币...");
       const approvalTx = await tokenContract.transfer(recipientAddress, fixedPrice);
       await approvalTx.wait();
 
-      // 创建太阳能板
+      setTransactionStatus("正在注册太阳能面板...");
       const tx = await contract.createPanel(intLat, intLng, 25, 100, 90);
       await tx.wait();
 
-      close(); // 交易完成后立刻关闭弹窗
+      setTransactionStatus("交易成功完成！");
+
+      setTimeout(() => {
+        close(); // 关闭弹窗
+      }, 1500);
+
     } catch (error) {
       console.error("交易失败:", error);
+      setTransactionStatus("交易失败，请重试。");
+    } finally {
+      setIsProcessing(false);
     }
   };
 
+  const formatAddress = (address) => {
+    if (!address) return "";
+    return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+  };
+
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <div className="p-3 flex justify-end items-start flex-col rounded-xl h-40 w-full my-5 eth-card white-glassmorphism">
-          <div className="flex justify-between items-start w-full">
-            <div className="w-10 h-10 rounded-full border-2 border-white flex justify-center items-center">
-              <SiEthereum fontSize={21} color="#fff" />
+    <div className="trade-modal-overlay">
+      <div className="trade-modal-content">
+        <div className="trade-modal-header">
+          <h2 className="trade-modal-title">注册太阳能面板</h2>
+          <button onClick={close} className="trade-close-button">×</button>
+        </div>
+
+        <div className="trade-wallet-card">
+          <div className="trade-wallet-card-header">
+            <div className="trade-wallet-icon">
+              <SiEthereum fontSize={24} />
             </div>
-            <BsInfoCircle fontSize={17} color="#fff" />
+            <BsInfoCircle fontSize={16} className="trade-info-icon" />
           </div>
-          <div>
-            <p className="text-white font-light text-sm">{currentAccount}</p>
-            <p className="text-white font-semibold text-lg mt-1">Ethereum</p>
+          <div className="trade-wallet-details">
+            <p className="trade-wallet-address">{formatAddress(currentAccount)}</p>
+            <p className="trade-wallet-network">以太坊网络</p>
+          </div>
+          <div className="trade-wallet-glow"></div>
+        </div>
+
+        <div className="trade-panel-details">
+          <h3 className="trade-section-title">
+            <FaSolarPanel className="trade-section-icon" />
+            面板信息
+          </h3>
+
+          <div className="trade-panel-specs">
+            <div className="trade-spec-item">
+              <FaLocationArrow className="trade-spec-icon" />
+              <div className="trade-spec-content">
+                <p className="trade-spec-label">地理位置</p>
+                <p className="trade-spec-value">纬度: {Math.floor(lat)}° | 经度: {Math.floor(lng)}°</p>
+              </div>
+            </div>
+
+            <div className="trade-spec-item">
+              <BsLightningChargeFill className="trade-spec-icon" />
+              <div className="trade-spec-content">
+                <p className="trade-spec-label">面板组件</p>
+                <p className="trade-spec-value">{sandiaModuleName}</p>
+                <p className="trade-spec-value">{cecInverterName}</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="panel-details p-5 w-full blue-glassmorphism">
-          <h3 className="text-white text-center font-semibold text-lg mb-2">Solar Panel Details</h3>
-          <p className="text-white text-sm"><strong>Latitude:</strong> {Math.floor(lat)}</p>
-          <p className="text-white text-sm"><strong>Longitude:</strong> {Math.floor(lng)}</p>
-          <p className="text-white text-sm"><strong>Sandia Module:</strong> {sandiaModuleName}</p>
-          <p className="text-white text-sm"><strong>CEC Inverter:</strong> {cecInverterName}</p>
-        </div>
-
-        <div className="p-5 w-full flex flex-col justify-start items-center blue-glassmorphism">
-          <p className="text-white">Fixed Price: 2 SOLR</p>
-          <div className="h-[1px] w-full bg-gray-400 my-2" />
+        <div className="trade-payment-section">
+          <div className="trade-price-tag">
+            <span className="trade-price-amount">2 SOLR</span>
+            <span className="trade-price-label">固定价格</span>
+          </div>
 
           <button
             type="button"
             onClick={handleSubmit}
-            className="text-white w-full mt-2 border-[1px] p-2 border-[#3d4f7c] hover:bg-[#3d4f7c] rounded-full cursor-pointer"
+            disabled={isProcessing || !currentAccount}
+            className={`trade-submit-button ${isProcessing ? 'processing' : ''}`}
           >
-            Pay & Register
+            {isProcessing ? (
+              <span className="trade-processing-text">{transactionStatus}</span>
+            ) : (
+              <span>注册并支付</span>
+            )}
+            <span className="trade-button-glow"></span>
           </button>
-        </div>
 
-        <button onClick={close} className="close-modal-button">Close</button>
+          {!currentAccount && (
+            <p className="trade-wallet-warning">请先连接您的钱包</p>
+          )}
+        </div>
       </div>
     </div>
   );
