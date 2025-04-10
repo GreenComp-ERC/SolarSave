@@ -306,24 +306,107 @@
   box-shadow: 0 4px 12px rgba(255, 78, 80, 0.2);
 }
 
-.chart-container {
+/* 结果容器样式 */
+.results-container {
+  margin-top: 2rem;
   position: relative;
+}
+
+/* 视图控制按钮 */
+.view-controls {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+  gap: 1rem;
+}
+
+.view-mode-btn {
+  padding: 0.8rem 1.6rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50px;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.view-mode-btn.active {
+  background: rgba(0, 198, 255, 0.3);
+  border-color: #00c6ff;
+  box-shadow: 0 0 0 2px rgba(0, 198, 255, 0.2), 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.view-mode-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+/* 图表卡片容器 */
+.chart-cards-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(550px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* 图表预览卡片 */
+.chart-preview-card {
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.chart-preview-card .chart-subtitle {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+}
+
+.chart-preview {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.view-chart-btn {
+  padding: 0.6rem 1.2rem;
+  background: linear-gradient(45deg, #00c6ff, #0072ff);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 0.5rem;
+  box-shadow: 0 4px 8px rgba(0, 114, 255, 0.3);
+}
+
+/* 接上文 */
+.view-chart-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 114, 255, 0.4);
+}
+
+.view-chart-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 114, 255, 0.3);
+}
+
+/* 图表列表容器 */
+.chart-list-container {
+  display: flex;
+  flex-direction: column;
   gap: 2.5rem;
-  perspective: 1000px;
 }
 
+/* 图表盒子样式补充 */
 .chart-box {
-  transition: all 0.5s ease;
-  transform-style: preserve-3d;
-  position: relative;
-  z-index: 1;
-}
-
-.chart-box:hover {
-  transform: translateY(-8px) rotateX(2deg) rotateY(2deg);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  padding: 2rem;
 }
 
 .chart-subtitle {
@@ -346,42 +429,93 @@
   background: linear-gradient(to right, transparent, #00c6ff, transparent);
 }
 
-.close-button {
-  position: absolute;
-  top: -25px;
+/* 模态对话框样式 */
+.chart-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
   right: 0;
-  background: linear-gradient(45deg, #ff4e50, #f9d423);
-  color: white;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  z-index: 1001;
+}
+
+.modal-content {
+  position: relative;
+  width: 90%;
+  max-width: 1200px;
+  max-height: 90vh;
+  overflow-y: auto;
+  z-index: 1002;
+  padding: 2rem;
+  margin: 0;
+  transform: none;
+  animation: modal-appear 0.3s ease-out;
+}
+
+@keyframes modal-appear {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
   border: none;
-  border-radius: 50px;
-  padding: 0.6rem 1.5rem;
-  font-size: 1rem;
-  font-weight: 600;
+  background: rgba(255, 78, 80, 0.9);
+  color: white;
+  font-size: 1.5rem;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 8px rgba(255, 78, 80, 0.3);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   z-index: 2;
 }
 
-.close-button:hover {
-  background: linear-gradient(45deg, #f9d423, #ff4e50);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(255, 78, 80, 0.4);
+.modal-close-btn:hover {
+  background: rgba(255, 78, 80, 1);
+  transform: scale(1.1);
 }
 
-.close-button:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(255, 78, 80, 0.3);
+.modal-chart-container {
+  padding: 1rem;
 }
 
-.data-point {
-  transition: all 0.3s ease;
+.modal-chart-title {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.data-point:hover {
-  stroke-width: 4;
-}
-
+/* 响应式设计调整 */
 @media (max-width: 768px) {
   .test-container {
     padding: 1rem;
@@ -389,10 +523,6 @@
 
   .test-title {
     font-size: 2.2rem;
-  }
-
-  .chart-container {
-    grid-template-columns: 1fr;
   }
 
   .coordinate-inputs {
@@ -407,9 +537,31 @@
     padding: 1rem 2rem;
     width: 100%;
   }
+
+  .chart-cards-container {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-content {
+    width: 95%;
+    padding: 1.5rem;
+  }
+
+  .modal-chart-title {
+    font-size: 1.5rem;
+  }
+
+  .view-controls {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .view-mode-btn {
+    width: 100%;
+  }
 }
 
-/* Floating particles */
+/* 浮动粒子效果 */
 .particle {
   position: absolute;
   border-radius: 50%;

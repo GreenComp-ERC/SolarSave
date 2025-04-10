@@ -1,4 +1,4 @@
-/* Cyberpunk Solar Theme Sidebar CSS */
+/* Cyberpunk Solar Theme Sidebar CSS - 更新版 */
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
@@ -17,7 +17,7 @@
   --transition-speed: 0.3s;
 }
 
-/* Base Styles */
+/* 基础样式保持不变 */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -30,7 +30,7 @@ body {
   background-color: var(--dark-bg);
 }
 
-/* Cyberpunk Sidebar */
+/* Cyberpunk Sidebar - 保持基本样式不变 */
 .cyberpunk-sidebar {
   position: fixed;
   top: 0;
@@ -57,15 +57,15 @@ body {
 .sidebar-content {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 16px;
+  gap: 12px;
+  padding: 14px;
   height: 100%;
 }
 
 .sidebar-header {
-  padding: 12px 0;
+  padding: 10px 0;
   border-bottom: 1px solid var(--dark-border);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .logo-container {
@@ -286,7 +286,7 @@ body {
   color: var(--solar-accent);
 }
 
-/* Panels Section */
+/* 更新的面板列表样式 */
 .panels-section {
   flex: 1;
   display: flex;
@@ -321,6 +321,87 @@ body {
   color: rgba(255, 255, 255, 0.7);
 }
 
+/* 新增: 搜索和筛选控件 */
+.panel-controls {
+  padding: 8px;
+  border-bottom: 1px solid var(--dark-border);
+  background: rgba(15, 18, 24, 0.4);
+}
+
+.search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 6px 30px 6px 26px;
+  border-radius: 4px;
+  border: 1px solid var(--dark-border);
+  background: rgba(15, 18, 24, 0.8);
+  color: white;
+  font-family: 'Rajdhani', sans-serif;
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: var(--solar-accent);
+}
+
+.search-box svg {
+  position: absolute;
+  left: 8px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.clear-search {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.clear-search:hover {
+  color: white;
+}
+
+.sort-controls {
+  display: flex;
+  gap: 6px;
+}
+
+.sort-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--dark-border);
+  background: rgba(15, 18, 24, 0.8);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  cursor: pointer;
+  font-family: 'Rajdhani', sans-serif;
+}
+
+.sort-button:hover {
+  background: rgba(31, 41, 55, 0.8);
+}
+
+.sort-button.active {
+  border-color: var(--solar-accent);
+  color: var(--solar-accent);
+  background: rgba(0, 240, 255, 0.1);
+}
+
+/* 更新面板列表 */
 .panel-list {
   flex: 1;
   overflow-y: auto;
@@ -337,20 +418,27 @@ body {
   gap: 12px;
 }
 
+/* 更新面板项目样式 - 紧凑版 */
 .panel-item {
   background: rgba(15, 18, 24, 0.8);
   border: 1px solid var(--dark-border);
   border-radius: 6px;
-  padding: 12px;
-  margin-bottom: 8px;
+  padding: 8px 12px;
+  margin-bottom: 6px;
   transition: all 0.2s;
   position: relative;
   overflow: hidden;
+  cursor: pointer;
 }
 
 .panel-item:hover {
-  border-color: var(--solar-accent);
+  border-color: var(--solar-yellow);
   box-shadow: 0 0 10px var(--panel-glow);
+}
+
+.panel-item.expanded {
+  border-color: var(--solar-accent);
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
 }
 
 .panel-item::before {
@@ -358,16 +446,21 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-  width: 4px;
+  width: 3px;
   height: 100%;
   background: linear-gradient(180deg, var(--solar-yellow), var(--solar-orange));
+}
+
+.panel-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .panel-id {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
+  gap: 6px;
 }
 
 .panel-id .value {
@@ -379,35 +472,41 @@ body {
   border-radius: 4px;
 }
 
-.panel-detail {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 8px;
-}
-
 .panel-metrics {
   display: flex;
-  gap: 12px;
-  margin-bottom: 8px;
-  padding: 8px;
-  border-radius: 4px;
-  background: rgba(0, 0, 0, 0.2);
+  gap: 10px;
 }
 
 .metric {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   font-family: 'Share Tech Mono', monospace;
-  font-size: 13px;
+  font-size: 12px;
   color: rgba(255, 255, 255, 0.8);
+}
+
+.panel-details {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--dark-border);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.panel-detail {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
 }
 
 .panel-owner {
   display: flex;
   justify-content: space-between;
   font-size: 12px;
-  padding-top: 6px;
+  margin-top: 4px;
+  padding-top: 4px;
   border-top: 1px solid var(--dark-border);
 }
 
@@ -420,7 +519,48 @@ body {
   color: white;
 }
 
-/* Sidebar Toggle Button */
+/* 新增: 分页控件 */
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border-top: 1px solid var(--dark-border);
+  gap: 8px;
+}
+
+.page-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  border: 1px solid var(--dark-border);
+  background: var(--dark-card);
+  color: var(--solar-accent);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.page-button:hover:not(:disabled) {
+  background: rgba(0, 240, 255, 0.1);
+  border-color: var(--solar-accent);
+}
+
+.page-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-info {
+  font-family: 'Share Tech Mono', monospace;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 0 8px;
+  font-size: 14px;
+}
+
+/* 侧边栏切换按钮 */
 .sidebar-toggle-btn {
   position: fixed;
   top: 20px;
@@ -449,7 +589,7 @@ body {
   left: 20px;
 }
 
-/* Notification */
+/* 通知样式 */
 .notification {
   position: fixed;
   bottom: 20px;
@@ -473,7 +613,7 @@ body {
   color: var(--error);
 }
 
-/* Animations */
+/* 动画效果 */
 @keyframes slideIn {
   0% {
     transform: translateY(20px);
@@ -494,7 +634,7 @@ body {
   }
 }
 
-/* Scrollbar styling */
+/* 滚动条样式 */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -512,21 +652,210 @@ body {
   background: var(--solar-accent);
 }
 
-/* Media Queries for Responsiveness */
+/* 虚拟列表滚动指示器 */
+.scroll-indicator {
+  position: absolute;
+  right: 0;
+  height: 50px;
+  width: 5px;
+  background: var(--solar-accent);
+  border-radius: 3px;
+  opacity: 0.6;
+  transition: top 0.1s;
+}
+
+/* 媒体查询以适应不同屏幕尺寸 */
 @media screen and (max-width: 768px) {
   .cyberpunk-sidebar {
     width: 280px;
   }
-  
+
   .sidebar-toggle-btn.closed {
     left: 16px;
   }
-  
+
   .sidebar-toggle-btn {
     left: 280px;
   }
-  
+
   .form-group {
     flex-direction: column;
   }
+
+  .panel-summary {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .panel-metrics {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+/* 当列表为空时显示的动画样式 */
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}
+
+.empty-state {
+  animation: pulse 2s infinite ease-in-out;
+}
+
+/* 高级数据显示样式 */
+.panel-data-visual {
+  width: 100%;
+  height: 30px;
+  background: linear-gradient(to right, rgba(0, 230, 118, 0.2), rgba(0, 240, 255, 0.2));
+  border-radius: 4px;
+  margin-top: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+.panel-data-bar {
+  height: 100%;
+  background: linear-gradient(to right, var(--success), var(--solar-accent));
+  border-radius: 4px;
+  transition: width 0.5s;
+}
+
+/* 收藏和置顶面板功能样式 */
+.panel-actions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 6px;
+}
+
+.panel-action-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  background: rgba(15, 18, 24, 0.6);
+  border: 1px solid var(--dark-border);
+  color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.panel-action-btn:hover {
+  color: var(--solar-yellow);
+  border-color: var(--solar-yellow);
+}
+
+.panel-action-btn.active {
+  color: var(--solar-yellow);
+  border-color: var(--solar-yellow);
+  background: rgba(255, 214, 0, 0.1);
+}
+
+/* 面板展开时的过渡效果 */
+.panel-details {
+  animation: expandDown 0.3s ease-out;
+  transform-origin: top center;
+}
+
+@keyframes expandDown {
+  0% {
+    opacity: 0;
+    transform: scaleY(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+/* 面板项目中添加状态指示器 */
+.panel-status-indicator {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 5px var(--success);
+}
+
+.panel-status-indicator.warning {
+  background: var(--solar-yellow);
+  box-shadow: 0 0 5px var(--solar-yellow);
+}
+
+.panel-status-indicator.danger {
+  background: var(--error);
+  box-shadow: 0 0 5px var(--error);
+}
+
+/* 添加数据标签 */
+.panel-data-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 2px;
+}
+
+/* 加载状态动画 */
+.panel-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px;
+}
+
+.loading-spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid var(--dark-border);
+  border-top-color: var(--solar-accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 群组展开控制 */
+.panel-group-header {
+  padding: 8px;
+  background: rgba(31, 41, 55, 0.6);
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.panel-group-header:hover {
+  background: rgba(31, 41, 55, 0.8);
+}
+
+.panel-group-content {
+  padding-left: 12px;
+  border-left: 1px dashed var(--dark-border);
+  margin-bottom: 12px;
 }
