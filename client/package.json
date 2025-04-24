@@ -49,6 +49,7 @@
     "@electron-forge/cli": "^7.6.0",
     "babel-loader": "^9.2.1",
     "css-loader": "^7.1.2",
+    "dotenv-cli": "^8.0.0",
     "electron": "^11.5.0",
     "eslint-webpack-plugin": "^4.2.0",
     "gh-pages": "^6.3.0",

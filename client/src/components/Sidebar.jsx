@@ -9,7 +9,7 @@ import SolarPanels from "../utils/SolarPanels.json";
 import "../style/Sidebar.css";
 
 const contractAddress = "0x9C29EE061119e730a1ba4EcdB71Bb00C01BF5aE9";
-const PANELS_PER_PAGE = 5; // 每页显示的面板数量
+const PANELS_PER_PAGE = 2; // 每页显示的面板数量
 
 const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
     const [contract, setContract] = useState(null);

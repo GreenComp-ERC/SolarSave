@@ -36,6 +36,12 @@ contract SolarPanels {
         uint256 acPower
     );
 
+    event PanelOwnershipTransferred(
+        uint256 indexed panelId,
+        address indexed from,
+        address indexed to
+    );
+
     modifier onlyOwner(uint256 _panelId) {
         require(panels[_panelId].owner == msg.sender, "Not the owner of this panel");
         _;
@@ -88,6 +94,27 @@ contract SolarPanels {
         panels[_panelId].acPower = _acPower;
 
         emit PanelUpdated(_panelId, _batteryTemperature, _dcPower, _acPower);
+    }
+
+    function transferPanelOwnership(uint256 _panelId, address _newOwner) public onlyOwner(_panelId) {
+        require(panels[_panelId].exists, "Panel does not exist");
+        require(_newOwner != address(0), "New owner cannot be zero address");
+
+        // Remove panel from current owner's list
+        uint256[] storage senderPanels = ownerPanels[msg.sender];
+        for (uint256 i = 0; i < senderPanels.length; i++) {
+            if (senderPanels[i] == _panelId) {
+                senderPanels[i] = senderPanels[senderPanels.length - 1];
+                senderPanels.pop();
+                break;
+            }
+        }
+
+        // Transfer ownership
+        panels[_panelId].owner = _newOwner;
+        ownerPanels[_newOwner].push(_panelId);
+
+        emit PanelOwnershipTransferred(_panelId, msg.sender, _newOwner);
     }
 
     function getPanel(uint256 _panelId) public view returns (

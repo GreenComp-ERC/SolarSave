@@ -3,13 +3,13 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import Sidebar from "./Sidebar";
 import PanelWindows from "./PanelWindows";
-import TradeScript from "./TradeScript";
+import TradeConfirm from "./TradeConfirm";
 import kakilogo from "../../images/kali.png";
 import { TransactionContext } from "../context/TransactionContext";
 import { ethers } from "ethers";
 import SolarPanels from "../utils/SolarPanels.json";
 import "../style/MapSection.css";
-
+import axios from "axios";
 const contractAddress = "0x9C29EE061119e730a1ba4EcdB71Bb00C01BF5aE9";
 
 const MapSection = () => {
@@ -59,22 +59,85 @@ const MapSection = () => {
       setIsLoading(false);
     }
   };
+  const getClosestTimestamp = (keys, target) => {
+    const targetTime = new Date(target).getTime();
+    let closest = keys[0];
+    let minDiff = Math.abs(new Date(closest).getTime() - targetTime);
 
-  const handleCreatePanel = (lat, lng) => {
+    keys.forEach((key) => {
+      const diff = Math.abs(new Date(key).getTime() - targetTime);
+      if (diff < minDiff) {
+        closest = key;
+        minDiff = diff;
+      }
+    });
+
+    return closest;
+  };
+
+  const fetchPredictedPanelData = async (lat, lng, timestamp) => {
+    try {
+      const response = await axios.post("https://solarpay-8e3p.onrender.com/run_model/", {
+        lat: lat,
+        lon: lng,
+        start_date: "2022-06-21",
+        end_date: "2022-06-22",
+        freq: "60min"
+      });
+
+      if (response.data.status !== "success") {
+        throw new Error("API 返回失败: " + response.data.message);
+      }
+
+      const data = response.data.data;
+      const keys = Object.keys(data.ac || {});
+      const closestTime = getClosestTimestamp(keys, timestamp);
+
+      return {
+        batteryTemp: data.cell_temperature?.[closestTime] ?? 25,
+        dcPower: data["dc(v_mp)"]?.[closestTime] ?? 100,
+        acPower: data.ac?.[closestTime] ?? 900,
+      };
+    } catch (err) {
+      console.error("获取预测数据失败:", err);
+      return {
+        batteryTemp: 25,
+        dcPower: 100,
+        acPower: 901,
+      };
+    }
+  };
+
+  const handleCreatePanel = async (lat, lng) => {
     if (currentAccount) {
       alert("请先连接钱包！");
       connectWallet();
       return;
     }
+
+    const now = new Date();
+    now.setMinutes(0);
+    now.setSeconds(0);
+    now.setMilliseconds(0);
+    const isoTimestamp = now.toISOString().slice(0, 19);
+
+    const prediction = await fetchPredictedPanelData(lat, lng, isoTimestamp);
+
     setPendingPanelLocation({ lat, lng });
     setIsConfirmingPanel(true);
     setTradeScriptData({
       lat,
       lng,
+      batteryTemp: prediction.batteryTemp,
+      dcPower: prediction.dcPower,
+      acPower: prediction.acPower,
       sandia_module_name: "Canadian_Solar_CS5P_220M___2009_",
       cec_inverter_name: "ABB__MICRO_0_25_I_OUTD_US_208__208V_",
     });
   };
+
+
+
 
   const confirmCreatePanel = () => {
     setIsConfirmingPanel(false);
@@ -91,14 +154,7 @@ const MapSection = () => {
       const { lat, lng } = pendingPanelLocation;
 
       try {
-        // 创建一个新的太阳能面板交易
-        const tx = await contract.createPanel(
-          Math.round(lat * 10000), // 转换为整数以适应合约
-          Math.round(lng * 10000),
-          25, // 默认电池温度
-          100, // 默认DC功率
-          90  // 默认AC功率
-        );
+
 
 
         // 等待交易确认
@@ -417,11 +473,15 @@ const MapSection = () => {
       )}
 
       {/* 交易脚本 */}
+
       {showTradeScript && (
-        <TradeScript
+        <TradeConfirm
           close={createPanelOnClose}
           lat={tradeScriptData.lat}
           lng={tradeScriptData.lng}
+          batterTemp={tradeScriptData.batteryTemp}
+          dcPower={tradeScriptData.dcPower}
+          acPower={tradeScriptData.acPower}
           sandiaModuleName={tradeScriptData.sandia_module_name}
           cecInverterName={tradeScriptData.cec_inverter_name}
         />

@@ -1,0 +1,79 @@
+.test-shop-container {
+  padding: 30px;
+  font-family: "Segoe UI", sans-serif;
+  color: #222;
+  background: #f8f9fb;
+}
+
+.test-shop-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-weight: 600;
+  font-size: 26px;
+}
+
+.test-shop-container p {
+  font-size: 14px;
+  margin: 5px 0;
+}
+
+.section {
+  margin-top: 40px;
+}
+
+.section h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.panel-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  padding: 20px;
+  margin-bottom: 20px;
+  transition: transform 0.2s ease;
+  max-width: 500px;
+}
+
+.panel-card:hover {
+  transform: translateY(-3px);
+}
+
+.panel-card p {
+  font-size: 14px;
+  margin: 4px 0;
+  color: #444;
+}
+
+.panel-card button {
+  margin-top: 10px;
+  padding: 8px 16px;
+  border: none;
+  background-color: #34a853;
+  color: white;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.panel-card button:hover {
+  background-color: #2d9045;
+}
+
+@media screen and (max-width: 768px) {
+  .panel-card {
+    width: 100%;
+  }
+
+  .test-shop-container {
+    padding: 20px;
+  }
+
+  .panel-card button {
+    width: 100%;
+  }
+}

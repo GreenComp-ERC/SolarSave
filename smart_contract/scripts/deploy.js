@@ -1,31 +1,49 @@
 const hre = require("hardhat");
+const fs = require("fs");
+const path = require("path");
 
 async function main() {
-    // ✅ 确保 ERC20 代币地址是字符串格式
-    const tokenAddress = "0x1d78aB9A7744430d64a5D9659E4FcB933Be78080";
+  const [deployer] = await hre.ethers.getSigners();
+  console.log(`🚀 Deploying contracts with: ${deployer.address}`);
 
-    console.log("🚀 正在部署 SolarTrade 合约...");
+  const deployed = {};
 
-    // ✅ 使用 `getContractFactory` 以适配 Hardhat v2 + ethers v6
-    const SolarTrade = await hre.ethers.deployContract("SolarTrade", [tokenAddress]);
+  // 1️⃣ SolarToken（无参）
+  const SolarToken = await hre.ethers.getContractFactory("SolarToken");
+  const solarToken = await SolarToken.deploy();
+  await solarToken.waitForDeployment();
+  deployed.SolarToken = solarToken.target;
+  console.log(`✅ SolarToken deployed at: ${solarToken.target}`);
 
-    // ✅ `waitForDeployment()` 适用于 ethers v6
-    await SolarTrade.waitForDeployment();
+  // 2️⃣ SolarPanels（无参）
+  const SolarPanels = await hre.ethers.getContractFactory("SolarPanels");
+  const solarPanels = await SolarPanels.deploy();
+  await solarPanels.waitForDeployment();
+  deployed.SolarPanels = solarPanels.target;
+  console.log(`✅ SolarPanels deployed at: ${solarPanels.target}`);
 
-    console.log(`✅ SolarTrade 部署成功，地址: ${SolarTrade.target}`);
+  // 3️⃣ Shop（需要 token 和 solarPanels 地址）
+  const Shop = await hre.ethers.getContractFactory("Shop");
+  const shop = await Shop.deploy(solarToken.target, solarPanels.target);
+  await shop.waitForDeployment();
+  deployed.Shop = shop.target;
+  console.log(`✅ Shop deployed at: ${shop.target}`);
 
-    // ✅ 将合约地址存储到前端的 `contractAddress.json`
-    // const fs = require("fs");
-    // const path = require("path");
-    // const frontendPath = path.join(__dirname, "./contractAddress.json");
-    //
-    // fs.writeFileSync(frontendPath, JSON.stringify({ address: SolarTrade.target }, null, 2));
-    //
-    // console.log(`✅ 合约地址已存储到: frontend/src/utils/contractAddress.json`);
-    console.log(`🚀 SolarToken 部署成功！合约地址: ${SolarTrade.target}`);
+  // 4️⃣ PowerReward（需要 token 和 solarPanels 地址）
+  const PowerReward = await hre.ethers.getContractFactory("PowerReward");
+  const reward = await PowerReward.deploy(solarToken.target, solarPanels.target);
+  await reward.waitForDeployment();
+  deployed.PowerReward = reward.target;
+  console.log(`✅ PowerReward deployed at: ${reward.target}`);
+
+  // 📄 保存所有地址到 JSON 文件
+  const outputPath = path.resolve(__dirname, "../contractAddress.json");
+  fs.writeFileSync(outputPath, JSON.stringify(deployed, null, 2));
+  console.log("📦 All contract addresses saved to contractAddress.json");
 }
 
+// 🚨 捕捉异常
 main().catch((error) => {
-    console.error("❌ 部署失败:", error);
-    process.exitCode = 1;
+  console.error("❌ Deployment failed:", error);
+  process.exitCode = 1;
 });
