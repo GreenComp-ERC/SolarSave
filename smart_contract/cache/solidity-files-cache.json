@@ -380,6 +380,45 @@
       "artifacts": [
         "SolarPanels"
       ]
+    },
+    "D:\\DOWNLOAD\\SolarSave\\smart_contract\\contracts\\CaoCaoBit.sol": {
+      "lastModificationDate": 1745502925862,
+      "contentHash": "862e8ab60e38032c52dd710053b12ab8",
+      "sourceName": "contracts/CaoCaoBit.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        "@openzeppelin/contracts/access/Ownable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "CaoCaoBit"
+      ]
     }
   }
 }
