@@ -1,0 +1,71 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "ISolarPanels",
+  "sourceName": "contracts/PowerReward.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "getMyPanels",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "id",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "latitude",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "longitude",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "batteryTemperature",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "dcPower",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "acPower",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "createdAt",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct ISolarPanels.Panel[]",
+          "name": "",
+          "type": "tuple[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

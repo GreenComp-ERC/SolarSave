@@ -7,6 +7,8 @@ export { default as Sidebar } from "./Sidebar";
 export { default as PanelWindows } from "./PanelWindows";
 export { default as SolarPredict } from "./SolarPredict";
 export { default as SolarTrade } from "./SolarTrade";
-export { default as Store } from "./Store";
-export { default as TestSolarTrade } from "./TestPanels";
+export { default as Store } from "./test/TestStore";
+export { default as TestSolarTrade } from "./test/TestPanels";
 export { default as SolarToken } from "./Wallet";
+export { default as TestSolarAPI } from "./test/TestSolarAPI";
+

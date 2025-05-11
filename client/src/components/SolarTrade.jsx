@@ -4,7 +4,7 @@ import {
   FiX, FiPlusCircle, FiBarChart2, FiPieChart,
   FiTrendingUp, FiLayers, FiSun, FiWifi
 } from "react-icons/fi";
-import TradeScript from "./TradeScript";
+import TradeScript from "./TradeConfirm";
 import PanelWindows from "./PanelWindows";
 import SolarPanels from "../utils/SolarPanels.json";
 import "../style/SolarTrade.css";

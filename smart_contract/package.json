@@ -7,7 +7,7 @@
   },
   "devDependencies": {
     "dotenv": "^16.4.7",
-    "hardhat": "^2.22.18"
+    "hardhat": "^2.23.0"
   },
   "scripts": {
     "test": "mocha"

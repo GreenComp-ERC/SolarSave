@@ -1,11 +1,11 @@
 import React, { useContext, useState, useEffect } from "react";
 import { TransactionContext } from "../context/TransactionContext";
 import { shortenAddress } from "../utils/shortenAddress";
-import SolarToken from "./Wallet";
-import Store from "./Store";
-import TestPanels from "./TestPanels";
+import SolarToken from "./test/TestWallet";
+import TestStore from "./test/TestStore";
+import TestPanels from "./test/TestPanels";
 import "../style/Navbar.css"; // 引入新的 CSS 文件
-
+import About from "./About"
 // 替换图标导入，使用更现代的图标
 import {
   Menu, X, Sun, ChevronDown, Wallet,
@@ -29,6 +29,7 @@ const Navbar = ({ logoSize = "w-16" }) => {
   const [isStoreModalOpen, setIsStoreModalOpen] = useState(false);
   const [isTestPanelsModalOpen, setIsTestPanelsModalOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [toolsDropdown, setToolsDropdown] = useState(false);
 
   const { currentAccount, connectWallet } = useContext(TransactionContext);
@@ -62,7 +63,7 @@ const Navbar = ({ logoSize = "w-16" }) => {
         </div>
 
         <ul className="nav-links">
-          <NavBarItem title="关于" icon={<Info size={18} />} />
+          <NavBarItem title="关于" icon={<Info size={18} />} onClick={() => setIsAboutOpen(true)} />
           <NavBarItem title="博客" icon={<BookOpen size={18} />} />
           <NavBarItem title="通讯" icon={<Activity size={18} />} />
           <NavBarItem title="文档" icon={<BookOpen size={18} />} />
@@ -134,7 +135,7 @@ const Navbar = ({ logoSize = "w-16" }) => {
       {toggleMenu && (
         <div className="mobile-nav">
           <ul className="mobile-nav-list">
-            <NavBarItem title="关于" icon={<Info size={18} />} />
+            NavBarItem title="关于" icon={<Info size={18} />} onClick={() => setIsAboutOpen(true)} />
             <NavBarItem title="博客" icon={<BookOpen size={18} />} />
             <NavBarItem title="通讯" icon={<Activity size={18} />} />
             <NavBarItem title="文档" icon={<BookOpen size={18} />} />
@@ -189,7 +190,7 @@ const Navbar = ({ logoSize = "w-16" }) => {
             >
               <X size={20} />
             </button>
-            <Store />
+            <TestStore />
           </div>
         </div>
       )}
@@ -204,6 +205,16 @@ const Navbar = ({ logoSize = "w-16" }) => {
               <X size={20} />
             </button>
             <TestPanels />
+          </div>
+        </div>
+      )}
+      {isAboutOpen && (
+        <div className="modal-overlay">
+          <div className="modal-container">
+            <button className="modal-close-btn" onClick={() => setIsAboutOpen(false)}>
+              <X size={20} />
+            </button>
+            <About />
           </div>
         </div>
       )}
