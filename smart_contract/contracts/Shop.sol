@@ -3,7 +3,6 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-// 接入 SolarPanels 合约接口
 interface ISolarPanels {
     function transferPanelOwnership(uint panelId, address newOwner) external;
     function getPanel(uint panelId) external view returns (
@@ -20,8 +19,8 @@ interface ISolarPanels {
 contract Shop {
     address public owner;
     uint public itemCount = 0;
-    IERC20 public token; // 绑定 ERC20 代币
-    ISolarPanels public solarPanelContract; // 外部 SolarPanels 合约
+    IERC20 public token;
+    ISolarPanels public solarPanelContract;
 
     struct Item {
         uint id;
@@ -35,7 +34,7 @@ contract Shop {
         uint dcPower;
         uint acPower;
         uint createdAt;
-        uint panelId; // 新增：对应的太阳能板 ID
+        uint panelId;
     }
 
     struct Purchase {
@@ -47,9 +46,12 @@ contract Shop {
 
     mapping(uint => Item) public items;
     mapping(address => Purchase[]) public purchaseHistory;
+    mapping(uint => address[]) public pendingBuyers;
+    mapping(uint => mapping(address => bool)) public hasOffered;
 
     event ItemListed(uint id, string name, uint price, address seller);
-    event ItemPurchased(uint id, address buyer, uint price);
+    event OfferPlaced(uint id, address buyer);
+    event ItemSold(uint id, address buyer);
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Not the contract owner");
@@ -69,7 +71,6 @@ contract Shop {
         solarPanelContract = ISolarPanels(_solarPanelAddress);
     }
 
-    // 上架商品，并关联面板 ID
     function listItem(
         string memory _name,
         uint _price,
@@ -79,11 +80,9 @@ contract Shop {
         uint _dcPower,
         uint _acPower,
         uint _createdAt,
-        uint _panelId // 新增参数
+        uint _panelId
     ) public {
         require(_price > 0, "Price must be greater than zero");
-
-        // 校验 seller 拥有该面板
         (address panelOwner,,,,,,) = solarPanelContract.getPanel(_panelId);
         require(panelOwner == msg.sender, "You do not own this panel");
 
@@ -106,39 +105,40 @@ contract Shop {
         emit ItemListed(itemCount, _name, _price, msg.sender);
     }
 
-    // 购买并转移面板所有权
-    function buyItem(uint _id) public itemExists(_id) {
+    function offerToBuy(uint _id) public itemExists(_id) {
         Item storage item = items[_id];
         require(!item.purchased, "Item already sold");
         require(token.balanceOf(msg.sender) >= item.price, "Insufficient token balance");
         require(token.allowance(msg.sender, address(this)) >= item.price, "Allowance too low");
+        require(!hasOffered[_id][msg.sender], "Already offered");
 
-        // 校验 panel 仍属于 seller
-        (address panelOwner,,,,,,) = solarPanelContract.getPanel(item.panelId);
-        require(panelOwner == item.seller, "Seller no longer owns the panel");
+        hasOffered[_id][msg.sender] = true;
+        pendingBuyers[_id].push(msg.sender);
 
-        require(token.transferFrom(msg.sender, item.seller, item.price), "Token transfer failed");
+        emit OfferPlaced(_id, msg.sender);
+    }
 
-        // 转移所有权
-        solarPanelContract.transferPanelOwnership(item.panelId, msg.sender);
+    function approveSale(uint _id, address buyer) public itemExists(_id) {
+        Item storage item = items[_id];
+        require(item.seller == msg.sender, "Not the seller");
+        require(hasOffered[_id][buyer], "Buyer has not offered");
+        require(!item.purchased, "Item already sold");
+
+        require(token.transferFrom(buyer, item.seller, item.price), "Token transfer failed");
+        solarPanelContract.transferPanelOwnership(item.panelId, buyer);
 
         item.purchased = true;
+        purchaseHistory[buyer].push(Purchase(_id, buyer, item.price, block.timestamp));
 
-        purchaseHistory[msg.sender].push(Purchase(_id, msg.sender, item.price, block.timestamp));
-
-        emit ItemPurchased(_id, msg.sender, item.price);
+        emit ItemSold(_id, buyer);
     }
 
     function getItem(uint _id) public view itemExists(_id) returns (Item memory) {
         return items[_id];
     }
 
-    function getPanelInfo(uint _id)
-        public
-        view
-        itemExists(_id)
-        returns (uint latitude, uint longitude, uint batteryTemperature, uint dcPower, uint acPower, uint createdAt)
-    {
+    function getPanelInfo(uint _id) public view itemExists(_id)
+        returns (uint, uint, uint, uint, uint, uint) {
         Item memory item = items[_id];
         return (item.latitude, item.longitude, item.batteryTemperature, item.dcPower, item.acPower, item.createdAt);
     }
@@ -146,4 +146,13 @@ contract Shop {
     function getPurchaseHistory(address _buyer) public view returns (Purchase[] memory) {
         return purchaseHistory[_buyer];
     }
+
+    function getPendingBuyers(uint _id) public view returns (address[] memory) {
+        return pendingBuyers[_id];
+    }
+
+    function hasUserOffered(uint _id, address user) public view returns (bool) {
+        return hasOffered[_id][user];
+    }
+
 }

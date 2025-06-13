@@ -11,35 +11,48 @@ const PanelWindows = ({ panel, closeWindow }) => {
   const [error, setError] = useState(null);
   const [expanded, setExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState('summary');
+  const fixValue = (val) => {
+  return Math.abs(val) > 1000 ? val / 10000 : val;
+};
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      setError(null);
-      setData(null);
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
+    setData(null);
 
-      try {
-        const response = await axios.post("https://solarpay-8e3p.onrender.com/run_model/", {
-          lat: panel.lat,
-          lon: panel.lng,
-          start_date: "2022-06-21",
-          end_date: "2022-06-22",
-        });
+    try {
+      // 修正异常坐标
+      let fixedLat = panel.lat;
+      let fixedLng = panel.lng;
 
-        if (response.data.status === "success") {
-          setData(response.data.data);
-        } else {
-          setError("API返回错误: " + response.data.message);
-        }
-      } catch (err) {
-        setError("获取数据失败: " + err.message);
-      } finally {
-        setLoading(false);
+      if (Math.abs(fixedLat) > 90 || Math.abs(fixedLng) > 180) {
+        fixedLat = fixedLat / 10000;
+        fixedLng = fixedLng / 10000;
       }
-    };
 
-    fetchData();
-  }, [panel.lat, panel.lng]);
+      const response = await axios.post("https://solarpay-8e3p.onrender.com/run_model/", {
+        lat: fixedLat,
+        lon: fixedLng,
+        start_date: "2022-06-21",
+        end_date: "2022-06-22",
+      });
+
+      if (response.data.status === "success") {
+        setData(response.data.data);
+      } else {
+        setError("API返回错误: " + response.data.message);
+      }
+    } catch (err) {
+      setError("获取数据失败: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchData();
+}, [panel.lat, panel.lng]);
+
 
   const transformDataForRecharts = (dataKey) => {
     if (!data || !data[dataKey]) return [];
@@ -175,8 +188,8 @@ const PanelWindows = ({ panel, closeWindow }) => {
                   <div className="stat-icon location-icon"></div>
                   <div className="stat-info">
                     <h4>位置</h4>
-                    <p>纬度: {panel.lat.toFixed(4)}</p>
-                    <p>经度: {panel.lng.toFixed(4)}</p>
+                    <p>纬度: {fixValue(panel.lat).toFixed(4)}</p>
+                    <p>经度: {fixValue(panel.lng).toFixed(4)}</p>
                   </div>
                 </div>
 
@@ -184,8 +197,10 @@ const PanelWindows = ({ panel, closeWindow }) => {
                   <div className="stat-icon power-icon"></div>
                   <div className="stat-info">
                     <h4>功率</h4>
-                    <p>直流: <span className="highlight">{panel.dcPower} W</span></p>
-                    <p>交流: <span className="highlight">{panel.acPower} W</span></p>
+
+                    <p>直流: <span className="highlight">{fixValue(panel.dcPower).toFixed(2)} W</span></p>
+                    <p>交流: <span className="highlight">{fixValue(panel.acPower).toFixed(2)} W</span></p>
+
                     <p>效率: <span className="highlight">{efficiency}%</span></p>
                   </div>
                 </div>
@@ -194,7 +209,7 @@ const PanelWindows = ({ panel, closeWindow }) => {
                   <div className="stat-icon temp-icon"></div>
                   <div className="stat-info">
                     <h4>温度</h4>
-                    <p><span className="highlight">{panel.batteryTemp}°C</span></p>
+                    <p><span className="highlight">{fixValue(panel.batteryTemp)}°C</span></p>
                     <p className={panel.batteryTemp > 40 ? 'warning' : ''}>
                       {panel.batteryTemp > 40 ? '温度偏高' : '正常范围'}
                     </p>

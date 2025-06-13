@@ -1,6 +1,5 @@
-import React, { useState } from "react";
-import axios from "axios";
-import Chart from "react-google-charts";
+import React, { useState, useEffect, useRef } from "react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
 import "../style/Test.css";
 
 const SolarPredict = () => {
@@ -15,28 +14,53 @@ const SolarPredict = () => {
   const [endDate, setEndDate] = useState("2022-06-22");
   const [modalOpen, setModalOpen] = useState(false);
   const [activeChart, setActiveChart] = useState(null);
-  const [viewMode, setViewMode] = useState("compact"); // compact, list, modal
+  const [viewMode, setViewMode] = useState("compact");
+  const [animationDelay, setAnimationDelay] = useState(0);
+  const containerRef = useRef(null);
 
-  // Fetch solar data
+  // 图表颜色配置
+  const chartColors = {
+    primary: "#00a2ff",
+    secondary: "#2ed573",
+    accent: "#ff6b6b",
+    highlight: "#26d0ce",
+    gradient1: "#00a2ff",
+    gradient2: "#0078ff"
+  };
+
+  // 获取太阳能数据
   const fetchSolarData = async () => {
     setLoading(true);
     setData(null);
     setError(null);
+    setAnimationDelay(0);
 
     try {
-      const response = await axios.post("https://solarpay-8e3p.onrender.com/run_model/", {
-        lat: parseFloat(lat),
-        lon: parseFloat(lng),
-        start_date: startDate,
-        end_date: endDate,
-        freq: interval === "second" ? "1s" : interval === "minute" ? "1min" : interval === "hour" ? "60min" : "1D",
+      const response = await fetch("https://solarpay-8e3p.onrender.com/run_model/", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          lat: parseFloat(lat),
+          lon: parseFloat(lng),
+          start_date: startDate,
+          end_date: endDate,
+          freq: interval === "second" ? "1s" : interval === "minute" ? "1min" : interval === "hour" ? "60min" : "1D",
+        })
       });
 
-      if (response.data.status === "success") {
-        setData(response.data.data);
-        setViewMode("compact"); // 默认显示压缩视图
+      const responseData = await response.json();
+
+      if (responseData.status === "success") {
+        // 添加动画延迟效果
+        setTimeout(() => {
+          setData(responseData.data);
+          setViewMode("compact");
+          triggerCardAnimations();
+        }, 500);
       } else {
-        setError("API 返回错误: " + response.data.message);
+        setError("API 返回错误: " + responseData.message);
       }
     } catch (err) {
       setError("数据获取失败: " + err.message);
@@ -45,281 +69,644 @@ const SolarPredict = () => {
     }
   };
 
-  // Format data for charts
+  // 触发卡片动画
+  const triggerCardAnimations = () => {
+    const cards = document.querySelectorAll('.pred-chart-preview-card');
+    cards.forEach((card, index) => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(50px) scale(0.9)';
+      setTimeout(() => {
+        card.style.transition = 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0) scale(1)';
+      }, index * 150);
+    });
+  };
+
+  useEffect(() => {
+    fetchSolarData();
+  }, []);
+
+  // 为图表转换数据格式
   const transformDataForChart = (dataKey) => {
     if (!data || !data[dataKey]) return [];
 
-    const chartData = [["时间", dataKey]];
     const timestamps = Object.keys(data[dataKey]);
-
-    timestamps.forEach((timestamp) => {
-      chartData.push([
-        new Date(timestamp).toLocaleTimeString(),
-        data[dataKey][timestamp],
-      ]);
-    });
-
-    return chartData;
+    return timestamps.map((timestamp, index) => ({
+      time: new Date(timestamp).toLocaleTimeString('zh-CN', {
+        hour: '2-digit',
+        minute: '2-digit'
+      }),
+      value: data[dataKey][timestamp] || 0,
+      fullTime: new Date(timestamp).toLocaleString('zh-CN'),
+      index
+    }));
   };
 
-  // 打开模态框并显示指定图表
+  // 获取数据统计信息
+  const getDataStats = (dataKey) => {
+    if (!data || !data[dataKey]) return { min: 0, max: 0, avg: 0, trend: 0 };
+
+    const values = Object.values(data[dataKey]).filter(v => v != null);
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const avg = values.reduce((sum, val) => sum + val, 0) / values.length;
+    const trend = values.length > 1 ? ((values[values.length - 1] - values[0]) / values[0] * 100) : 0;
+
+    return { min, max, avg, trend };
+  };
+
+  // 自定义Tooltip组件
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="pred-custom-tooltip" style={{
+          background: 'rgba(15, 14, 19, 0.95)',
+          border: '2px solid rgba(0, 162, 255, 0.5)',
+          borderRadius: '12px',
+          padding: '12px 16px',
+          backdropFilter: 'blur(20px)',
+          color: '#ffffff',
+          fontSize: '14px',
+          fontWeight: '600'
+        }}>
+          <p style={{ margin: '0 0 8px 0', color: '#00a2ff' }}>{`时间: ${label}`}</p>
+          <p style={{ margin: '0', color: '#2ed573' }}>
+            {`数值: ${payload[0].value.toFixed(2)}`}
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  // 打开模态框
   const openChartModal = (chartKey) => {
     setActiveChart(chartKey);
     setModalOpen(true);
-    document.body.style.overflow = "hidden"; // 防止背景滚动
+    document.body.style.overflow = "hidden";
+
+    // 添加模态框打开动画
+    setTimeout(() => {
+      const modal = document.querySelector('.pred-modal-content');
+      if (modal) {
+        modal.style.animation = 'pred-modalSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+      }
+    }, 10);
   };
 
   // 关闭模态框
   const closeModal = () => {
-    setModalOpen(false);
-    document.body.style.overflow = "auto"; // 恢复背景滚动
-  };
-
-  // 切换视图模式
-  const toggleViewMode = () => {
-    if (viewMode === "compact") {
-      setViewMode("list");
-    } else if (viewMode === "list") {
-      setViewMode("compact");
+    const modal = document.querySelector('.pred-modal-content');
+    if (modal) {
+      modal.style.animation = 'pred-modalSlideOut 0.3s ease-in-out';
+      setTimeout(() => {
+        setModalOpen(false);
+        setActiveChart(null);
+        document.body.style.overflow = "auto";
+      }, 300);
+    } else {
+      setModalOpen(false);
+      setActiveChart(null);
+      document.body.style.overflow = "auto";
     }
   };
 
-  // 渲染图表预览卡片
-  const renderChartCards = () => {
+  // 渲染增强版图表卡片
+  const renderEnhancedChartCards = () => {
     if (!data) return null;
 
     return (
-      <div className="chart-cards-container">
-        {Object.keys(data).map((key) => (
-          <div key={key} className="chart-preview-card blue-glassmorphism" onClick={() => openChartModal(key)}>
-            <h3 className="chart-subtitle">{key}</h3>
-            <div className="chart-preview">
-              <Chart
-                chartType="LineChart"
-                data={transformDataForChart(key)}
-                options={{
-                  legend: "none",
-                  backgroundColor: "transparent",
-                  colors: ["#34A853"],
-                  hAxis: { textPosition: "none" },
-                  vAxis: { textPosition: "none" },
-                  chartArea: { width: "90%", height: "80%" },
-                  enableInteractivity: false
-                }}
-                width="100%"
-                height="120px"
-              />
-            </div>
-            <button className="view-chart-btn">查看详情</button>
-          </div>
-        ))}
-      </div>
-    );
-  };
+      <div className="pred-chart-cards-container">
+        {Object.keys(data).map((key, index) => {
+          const chartData = transformDataForChart(key);
+          const stats = getDataStats(key);
 
-  // 渲染图表列表视图
-  const renderChartList = () => {
-    if (!data) return null;
-
-    return (
-      <div className="chart-list-container">
-        {Object.keys(data).map((key) => (
-          <div key={key} className="chart-box blue-glassmorphism">
-            <h3 className="chart-subtitle">{key} 数据图</h3>
-            <Chart
-              chartType="LineChart"
-              data={transformDataForChart(key)}
-              options={{
-                title: `${key} 变化趋势`,
-                titleTextStyle: { color: "#fff" },
-                hAxis: {
-                  title: "时间",
-                  textStyle: { color: "#fff" },
-                  gridlines: { color: "rgba(255,255,255,0.1)" }
-                },
-                vAxis: {
-                  title: key,
-                  textStyle: { color: "#fff" },
-                  gridlines: { color: "rgba(255,255,255,0.1)" }
-                },
-                legend: { position: "bottom", textStyle: { color: "#fff" } },
-                colors: ["#34A853", "#FBBC05", "#EA4335", "#4285F4"],
-                backgroundColor: "transparent",
-                curveType: "function",
-                chartArea: { width: "85%", height: "70%" }
+          return (
+            <div
+              key={key}
+              className="pred-chart-preview-card"
+              style={{
+                animationDelay: `${index * 0.1}s`,
+                '--card-index': index
               }}
-              width="100%"
-              height="400px"
-            />
-          </div>
-        ))}
+              onClick={() => openChartModal(key)}
+            >
+              {/* 卡片头部信息 */}
+              <div className="pred-card-header">
+                <h3 className="pred-chart-subtitle">{key}</h3>
+                <div className="pred-stats-badges">
+                  <span className="pred-stat-badge pred-trend"
+                        style={{ color: stats.trend >= 0 ? '#2ed573' : '#ff6b6b' }}>
+                    {stats.trend >= 0 ? '↗' : '↘'} {Math.abs(stats.trend).toFixed(1)}%
+                  </span>
+                </div>
+              </div>
+
+              {/* 数据统计栏 */}
+              <div className="pred-stats-row">
+                <div className="pred-stat-item">
+                  <span className="pred-stat-label">最小值</span>
+                  <span className="pred-stat-value" style={{ color: '#26d0ce' }}>
+                    {stats.min.toFixed(2)}
+                  </span>
+                </div>
+                <div className="pred-stat-item">
+                  <span className="pred-stat-label">平均值</span>
+                  <span className="pred-stat-value" style={{ color: '#00a2ff' }}>
+                    {stats.avg.toFixed(2)}
+                  </span>
+                </div>
+                <div className="pred-stat-item">
+                  <span className="pred-stat-label">最大值</span>
+                  <span className="pred-stat-value" style={{ color: '#ff6b6b' }}>
+                    {stats.max.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+
+              {/* 增强版图表预览 */}
+              <div className="pred-chart-preview">
+                <ResponsiveContainer width="100%" height={120}>
+                  <AreaChart data={chartData}>
+                    <defs>
+                      <linearGradient id={`gradient-${index}`} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={chartColors.primary} stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor={chartColors.primary} stopOpacity={0.05}/>
+                      </linearGradient>
+                    </defs>
+                    <Area
+                      type="monotone"
+                      dataKey="value"
+                      stroke={chartColors.primary}
+                      strokeWidth={2}
+                      fill={`url(#gradient-${index})`}
+                      dot={false}
+                      activeDot={{ r: 4, fill: chartColors.primary, stroke: '#ffffff', strokeWidth: 2 }}
+                    />
+                    <Tooltip content={<CustomTooltip />} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* 交互按钮 */}
+              <button className="pred-view-chart-btn">
+                <span>🔍 查看详情</span>
+                <div className="pred-btn-glow"></div>
+              </button>
+            </div>
+          );
+        })}
       </div>
     );
   };
 
-  // 渲染模态框图表
-  const renderModalChart = () => {
+  // 渲染增强版列表视图
+  const renderEnhancedChartList = () => {
+    if (!data) return null;
+
+    return (
+      <div className="pred-chart-list-container">
+        {Object.keys(data).map((key, index) => {
+          const chartData = transformDataForChart(key);
+
+          return (
+            <div key={key} className="pred-chart-box" style={{ animationDelay: `${index * 0.2}s` }}>
+              <h3 className="pred-chart-subtitle">{key} 数据趋势</h3>
+              <ResponsiveContainer width="100%" height={400}>
+                <LineChart data={chartData}>
+                  <defs>
+                    <linearGradient id={`listGradient-${index}`} x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor={chartColors.primary}/>
+                      <stop offset="50%" stopColor={chartColors.secondary}/>
+                      <stop offset="100%" stopColor={chartColors.highlight}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="rgba(255,255,255,0.1)"
+                    horizontal={true}
+                    vertical={false}
+                  />
+                  <XAxis
+                    dataKey="time"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: '#ffffff', fontSize: 12 }}
+                    interval="preserveStartEnd"
+                  />
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: '#ffffff', fontSize: 12 }}
+                    domain={['dataMin - 5', 'dataMax + 5']}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Line
+                    type="monotone"
+                    dataKey="value"
+                    stroke={`url(#listGradient-${index})`}
+                    strokeWidth={3}
+                    dot={{ fill: chartColors.primary, strokeWidth: 2, r: 4 }}
+                    activeDot={{ r: 6, fill: chartColors.secondary, stroke: '#ffffff', strokeWidth: 2 }}
+                    connectNulls={false}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
+  // 渲染增强版模态框图表
+  const renderEnhancedModalChart = () => {
     if (!activeChart || !data) return null;
 
+    const chartData = transformDataForChart(activeChart);
+    const stats = getDataStats(activeChart);
+
     return (
-      <div className="modal-chart-container">
-        <h2 className="modal-chart-title">{activeChart} 详细数据</h2>
-        <Chart
-          chartType="LineChart"
-          data={transformDataForChart(activeChart)}
-          options={{
-            title: `${activeChart} 变化趋势`,
-            titleTextStyle: { color: "#fff" },
-            hAxis: {
-              title: "时间",
-              textStyle: { color: "#fff" },
-              gridlines: { color: "rgba(255,255,255,0.1)" }
-            },
-            vAxis: {
-              title: activeChart,
-              textStyle: { color: "#fff" },
-              gridlines: { color: "rgba(255,255,255,0.1)" }
-            },
-            legend: { position: "bottom", textStyle: { color: "#fff" } },
-            colors: ["#34A853", "#FBBC05", "#EA4335", "#4285F4"],
-            backgroundColor: "transparent",
-            curveType: "function",
-            chartArea: { width: "85%", height: "70%" },
-            explorer: {
-              actions: ['dragToZoom', 'rightClickToReset'],
-              axis: 'horizontal',
-              keepInBounds: true,
-              maxZoomIn: 0.01
-            }
-          }}
-          width="100%"
-          height="600px"
-        />
+      <div className="pred-modal-chart-container">
+        <div className="pred-modal-header">
+          <h2 className="pred-modal-chart-title">{activeChart} 详细分析</h2>
+          <div className="pred-modal-stats">
+            <div className="pred-modal-stat">
+              <span className="pred-modal-stat-label">数据点</span>
+              <span className="pred-modal-stat-value">{chartData.length}</span>
+            </div>
+            <div className="pred-modal-stat">
+              <span className="pred-modal-stat-label">变化趋势</span>
+              <span className="pred-modal-stat-value" style={{ color: stats.trend >= 0 ? '#2ed573' : '#ff6b6b' }}>
+                {stats.trend >= 0 ? '+' : ''}{stats.trend.toFixed(2)}%
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <ResponsiveContainer width="100%" height={500}>
+  <AreaChart data={chartData}>
+    <defs>
+      <linearGradient id="modalGradient" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="5%" stopColor={chartColors.primary} stopOpacity={0.3}/>
+        <stop offset="95%" stopColor={chartColors.primary} stopOpacity={0.05}/>
+      </linearGradient>
+    </defs>
+    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.15)" />
+    <XAxis
+      dataKey="time"
+      axisLine={false}
+      tickLine={false}
+      tick={{ fill: '#ffffff', fontSize: 12 }}
+      interval="preserveStartEnd"
+    />
+    <YAxis
+      axisLine={false}
+      tickLine={false}
+      tick={{ fill: '#ffffff', fontSize: 12 }}
+      domain={['dataMin - 10', 'dataMax + 10']}
+    />
+    <Tooltip
+      content={<CustomTooltip />}
+      cursor={{ stroke: chartColors.primary, strokeWidth: 1, strokeDasharray: '5 5' }}
+    />
+    <Area
+      type="monotone"
+      dataKey="value"
+      stroke={chartColors.primary}
+      strokeWidth={3}
+      fill="url(#modalGradient)"
+      dot={{ fill: chartColors.primary, strokeWidth: 2, r: 3 }}
+      activeDot={{
+        r: 8,
+        fill: chartColors.secondary,
+        stroke: '#ffffff',
+        strokeWidth: 3,
+        filter: 'drop-shadow(0 0 6px rgba(46, 213, 115, 0.6))'
+      }}
+    />
+  </AreaChart>
+</ResponsiveContainer>
+
       </div>
     );
   };
 
   return (
-    <div className="test-container gradient-bg-welcome">
-      <h1 className="test-title">太阳能数据可视化</h1>
+    <div className="pred-test-container" ref={containerRef}>
+      {/* 动态粒子背景效果 */}
+      <div className="pred-particles-container">
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            className="pred-particle"
+            style={{
+              '--delay': `${Math.random() * 5}s`,
+              '--duration': `${15 + Math.random() * 10}s`,
+              '--size': `${2 + Math.random() * 4}px`,
+              left: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 5}s`
+            }}
+          />
+        ))}
+      </div>
 
-      <div className="input-container white-glassmorphism">
-        <div className="coordinate-inputs">
+      <h1 className="pred-test-title">
+        ⚡ 太阳能数据可视化 ⚡
+        <div className="pred-title-glow"></div>
+      </h1>
+
+      <div className="pred-input-container">
+        <div className="pred-coordinate-inputs">
           <label>
-            纬度:
+            🌍 纬度坐标:
             <input
               type="number"
               value={lat}
               onChange={(e) => setLat(e.target.value)}
-              className="coordinate-input"
+              className="pred-coordinate-input"
               step="0.0001"
+              placeholder="输入纬度坐标"
             />
           </label>
           <label>
-            经度:
+            🗺️ 经度坐标:
             <input
               type="number"
               value={lng}
               onChange={(e) => setLng(e.target.value)}
-              className="coordinate-input"
+              className="pred-coordinate-input"
               step="0.0001"
+              placeholder="输入经度坐标"
             />
           </label>
         </div>
 
-        <div className="time-controls">
+        <div className="pred-time-controls">
           <label>
-            开始日期:
+            📅 开始日期:
             <input
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="time-input"
+              className="pred-time-input"
             />
           </label>
           <label>
-            结束日期:
+            📅 结束日期:
             <input
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="time-input"
+              className="pred-time-input"
             />
           </label>
           <label>
-            时间间隔:
+            ⏱️ 时间间隔:
             <select
               value={interval}
               onChange={(e) => setInterval(e.target.value)}
-              className="time-interval-select"
+              className="pred-time-interval-select"
             >
-              <option value="second">秒</option>
-              <option value="minute">分钟</option>
-              <option value="hour">小时</option>
-              <option value="day">天</option>
+              <option value="second">⚡ 秒级精度</option>
+              <option value="minute">⏰ 分钟级别</option>
+              <option value="hour">🕐 小时维度</option>
+              <option value="day">📊 日级统计</option>
             </select>
           </label>
           <label>
-            时间范围 (小时):
-            <div className="range-container">
+            📊 时间范围 (小时):
+            <div className="pred-range-container">
               <input
                 type="range"
                 min="1"
                 max="48"
                 value={timeRange}
                 onChange={(e) => setTimeRange(e.target.value)}
-                className="time-range-slider"
+                className="pred-time-range-slider"
               />
-              <span>{timeRange} 小时</span>
+              <span>🔥 {timeRange} 小时</span>
             </div>
           </label>
         </div>
 
-        <button className="fetch-button" onClick={fetchSolarData}>
-          获取数据
+        <button className="pred-fetch-button" onClick={fetchSolarData} disabled={loading}>
+          {loading ? (
+            <>
+              <div className="pred-loading-spinner"></div>
+              🔄 数据获取中...
+            </>
+          ) : (
+            <>
+              🚀 获取太阳能数据
+              <div className="pred-btn-particles"></div>
+            </>
+          )}
         </button>
       </div>
 
       {loading && (
-        <div className="loading-text">
-          <div className="spinner"></div>
-          数据加载中...
+        <div className="pred-loading-text">
+          <div className="pred-spinner"></div>
+          <span>⚡ 正在分析太阳能数据...</span>
         </div>
       )}
 
-      {error && <div className="error-text">{error}</div>}
+      {error && (
+        <div className="pred-error-text">
+          ❌ {error}
+        </div>
+      )}
 
       {data && (
-        <div className="results-container">
-          <div className="view-controls">
+        <div className="pred-results-container">
+          <div className="pred-view-controls">
             <button
-              className={`view-mode-btn ${viewMode === "compact" ? "active" : ""}`}
+              className={`pred-view-mode-btn ${viewMode === "compact" ? "active" : ""}`}
               onClick={() => setViewMode("compact")}
             >
-              卡片视图
+              🎯 卡片视图
             </button>
             <button
-              className={`view-mode-btn ${viewMode === "list" ? "active" : ""}`}
+              className={`pred-view-mode-btn ${viewMode === "list" ? "active" : ""}`}
               onClick={() => setViewMode("list")}
             >
-              列表视图
+              📊 列表视图
             </button>
           </div>
 
-          {viewMode === "compact" ? renderChartCards() : renderChartList()}
+          {viewMode === "compact" ? renderEnhancedChartCards() : renderEnhancedChartList()}
         </div>
       )}
 
-      {/* 模态图表对话框 */}
+      {/* 增强版模态框 */}
       {modalOpen && (
-        <div className="chart-modal">
-          <div className="modal-overlay" onClick={closeModal}></div>
-          <div className="modal-content white-glassmorphism">
-            <button className="modal-close-btn" onClick={closeModal}>×</button>
-            {renderModalChart()}
+        <div className="pred-chart-modal">
+          <div className="pred-modal-overlay" onClick={closeModal}></div>
+          <div className="pred-modal-content">
+            <button className="pred-modal-close-btn" onClick={closeModal}>
+              ✕
+            </button>
+            {renderEnhancedModalChart()}
           </div>
         </div>
       )}
+
+      {/* 添加动态样式 */}
+      <style jsx>{`
+        .pred-particles-container {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          z-index: 0;
+        }
+
+        .pred-particle {
+          position: absolute;
+          width: var(--size);
+          height: var(--size);
+          background: radial-gradient(circle, rgba(0, 162, 255, 0.8) 0%, transparent 70%);
+          border-radius: 50%;
+          animation: pred-float var(--duration) linear infinite;
+          animation-delay: var(--delay);
+        }
+
+        @keyframes pred-float {
+          0% {
+            transform: translateY(100vh) rotate(0deg);
+            opacity: 0;
+          }
+          10% {
+            opacity: 1;
+          }
+          90% {
+            opacity: 1;
+          }
+          100% {
+            transform: translateY(-100px) rotate(360deg);
+            opacity: 0;
+          }
+        }
+
+        @keyframes pred-modalSlideIn {
+          0% {
+            transform: scale(0.7) translateY(50px);
+            opacity: 0;
+          }
+          100% {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+          }
+        }
+
+        @keyframes pred-modalSlideOut {
+          0% {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+          }
+          100% {
+            transform: scale(0.7) translateY(50px);
+            opacity: 0;
+          }
+        }
+
+        .pred-card-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 15px;
+        }
+
+        .pred-stats-badges {
+          display: flex;
+          gap: 8px;
+        }
+
+        .pred-stat-badge {
+          background: rgba(255, 255, 255, 0.1);
+          padding: 4px 8px;
+          border-radius: 12px;
+          font-size: 0.8rem;
+          font-weight: 600;
+          backdrop-filter: blur(10px);
+        }
+
+        .pred-stats-row {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 15px;
+          background: rgba(0, 0, 0, 0.2);
+          border-radius: 10px;
+          padding: 10px;
+        }
+
+        .pred-stat-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+        }
+
+        .pred-stat-label {
+          font-size: 0.7rem;
+          color: rgba(255, 255, 255, 0.7);
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .pred-stat-value {
+          font-size: 0.9rem;
+          font-weight: 700;
+          font-family: 'Orbitron', monospace;
+        }
+
+        .pred-modal-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 20px;
+        }
+
+        .pred-modal-stats {
+          display: flex;
+          gap: 20px;
+        }
+
+        .pred-modal-stat {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+        }
+
+        .pred-modal-stat-label {
+          font-size: 0.8rem;
+          color: rgba(255, 255, 255, 0.7);
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .pred-modal-stat-value {
+          font-size: 1.1rem;
+          font-weight: 700;
+          color: #00a2ff;
+          font-family: 'Orbitron', monospace;
+        }
+
+        .pred-loading-spinner {
+          width: 16px;
+          height: 16px;
+          border: 2px solid rgba(255, 255, 255, 0.3);
+          border-top: 2px solid #ffffff;
+          border-radius: 50%;
+          animation: pred-spin 1s linear infinite;
+          margin-right: 8px;
+        }
+      `}</style>
     </div>
   );
 };

@@ -1,0 +1,113 @@
+/* testReward.css - Deep Blue Cyber Theme */
+.test-reward-container {
+  padding: 2rem;
+  background: linear-gradient(135deg, #0f0e13, #1a1b3a, #2d3561);
+  min-height: 100vh;
+  color: #ffffff;
+  font-family: 'Orbitron', sans-serif;
+}
+
+.test-reward-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  text-align: center;
+  background: linear-gradient(135deg, #00d4ff, #2ed573);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 2rem;
+  text-shadow: 0 0 12px rgba(0, 212, 255, 0.3);
+}
+
+.test-reward-summary {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(0, 212, 255, 0.2);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.test-reward-summary h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
+  color: #00d4ff;
+}
+
+.test-reward-summary p {
+  font-size: 1rem;
+  color: #e2e8f0;
+  margin: 0.25rem 0;
+}
+
+.test-reward-btn {
+  background: linear-gradient(135deg, #2ed573, #00d4ff);
+  color: #0f0e13;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  font-weight: 700;
+  font-size: 1rem;
+  text-transform: uppercase;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+}
+
+.test-reward-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 212, 255, 0.4);
+}
+
+.test-reward-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.test-reward-card {
+  background: rgba(15, 30, 61, 0.9);
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  border-radius: 16px;
+  padding: 1.25rem;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.test-reward-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 212, 255, 0.15);
+  border-color: rgba(0, 212, 255, 0.5);
+}
+
+.test-reward-card h4 {
+  font-size: 1.1rem;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+}
+
+.test-reward-card p {
+  font-size: 0.875rem;
+  color: #cbd5e1;
+  margin: 0.2rem 0;
+}
+
+.test-reward-highlight {
+  color: #2ed573;
+  font-weight: 700;
+}
+
+.test-reward-log {
+  margin-top: 2rem;
+  padding: 1rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.9rem;
+  color: #9ca3af;
+  max-height: 300px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  font-family: 'JetBrains Mono', monospace;
+}

@@ -1,18 +1,29 @@
 .footer {
   width: 100%;
   display: flex;
-  justify-content: center;
-  align-items: center;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   padding: 1rem;
+  background-color: #0f0e13;
+  color: white;
+  font-family: "Open Sans", sans-serif;
 }
 
 .footer-content {
   width: 100%;
+  max-width: 1280px;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  margin: 1rem 0;
+  margin: 1.5rem 0;
+}
+
+@media (min-width: 640px) {
+  .footer-content {
+    flex-direction: row;
+    justify-content: space-between;
+  }
 }
 
 .logo-container {
@@ -24,11 +35,11 @@
 
 .logo {
   width: 8rem;
-  transition: transform 0.3s;
+  transition: transform 0.4s ease-in-out;
 }
 
-.logo:hover {
-  transform: scale(1.1) rotate(3deg);
+.logo.hover-animate:hover {
+  transform: scale(1.1) rotate(5deg);
 }
 
 .nav-links {
@@ -37,16 +48,18 @@
   justify-content: space-evenly;
   align-items: center;
   flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
   width: 100%;
 }
 
 .nav-link {
-  color: white;
   font-size: 1rem;
   text-align: center;
   margin: 0 0.5rem;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.3s ease;
+  color: white;
 }
 
 .nav-link:hover {
@@ -56,17 +69,12 @@
 }
 
 .footer-info {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  margin-top: 1.25rem;
+  text-align: center;
+  margin-top: 1.5rem;
 }
 
 .footer-text {
-  color: white;
   font-size: 0.875rem;
-  text-align: center;
   font-style: italic;
   opacity: 0.8;
   transition: opacity 0.3s;
@@ -77,11 +85,9 @@
 }
 
 .footer-email {
-  color: white;
   font-size: 0.875rem;
-  text-align: center;
-  font-weight: 500;
   margin-top: 0.5rem;
+  font-weight: 500;
   text-decoration: underline;
   transition: color 0.3s;
 }
@@ -98,35 +104,28 @@
   animation: pulse 2s infinite;
 }
 
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
 .footer-copyright {
   width: 90%;
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-top: 0.75rem;
+  font-size: 0.75rem;
 }
 
 .copyright-text {
-  color: white;
-  font-size: 0.75rem;
-  transition: opacity 0.3s;
+  transition: opacity 0.3s ease;
 }
 
 .copyright-text:hover {
   opacity: 0.8;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-
-@media (max-width: 640px) {
-  .footer-content {
-    flex-direction: column;
-  }
-
-  .nav-links {
-    margin-top: 1.25rem;
-  }
 }

@@ -5,11 +5,35 @@ import {
   Globe, Lock, PlusCircle, Search, Filter, ChevronsLeft,
   ChevronsRight, ArrowUpDown
 } from "lucide-react";
-import SolarPanels from "../utils/SolarPanels.json";
+import SolarPanels from "../utils/test/SolarPanels.json";
 import "../style/Sidebar.css";
 
-const contractAddress = "0x9C29EE061119e730a1ba4EcdB71Bb00C01BF5aE9";
-const PANELS_PER_PAGE = 2; // 每页显示的面板数量
+const contractAddress = "0x39Cb00Cf33827D78892b1c83aF166CB7c4FCB3C0";
+const PANELS_PER_PAGE = 4; // 每页显示的面板数量
+// 修复面板位置和功率数值的函数
+const fixPanelData = (panel) => {
+  let { lat, lng, batteryTemp, dcPower, acPower } = panel;
+
+  if (lat > 90 || lng > 180 || lat < -90 || lng < -180) {
+    if (Math.abs(lat) > 90 || Math.abs(lng) > 180) {
+      lat = lat / 10000;
+      lng = lng / 10000;
+      batteryTemp = batteryTemp / 10000;
+      dcPower = dcPower / 10000;
+      acPower = acPower / 10000;
+    }
+  }
+
+  return {
+    ...panel,
+    latitude: lat,
+    longitude: lng,
+    batteryTemperature: batteryTemp,
+    dcPower,
+    acPower,
+  };
+};
+
 
 const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
     const [contract, setContract] = useState(null);
@@ -110,28 +134,55 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
     };
 
     const fetchPanels = async (contractInstance = contract) => {
-        if (!contractInstance) return;
+  if (!contractInstance) return;
 
-        try {
-            const allPanels = await contractInstance.getAllPanels();
-            setPanels(allPanels);
-        } catch (error) {
-            console.error("❌ 获取所有太阳能板失败:", error);
-            showNotification("获取太阳能板失败", "error");
-        }
-    };
+  try {
+        const raw = await contractInstance.getAllPanels();
+        const fixed = raw.map((p, idx) =>
+  fixPanelData({
+    id: idx + 1,
+    owner: p.owner,
+    lat: p.latitude.toNumber(),
+    lng: p.longitude.toNumber(),
+    batteryTemp: p.batteryTemperature.toNumber(),
+    dcPower: p.dcPower.toNumber(),
+    acPower: p.acPower.toNumber(),
+  })
+);
+
+    setPanels(fixed);
+  } catch (error) {
+    console.error("❌ 获取所有太阳能板失败:", error);
+    showNotification("获取太阳能板失败", "error");
+  }
+};
+
 
     const fetchMyPanels = async (contractInstance = contract) => {
-        if (!contractInstance) return;
+  if (!contractInstance) return;
 
-        try {
-            const myPanelsData = await contractInstance.getMyPanels();
-            setMyPanels(myPanelsData);
-        } catch (error) {
-            console.error("❌ 获取用户太阳能板失败:", error);
-            showNotification("获取用户太阳能板失败", "error");
-        }
-    };
+  try {
+    const raw = await contractInstance.getMyPanels();
+    const fixed = raw.map((p, idx) =>
+  fixPanelData({
+    id: idx + 1,
+    owner: p.owner,
+    lat: p.latitude.toNumber(),
+    lng: p.longitude.toNumber(),
+    batteryTemp: p.batteryTemperature.toNumber(),
+    dcPower: p.dcPower.toNumber(),
+    acPower: p.acPower.toNumber(),
+  })
+);
+
+
+    setMyPanels(fixed);
+  } catch (error) {
+    console.error("❌ 获取用户太阳能板失败:", error);
+    showNotification("获取用户太阳能板失败", "error");
+  }
+};
+
 
     // 过滤面板
     const filterPanels = (panelsData) => {

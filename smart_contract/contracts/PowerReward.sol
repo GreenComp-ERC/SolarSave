@@ -3,7 +3,6 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-// 引入 SolarPanels 合约接口
 interface ISolarPanels {
     struct Panel {
         uint256 id;
@@ -18,6 +17,7 @@ interface ISolarPanels {
     }
 
     function getMyPanels() external view returns (Panel[] memory);
+    function getPanelsOf(address user) external view returns (Panel[] memory); // ✅ 新增函数声明
 }
 
 contract PowerReward {
@@ -25,9 +25,15 @@ contract PowerReward {
     ISolarPanels public solarPanelContract;
     address public owner;
 
-    mapping(address => bool) public hasClaimed;
+    mapping(address => uint256) public lastClaimedAt;
 
-    event RewardClaimed(address indexed user, uint totalPower, uint rewardAmount);
+    event RewardClaimed(
+        address indexed user,
+        uint256 totalDCPower,
+        uint256 totalACPower,
+        uint256 rewardAmount,
+        uint256 timestamp
+    );
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Not owner");
@@ -40,43 +46,56 @@ contract PowerReward {
         owner = msg.sender;
     }
 
-    // 🚀 主功能：领取奖励
-    function claimReward() public {
-        require(!hasClaimed[msg.sender], "Already claimed");
+    function claimReward() external {
+    require(
+        block.timestamp - lastClaimedAt[msg.sender] >= 1 hours,
+        "Can only claim once per hour"
+    );
 
-        ISolarPanels.Panel[] memory panels = solarPanelContract.getMyPanels();
-        require(panels.length > 0, "No panels found");
+    // ✅ 改这里：用 getPanelsOf(msg.sender) 替代 getMyPanels()
+    ISolarPanels.Panel[] memory panels = solarPanelContract.getPanelsOf(msg.sender);
+    require(panels.length > 0, "No panels found");
 
-        uint totalPower = 0;
+    uint256 totalDC = 0;
+    uint256 totalAC = 0;
 
-        for (uint i = 0; i < panels.length; i++) {
-            totalPower += panels[i].acPower;
-        }
-
-        require(totalPower > 0, "No power output");
-
-        uint rewardAmount = totalPower; // 1W = 1 token，可换成更复杂的公式
-        hasClaimed[msg.sender] = true;
-
-        require(rewardToken.transfer(msg.sender, rewardAmount), "Token transfer failed");
-
-        emit RewardClaimed(msg.sender, totalPower, rewardAmount);
+    for (uint256 i = 0; i < panels.length; i++) {
+        totalDC += panels[i].dcPower;
+        totalAC += panels[i].acPower;
     }
 
-    // 🔧 后备方法：合约充值（owner 发送奖励池）
-    function deposit(uint amount) public onlyOwner {
-        require(rewardToken.transferFrom(msg.sender, address(this), amount), "Deposit failed");
+    require(totalDC > 0, "No DC power to claim");
+
+    uint256 rewardAmount = (totalDC * 1e18) / 100_000;
+
+    require(rewardAmount > 0, "Reward too small");
+
+    lastClaimedAt[msg.sender] = block.timestamp;
+    require(rewardToken.transfer(msg.sender, rewardAmount), "Token transfer failed");
+
+    emit RewardClaimed(msg.sender, totalDC, totalAC, rewardAmount, block.timestamp);
+}
+
+
+    function deposit(uint256 amount) external onlyOwner {
+        require(
+            rewardToken.transferFrom(msg.sender, address(this), amount),
+            "Deposit failed"
+        );
     }
 
-    // 🔍 查询我的可领取奖励
-    function previewReward() public view returns (uint) {
-        if (hasClaimed[msg.sender]) return 0;
+    // ✅ 使用用户地址获取面板
+    function previewReward(address user) external view returns (uint256 estimatedReward) {
+        if (block.timestamp - lastClaimedAt[user] < 1 hours) return 0;
 
-        ISolarPanels.Panel[] memory panels = solarPanelContract.getMyPanels();
-        uint totalPower = 0;
-        for (uint i = 0; i < panels.length; i++) {
-            totalPower += panels[i].acPower;
+        ISolarPanels.Panel[] memory panels = solarPanelContract.getPanelsOf(user);
+        uint256 totalDC = 0;
+
+        for (uint256 i = 0; i < panels.length; i++) {
+            totalDC += panels[i].dcPower;
         }
-        return totalPower;
+
+        return (totalDC * 1e18) / 100_000;
+
     }
 }

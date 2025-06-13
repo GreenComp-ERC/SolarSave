@@ -1,21 +1,21 @@
-// scripts/deploy.js
-const { ethers } = require("hardhat");
+const hre = require("hardhat");
 
 async function main() {
-  // 获取合约工厂
-  const CaoCaoBit = await ethers.getContractFactory("CaoCaoBit");
+  const { ethers } = hre; // ✅ 从 hre 中安全解构
+  const [sender] = await ethers.getSigners();
 
-  // 部署合约
-  const ccb = await CaoCaoBit.deploy();
-  await ccb.waitForDeployment();
+  const to = "0x1d78aB9A7744430d64a5D9659E4FcB933Be78080";
+  const amount = ethers.utils.parseEther("0.1");
 
-  // 获取部署地址
-  console.log("✅ CaoCaoBit deployed to:", await ccb.getAddress());
+  const tx = await sender.sendTransaction({
+    to,
+    value: amount
+  });
+
+  console.log("✅ 发送成功，交易哈希:", tx.hash);
 }
 
-main()
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error("❌ Deployment failed:", error);
-    process.exit(1);
-  });
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

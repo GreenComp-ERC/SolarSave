@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "D:\\DOWNLOAD\\SolarSave\\smart_contract\\contracts\\PowerReward.sol": {
-      "lastModificationDate": 1744831708516,
-      "contentHash": "f602e31aa82d94599b7cef469b84b6df",
+      "lastModificationDate": 1749666905600,
+      "contentHash": "de4a625d6f55da09baef97f28973929d",
       "sourceName": "contracts/PowerReward.sol",
       "solcConfig": {
         "version": "0.8.20",
@@ -307,8 +307,8 @@
       ]
     },
     "D:\\DOWNLOAD\\SolarSave\\smart_contract\\contracts\\Shop.sol": {
-      "lastModificationDate": 1744830717777,
-      "contentHash": "416353daee5b854a6ad6b134de70c8ec",
+      "lastModificationDate": 1749783221465,
+      "contentHash": "f107842c791fb2785ccecd6b1c83e61a",
       "sourceName": "contracts/Shop.sol",
       "solcConfig": {
         "version": "0.8.20",
@@ -346,8 +346,8 @@
       ]
     },
     "D:\\DOWNLOAD\\SolarSave\\smart_contract\\contracts\\SolarPanels.sol": {
-      "lastModificationDate": 1745178832936,
-      "contentHash": "f960f4db82c147de34e9e1ccd5e09a22",
+      "lastModificationDate": 1749633895453,
+      "contentHash": "92c5f5113057f4481cedafa7e491fd69",
       "sourceName": "contracts/SolarPanels.sol",
       "solcConfig": {
         "version": "0.8.20",
@@ -379,45 +379,6 @@
       ],
       "artifacts": [
         "SolarPanels"
-      ]
-    },
-    "D:\\DOWNLOAD\\SolarSave\\smart_contract\\contracts\\CaoCaoBit.sol": {
-      "lastModificationDate": 1745502925862,
-      "contentHash": "862e8ab60e38032c52dd710053b12ab8",
-      "sourceName": "contracts/CaoCaoBit.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/token/ERC20/ERC20.sol",
-        "@openzeppelin/contracts/access/Ownable.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "CaoCaoBit"
       ]
     }
   }

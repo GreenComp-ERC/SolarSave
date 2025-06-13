@@ -1,8 +1,8 @@
 const hre = require("hardhat");
 
 async function main() {
-  const tokenAddress = "0xdb5e74FCCE02B552fD3Ef92dEFccB171edfB8edA";
-  const solarPanelsAddress = "0x000b697FD091585bBA0C1e3f92c8Ba4A3Cc15B3d";
+  const tokenAddress = "0x175da7583f3b085ac4Ab87AEd758c6Cd11A8b81e";
+  const solarPanelsAddress = "0x39Cb00Cf33827D78892b1c83aF166CB7c4FCB3C0";
 
   console.log("🚀 开始部署 Shop 合约...");
   const Shop = await hre.ethers.getContractFactory("Shop");

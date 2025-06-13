@@ -7,8 +7,6 @@
     "build": "vite build",
     "preview": "vite preview",
     "start": "vite",
-    "package": "electron-forge package",
-    "make": "electron-forge make",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
     "deploy:prod": "npm run build && git checkout production && cp -r dist/* . && git add . && git commit -m \"Update production build\" && git push origin production"
@@ -39,18 +37,22 @@
     "react-modal": "^3.16.1",
     "react-router-dom": "^6.27.0",
     "recharts": "^2.15.2",
+    "three": "^0.135.0",
+    "uuid": "^9.0.1",
     "vite": "^6.0.7",
     "web3": "^4.15.0"
+  },
+  "overrides": {
+    "uuid": "^9.0.1",
+     "elliptic": "^6.6.1"
   },
   "devDependencies": {
     "@babel/core": "^7.26.7",
     "@babel/preset-env": "^7.26.7",
     "@babel/preset-react": "^7.26.3",
-    "@electron-forge/cli": "^7.6.0",
+    "@tailwindcss/postcss": "^4.1.6",
     "babel-loader": "^9.2.1",
     "css-loader": "^7.1.2",
-    "dotenv-cli": "^8.0.0",
-    "electron": "^11.5.0",
     "eslint-webpack-plugin": "^4.2.0",
     "gh-pages": "^6.3.0",
     "mini-css-extract-plugin": "^2.9.2",

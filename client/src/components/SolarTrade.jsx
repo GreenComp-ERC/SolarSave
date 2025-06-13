@@ -6,10 +6,10 @@ import {
 } from "react-icons/fi";
 import TradeScript from "./TradeConfirm";
 import PanelWindows from "./PanelWindows";
-import SolarPanels from "../utils/SolarPanels.json";
+import SolarPanels from "../utils/test/SolarPanels.json";
 import "../style/SolarTrade.css";
 
-const contractAddress = "0x9C29EE061119e730a1ba4EcdB71Bb00C01BF5aE9";
+const contractAddress = "0x39Cb00Cf33827D78892b1c83aF166CB7c4FCB3C0";
 
 // This component handles the chart display using a more reliable approach
 const PowerChart = ({ data, chartType }) => {
@@ -168,15 +168,25 @@ const SolarTrade = () => {
         const contract = new ethers.Contract(contractAddress, SolarPanels.abi, signer);
 
         const myPanelsData = await contract.getMyPanels();
-        const formattedPanels = myPanelsData.map((panel, index) => ({
+        const fix = (v) => {
+        const num = v.toNumber();
+        return Math.abs(num) > 1000 ? num / 10000 : num;
+      };
+
+      const formattedPanels = myPanelsData.map((panel, index) => {
+        const dc = fix(panel.dcPower);
+        const ac = fix(panel.acPower);
+        return {
           id: index + 1,
           name: `太阳能板 ${index + 1}`,
-          lat: panel.latitude.toNumber(),
-          lng: panel.longitude.toNumber(),
-          dcPower: panel.dcPower.toNumber(),
-          acPower: panel.acPower.toNumber(),
-          efficiency: Math.round((panel.acPower.toNumber() / panel.dcPower.toNumber()) * 100) || 0
-        }));
+          lat: fix(panel.latitude),
+          lng: fix(panel.longitude),
+          dcPower: dc,
+          acPower: ac,
+          efficiency: dc > 0 ? Math.round((ac / dc) * 100) : 0
+        };
+});
+
 
         setAllPanels(formattedPanels);
         setPanels(formattedPanels);

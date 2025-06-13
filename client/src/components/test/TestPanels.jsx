@@ -3,7 +3,7 @@ import { ethers } from "ethers";
 import SolarPanels from "../../utils/test/SolarPanels.json";
 import "../../style/TestPanels.css";
 
-const contractAddress = "0x000b697FD091585bBA0C1e3f92c8Ba4A3Cc15B3d"; // 你的 SolarPanels 合约地址
+const contractAddress = "0x39Cb00Cf33827D78892b1c83aF166CB7c4FCB3C0"; // 你的 SolarPanels 合约地址
 
 const TestPanels = () => {
     const [contract, setContract] = useState(null);

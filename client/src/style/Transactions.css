@@ -1,271 +1,972 @@
-/* Transactions.css - 修复排版问题的简洁样式 */
+/* Transactions.css - Sportish Dark Blue Theme with trans- prefix */
 
-/* 全局样式 */
-.solar-transactions {
-  padding: 2rem 0;
-  background: #0f172a;
+/* Main Container */
+.trans-marketplace {
+  background: linear-gradient(135deg, #0c1426 0%, #1a2744 50%, #0f1e3d 100%);
   min-height: 100vh;
+  padding: 2rem 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-.container-solar {
-  width: 100%;
-  max-width: 1280px;
+.trans-container {
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 1.5rem;
 }
 
-/* 卡片基础样式 */
-.solar-card {
-  background-color: rgba(30, 41, 59, 0.8);
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-  transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  margin-bottom: 1rem;
+/* Header Styles */
+.trans-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.trans-main-title {
+  font-size: 2.5rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #00d4ff 0%, #0099cc 50%, #ffffff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  letter-spacing: -0.02em;
+}
+
+.trans-title-icon {
+  font-size: 2rem;
+  filter: drop-shadow(0 0 10px #00d4ff);
+}
+
+.trans-title-accent {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+  letter-spacing: 0.2em;
+  display: block;
+  margin-top: 0.5rem;
+}
+
+/* Layout */
+.trans-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .trans-layout {
+    grid-template-columns: 380px 1fr;
+    gap: 2.5rem;
+  }
+}
+
+/* Section Cards */
+.trans-section-card {
+  background: rgba(15, 30, 61, 0.95);
+  border: 2px solid rgba(0, 212, 255, 0.1);
+  border-radius: 20px;
+  backdrop-filter: blur(20px);
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   overflow: hidden;
 }
 
-.solar-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+.trans-section-header {
+  padding: 2rem;
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(0, 153, 204, 0.05) 100%);
+  border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-/* 标题样式 */
-.solar-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: white;
-  margin-bottom: 1.5rem;
-  text-align: center;
-}
-
-.solar-subtitle {
+.trans-section-title {
   font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.trans-section-icon {
+  font-size: 1.5rem;
+  filter: drop-shadow(0 0 8px #00d4ff);
+}
+
+.trans-panel-count,
+.trans-items-count {
+  background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+  color: #0c1426;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
   font-weight: 600;
-  color: #94a3b8;
+  box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
+}
+
+/* Panel Cards */
+.trans-panel-card {
+  background: linear-gradient(135deg, rgba(26, 39, 68, 0.8) 0%, rgba(15, 30, 61, 0.9) 100%);
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.trans-panel-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, #00d4ff 50%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.trans-panel-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  border-color: rgba(0, 212, 255, 0.5);
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.3),
+    0 0 30px rgba(0, 212, 255, 0.2);
+}
+
+.trans-panel-card:hover::before {
+  opacity: 1;
+}
+
+/* Card Header */
+.trans-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.trans-panel-name-section {
+  flex: 1;
+}
+
+.trans-panel-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 0.25rem 0;
+}
+
+.trans-panel-id {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Status Indicator */
+.trans-status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.5rem 0.75rem;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.trans-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  position: relative;
+}
+
+.trans-status-dot::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: trans-pulse 2s infinite;
+}
+
+.trans-status-active {
+  background: #10b981;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+}
+
+.trans-status-active::after {
+  background: #10b981;
+}
+
+.trans-status-inactive {
+  background: #ef4444;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+}
+
+.trans-status-inactive::after {
+  background: #ef4444;
+}
+
+.trans-status-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Performance Section */
+.trans-performance-section {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(0, 212, 255, 0.1);
+}
+
+.trans-performance-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 1rem;
 }
 
-/* 布局容器 */
-.solar-layout {
+.trans-performance-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.trans-price-badge {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: #0c1426;
+  padding: 0.375rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+}
+
+/* Metrics Grid */
+.trans-metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.trans-metric-item {
+  text-align: center;
+}
+
+.trans-metric-label {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.trans-metric-value {
+  font-size: 0.875rem;
+  color: #e2e8f0;
+  font-weight: 600;
+}
+
+.trans-temp-value {
+  color: #f97316;
+  font-weight: 700;
+}
+
+/* Power Section */
+.trans-power-section {
   display: flex;
   flex-direction: column;
+  gap: 1rem;
 }
 
-.solar-layout-left {
-  width: 100%;
-  margin-bottom: 2rem;
+.trans-power-item {
+  flex: 1;
 }
 
-.solar-layout-right {
-  width: 100%;
-}
-
-/* 数据项样式 */
-.solar-data-item {
+.trans-power-header {
   display: flex;
   justify-content: space-between;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  align-items: center;
+  margin-bottom: 0.5rem;
 }
 
-.solar-data-label {
+.trans-power-label {
+  font-size: 0.75rem;
   color: #94a3b8;
-  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.solar-data-value {
-  color: #e2e8f0;
+.trans-power-value {
+  font-size: 0.875rem;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.trans-power-bar {
+  height: 6px;
+  background: rgba(15, 30, 61, 0.8);
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid rgba(0, 212, 255, 0.2);
+}
+
+.trans-power-fill {
+  height: 100%;
+  border-radius: 8px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.trans-dc-fill {
+  background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 50%, #93c5fd 100%);
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+}
+
+.trans-ac-fill {
+  background: linear-gradient(90deg, #10b981 0%, #34d399 50%, #6ee7b7 100%);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+}
+
+.trans-power-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
+  animation: trans-shimmer 2s infinite;
+}
+
+/* Card Footer */
+.trans-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.trans-footer-info {
+  flex: 1;
+}
+
+.trans-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.375rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.trans-info-item:last-child {
+  border-bottom: none;
+}
+
+.trans-info-label {
+  font-size: 0.75rem;
+  color: #64748b;
   font-weight: 500;
 }
 
-/* 电量显示 */
-.solar-power-bar {
-  height: 8px;
-  background-color: rgba(100, 116, 139, 0.3);
-  border-radius: 4px;
-  margin: 8px 0;
+.trans-info-value {
+  font-size: 0.75rem;
+  color: #cbd5e1;
+  font-weight: 600;
+}
+
+.trans-owner-address {
+  color: #00d4ff;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Action Buttons */
+.trans-action-button {
+  background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+  color: #0c1426;
+  border: none;
+  border-radius: 12px;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
+  position: relative;
   overflow: hidden;
 }
 
-.solar-power-fill {
+.trans-action-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
+  transition: left 0.6s;
 }
 
-.solar-power-fill-ac {
-  background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+.trans-action-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 212, 255, 0.4);
 }
 
-/* 按钮样式 */
-.solar-button {
-  background-color: #3b82f6;
-  color: white;
-  border: none;
+.trans-action-button:hover::before {
+  left: 100%;
+}
+
+.trans-button-icon {
+  font-size: 1rem;
+}
+
+/* Loading Cards */
+.trans-loading-card {
+  background: rgba(26, 39, 68, 0.6);
+  border-color: rgba(0, 212, 255, 0.1);
+}
+
+.trans-loading-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.trans-loading-bar {
+  background: linear-gradient(90deg, rgba(100, 116, 139, 0.3) 0%, rgba(148, 163, 184, 0.5) 50%, rgba(100, 116, 139, 0.3) 100%);
+  background-size: 200% 100%;
+  animation: trans-loading-shimmer 1.5s infinite;
   border-radius: 8px;
-  padding: 0.75rem 1rem;
+}
+
+.trans-loading-title {
+  height: 1.5rem;
+  width: 70%;
+}
+
+.trans-loading-status {
+  height: 1rem;
+  width: 40%;
+}
+
+.trans-loading-metric {
+  height: 1rem;
+  width: 60%;
+}
+
+.trans-loading-power {
+  height: 0.75rem;
+  width: 80%;
+}
+
+.trans-loading-button {
+  height: 2.5rem;
+  width: 100%;
+}
+
+/* Shop Grid */
+.trans-shop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  padding: 2rem;
+}
+
+/* Pagination */
+.trans-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+}
+
+.trans-pagination-btn {
+  background: rgba(26, 39, 68, 0.8);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  border-radius: 12px;
+  color: #ffffff;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
-  width: 100%;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.trans-pagination-btn:hover:not(:disabled) {
+  background: rgba(0, 212, 255, 0.1);
+  border-color: rgba(0, 212, 255, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 212, 255, 0.2);
+}
+
+.trans-pagination-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.trans-pagination-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.trans-current-page {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #00d4ff;
+}
+
+.trans-page-separator {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.trans-total-pages {
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+/* Empty State */
+.trans-empty-state {
   text-align: center;
-  margin-top: 1rem;
+  padding: 3rem 2rem;
+  color: #64748b;
 }
 
-.solar-button:hover {
-  background-color: #2563eb;
+.trans-empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.6;
 }
 
-.solar-button-red {
-  background-color: #ef4444;
+.trans-empty-text {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
 }
 
-.solar-button-red:hover {
-  background-color: #dc2626;
+.trans-empty-subtext {
+  font-size: 0.875rem;
+  opacity: 0.8;
 }
 
-/* 状态指示器 */
-.solar-status {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  margin-right: 6px;
-}
-
-.solar-status-active {
-  background-color: #10b981;
-  box-shadow: 0 0 5px #10b981;
-}
-
-.solar-status-inactive {
-  background-color: #ef4444;
-  box-shadow: 0 0 5px #ef4444;
-}
-
-/* 模态框样式 */
-.solar-modal-overlay {
+/* Modal Styles */
+.trans-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 50;
+  z-index: 1000;
+  padding: 1rem;
 }
 
-.solar-modal {
-  background-color: #1e293b;
+.trans-modal {
+  background: linear-gradient(135deg, rgba(15, 30, 61, 0.95) 0%, rgba(26, 39, 68, 0.98) 100%);
+  border: 2px solid rgba(0, 212, 255, 0.3);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  backdrop-filter: blur(20px);
+  box-shadow:
+    0 25px 50px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.trans-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem 2rem 1rem 2rem;
+  border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+}
+
+.trans-modal-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.trans-modal-icon {
+  font-size: 1.5rem;
+  filter: drop-shadow(0 0 8px #00d4ff);
+}
+
+.trans-modal-close {
+  background: none;
+  border: none;
+  color: #64748b;
+  font-size: 1.5rem;
+  cursor: pointer;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.trans-modal-close:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.trans-modal-body {
+  padding: 2rem;
+}
+
+.trans-modal-panel-info {
+  background: rgba(0, 0, 0, 0.2);
   border-radius: 12px;
   padding: 1.5rem;
-  width: 90%;
-  max-width: 500px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: white;
+  margin-bottom: 2rem;
+  border: 1px solid rgba(0, 212, 255, 0.1);
 }
 
-.solar-modal-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  text-align: center;
-  color: #60a5fa;
-}
-
-.solar-modal-buttons {
+.trans-modal-panel-header {
   display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
-
-/* 分页控件 */
-.solar-pagination {
-  display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  margin-top: 1.5rem;
+  margin-bottom: 1rem;
 }
 
-.solar-pagination-button {
-  background-color: rgba(51, 65, 85, 0.5);
-  border: none;
-  border-radius: 6px;
-  color: white;
-  padding: 0.5rem 1rem;
-  margin: 0 0.5rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
+.trans-modal-panel-name {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
 }
 
-.solar-pagination-button:hover:not(:disabled) {
-  background-color: rgba(71, 85, 105, 0.7);
+.trans-modal-panel-id {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.solar-pagination-button:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-.solar-pagination-info {
-  color: white;
-  padding: 0.5rem 1rem;
-}
-
-/* 加载动画 */
-.solar-loading {
-  padding: 2rem;
-  text-align: center;
-  color: #94a3b8;
-}
-
-/* 响应式布局 */
-@media (min-width: 768px) {
-  .solar-layout {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 2rem;
-  }
-
-  .solar-layout-left {
-    width: calc(35% - 1rem);
-    margin-bottom: 0;
-  }
-
-  .solar-layout-right {
-    width: calc(65% - 1rem);
-  }
-
-  .solar-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1rem;
-  }
-}
-
-/* 价格输入框 */
-.solar-price-input {
+.trans-modal-specs {
   display: flex;
-  border-radius: 8px;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
-.solar-price-input input {
-  flex-grow: 1;
-  background-color: #334155;
-  border: none;
+.trans-spec-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.trans-spec-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
   padding: 0.75rem;
-  color: white;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.trans-spec-label {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.trans-spec-value {
+  font-size: 0.875rem;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.trans-price-section {
+  margin-bottom: 2rem;
+}
+
+.trans-price-label {
+  display: block;
+  font-size: 0.875rem;
+  color: #94a3b8;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.trans-price-input-group {
+  display: flex;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid rgba(0, 212, 255, 0.3);
+  background: rgba(0, 0, 0, 0.2);
+  transition: border-color 0.3s ease;
+}
+
+.trans-price-input-group:focus-within {
+  border-color: rgba(0, 212, 255, 0.6);
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+}
+
+.trans-price-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 1rem;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 600;
   outline: none;
 }
 
-.solar-price-input span {
-  background-color: #475569;
-  padding: 0.75rem;
-  color: #e2e8f0;
+.trans-price-input::placeholder {
+  color: #64748b;
+}
+
+.trans-price-currency {
+  background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+  color: #0c1426;
+  padding: 1rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.trans-modal-actions {
+  display: flex;
+  gap: 1rem;
+  padding: 0 2rem 2rem 2rem;
+}
+
+.trans-modal-btn {
+  flex: 1;
+  border: none;
+  border-radius: 12px;
+  padding: 1rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.trans-confirm-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.trans-confirm-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+}
+
+.trans-cancel-btn {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.trans-cancel-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  transform: translateY(-2px);
+}
+
+.trans-btn-icon {
+  font-size: 1rem;
+}
+
+/* Animations */
+@keyframes trans-pulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+}
+
+@keyframes trans-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes trans-loading-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .trans-main-title {
+    font-size: 2rem;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .trans-title-accent {
+    font-size: 0.7rem;
+    margin-top: 0.25rem;
+  }
+
+  .trans-section-header {
+    padding: 1.5rem;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .trans-shop-grid {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+
+  .trans-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .trans-spec-row {
+    grid-template-columns: 1fr;
+  }
+
+  .trans-modal-actions {
+    flex-direction: column;
+  }
+
+  .trans-pagination {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .trans-pagination-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+  }
+}
+.trans-approval-card {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin-top: 1rem;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.1);
+}
+
+.trans-approval-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #00d4ff;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.trans-approval-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.trans-approval-entry {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(26, 39, 68, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+}
+
+.trans-approval-address {
+  font-size: 0.75rem;
+  color: #ffffff;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.trans-approval-button {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.trans-approval-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
 }

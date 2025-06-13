@@ -5,14 +5,14 @@ import { SiEthereum } from "react-icons/si";
 import { BsInfoCircle, BsLightningChargeFill } from "react-icons/bs";
 import { FaSolarPanel, FaLocationArrow,FaWhmcs } from "react-icons/fa";
 import { ethers } from "ethers";
-import SolarPanels from "../utils/SolarPanels.json";
+// import SolarPanels from "../utils/SolarPanels.json";
 import "../style/TradeConfirm.css";
-
-const contractAddress = "0x9C29EE061119e730a1ba4EcdB71Bb00C01BF5aE9"; // 太阳能板合约地址
-const tokenAddress = "0xdb5e74FCCE02B552fD3Ef92dEFccB171edfB8edA"; // ERC20 代币合约地址
-const recipientAddress = "0x94e43e4088e92177E833FD43bF3C15fB1b629C87"; // 资金接收地址
+import SolarPanels from "../utils/test/SolarPanels.json";
+// const contractAddress = "0xF18dcE37a1736D18D2734c5611EE9433d8D9c2F2"; // 太阳能板合约地址
+const tokenAddress = "0x175da7583f3b085ac4Ab87AEd758c6Cd11A8b81e"; // ERC20 代币合约地址
+const recipientAddress = "0xf5CcA82D37db8d2B0503c20f0f21A3a8eD25F4E9"; // 资金接收地址
 const fixedPrice = ethers.utils.parseUnits("2", 18); // 2 ERC20 代币
-
+const contractAddress = "0x39Cb00Cf33827D78892b1c83aF166CB7c4FCB3C0";
 const TradeConfirm = ({ close, lat, lng, batterTemp, dcPower, acPower, sandiaModuleName, cecInverterName }) => {
   const [provider, setProvider] = useState(null);
   const [signer, setSigner] = useState(null);
@@ -36,7 +36,10 @@ const TradeConfirm = ({ close, lat, lng, batterTemp, dcPower, acPower, sandiaMod
 
   const handleSubmit = async () => {
     if (!contract || !tokenContract || !signer) return;
-
+    if (currentAccount && currentAccount.toLowerCase() === recipientAddress.toLowerCase()) {
+    alert("不能将面板注册给接收地址自己！");
+    return;
+  }
     setIsProcessing(true);
     setTransactionStatus("正在初始化交易...");
 
@@ -53,6 +56,8 @@ const TradeConfirm = ({ close, lat, lng, batterTemp, dcPower, acPower, sandiaMod
       setTransactionStatus("正在发送 SOLR 代币...");
       const approvalTx = await tokenContract.transfer(recipientAddress, fixedPrice);
       await approvalTx.wait();
+
+
 
       setTransactionStatus("正在注册太阳能面板...");
       const tx = await contract.createPanel(intLat, intLng, intbatteryTemp, intdcpower, intacpower);

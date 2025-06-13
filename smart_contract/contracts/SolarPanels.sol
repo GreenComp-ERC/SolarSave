@@ -14,6 +14,8 @@ contract SolarPanels {
         bool exists;
     }
 
+    address public shopContract; // ✅ 添加授权合约地址
+
     uint256 public panelCount = 0;
     mapping(uint256 => Panel) public panels;
     mapping(address => uint256[]) public ownerPanels;
@@ -41,6 +43,22 @@ contract SolarPanels {
         address indexed from,
         address indexed to
     );
+
+    // ✅ 一次性设置 Shop 合约地址
+    function setShopContract(address _shop) external {
+        require(shopContract == address(0), "Shop contract already set");
+        require(_shop != address(0), "Invalid shop address");
+        shopContract = _shop;
+    }
+
+    // ✅ 新增权限控制修饰符
+    modifier onlyOwnerOrShop(uint256 _panelId) {
+        require(
+            panels[_panelId].owner == msg.sender || msg.sender == shopContract,
+            "Not authorized to transfer this panel"
+        );
+        _;
+    }
 
     modifier onlyOwner(uint256 _panelId) {
         require(panels[_panelId].owner == msg.sender, "Not the owner of this panel");
@@ -96,12 +114,15 @@ contract SolarPanels {
         emit PanelUpdated(_panelId, _batteryTemperature, _dcPower, _acPower);
     }
 
-    function transferPanelOwnership(uint256 _panelId, address _newOwner) public onlyOwner(_panelId) {
+    // ✅ 修改：允许面板原 owner 或 shop 合约调用
+    function transferPanelOwnership(uint256 _panelId, address _newOwner) public onlyOwnerOrShop(_panelId) {
         require(panels[_panelId].exists, "Panel does not exist");
         require(_newOwner != address(0), "New owner cannot be zero address");
 
+        address currentOwner = panels[_panelId].owner;
+
         // Remove panel from current owner's list
-        uint256[] storage senderPanels = ownerPanels[msg.sender];
+        uint256[] storage senderPanels = ownerPanels[currentOwner];
         for (uint256 i = 0; i < senderPanels.length; i++) {
             if (senderPanels[i] == _panelId) {
                 senderPanels[i] = senderPanels[senderPanels.length - 1];
@@ -114,7 +135,7 @@ contract SolarPanels {
         panels[_panelId].owner = _newOwner;
         ownerPanels[_newOwner].push(_panelId);
 
-        emit PanelOwnershipTransferred(_panelId, msg.sender, _newOwner);
+        emit PanelOwnershipTransferred(_panelId, currentOwner, _newOwner);
     }
 
     function getPanel(uint256 _panelId) public view returns (
@@ -156,4 +177,13 @@ contract SolarPanels {
         }
         return myPanels;
     }
+    function getPanelsOf(address user) public view returns (Panel[] memory) {
+    uint256[] memory ids = ownerPanels[user];
+    Panel[] memory result = new Panel[](ids.length);
+    for (uint256 i = 0; i < ids.length; i++) {
+        result[i] = panels[ids[i]];
+    }
+    return result;
+}
+
 }
