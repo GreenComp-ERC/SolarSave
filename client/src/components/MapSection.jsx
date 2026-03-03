@@ -49,41 +49,41 @@ const MapSection = () => {
   });
   const [markers, setMarkers] = useState([]);
 
-  // 连接钱包 & 合约
+  // Connect wallet & contracts
   const connectToBlockchain = async () => {
   if (!window.ethereum) {
-    alert("请安装 MetaMask!");
+    alert("Please install MetaMask!");
     return;
   }
 
   try {
     setIsLoading(true);
 
-    // ✅ 正确顺序：先初始化 provider 和 signer，再用 signer 初始化合约
+    // ✅ Correct order: init provider and signer, then init contract with signer
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
     const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
 
-    // ✅ 正确初始化合约
+    // ✅ Initialize contracts correctly
     const contractInstance = new ethers.Contract(contractAddress, SolarPanels.abi, signer);
     const rewardCtr = new ethers.Contract(powerRewardAddress, PowerRewardABI.abi, signer);
 
     setContract(contractInstance);
     setRewardContract(rewardCtr);
 
-    // ✅ 获取奖励相关信息
+    // ✅ Fetch reward-related info
     const last = await rewardCtr.lastClaimedAt(accounts[0]);
     setLastClaimedAt(last.toNumber());
 
     const preview = await rewardCtr.previewReward(accounts[0]);
     setRewardPreview(preview);
 
-    // ✅ 获取面板
+    // ✅ Fetch panels
     await fetchPanels(contractInstance);
     await fetchMyPanels(contractInstance);
 
   } catch (error) {
-    console.error("连接区块链失败:", error);
+    console.error("Failed to connect to blockchain:", error);
   } finally {
     setIsLoading(false);
   }
@@ -91,16 +91,16 @@ const MapSection = () => {
   const claimReward = async () => {
   try {
     if (!rewardContract) {
-      alert("合约未连接");
+      alert("Contract not connected");
       return;
     }
     const tx = await rewardContract.claimReward();
     await tx.wait();
-    alert("✅ 奖励领取成功！");
-    await connectToBlockchain(); // 重新拉取 rewardPreview 和 cooldown
+    alert("✅ Reward claimed successfully!");
+    await connectToBlockchain(); // Refresh rewardPreview and cooldown
   } catch (e) {
-    console.error("❌ 领取失败:", e);
-    alert("❌ 奖励领取失败！");
+    console.error("❌ Claim failed:", e);
+    alert("❌ Reward claim failed!");
   }
 };
 
@@ -134,7 +134,7 @@ const MapSection = () => {
       });
 
       if (response.data.status !== "success") {
-        throw new Error("API 返回失败: " + response.data.message);
+        throw new Error("API error: " + response.data.message);
       }
 
       const data = response.data.data;
@@ -147,7 +147,7 @@ const MapSection = () => {
         acPower: data.ac?.[closestTime] ?? 900,
       };
     } catch (err) {
-      console.error("获取预测数据失败:", err);
+      console.error("Failed to fetch prediction data:", err);
       return {
         batteryTemp: 25,
         dcPower: 100,
@@ -158,12 +158,12 @@ const MapSection = () => {
 
   const handleCreatePanel = (lat, lng) => {
   if (currentAccount) {
-    alert("请先连接钱包！");
+    alert("Please connect your wallet first!");
     connectWallet();
     return;
   }
 
-  // 先设置位置并弹出确认窗口
+  // Set location first and show confirmation window
   setPendingPanelLocation({ lat, lng });
   setIsConfirmingPanel(true);
 };
@@ -188,7 +188,7 @@ const setShowNotification = (msg) => {
 
   const confirmCreatePanel = async () => {
   setIsConfirmingPanel(false);
-  setIsPredicting(true);  // 开始加载
+  setIsPredicting(true);  // Start loading
 
   const { lat, lng } = pendingPanelLocation;
   const isoTimestamp = "2022-06-21T15:00:00";
@@ -208,9 +208,9 @@ const setShowNotification = (msg) => {
 
     setShowTradeScript(true);
   } catch (e) {
-    alert("加载预测数据失败！");
+    alert("Failed to load prediction data!");
   } finally {
-    setIsPredicting(false); // 结束加载
+    setIsPredicting(false); // End loading
   }
 };
 
@@ -228,10 +228,10 @@ const setShowNotification = (msg) => {
     try {
       await fetchPanels();
       await fetchMyPanels();
-      showNotification("太阳能面板创建成功!");
+      showNotification("Solar panel created successfully!");
     } catch (error) {
-      console.error("创建太阳能面板失败:", error);
-      showNotification("创建太阳能面板失败，请稍后再试", "error");
+      console.error("Failed to create solar panel:", error);
+      showNotification("Failed to create solar panel, please try again later", "error");
     }
   }
 
@@ -240,7 +240,7 @@ const setShowNotification = (msg) => {
 };
 
 
-  // 显示通知
+  // Show notification
   const showNotification = (message, type = "success") => {
     const notification = document.createElement("div");
     notification.className = `notification ${type}`;
@@ -258,7 +258,7 @@ const setShowNotification = (msg) => {
     }, 100);
   };
 
-  // 获取所有太阳能板
+  // Fetch all solar panels
   const fetchPanels = async (contractInstance = contract) => {
     if (!contractInstance) return;
 
@@ -276,7 +276,7 @@ const setShowNotification = (msg) => {
 
       setAllPanels(formattedPanels);
 
-      // 更新统计数据
+      // Update stats
       const totalPower = formattedPanels.reduce((sum, panel) => {
       const correctedPower = panel.acPower > 100000 ? panel.acPower / 10000 : panel.acPower;
       return sum + correctedPower;
@@ -288,11 +288,11 @@ const setShowNotification = (msg) => {
       totalPower
     }));
     } catch (error) {
-      console.error("获取所有太阳能板失败:", error);
+      console.error("Failed to fetch all solar panels:", error);
     }
   };
 
-  // 获取用户的太阳能板
+  // Fetch user's solar panels
   const fetchMyPanels = async (contractInstance = contract) => {
     if (!contractInstance) return;
 
@@ -310,7 +310,7 @@ const setShowNotification = (msg) => {
 
       setMyPanels(formattedMyPanels);
 
-      // 更新统计数据
+      // Update stats
           const myPanelsPower = formattedMyPanels.reduce((sum, panel) => {
       const correctedPower = panel.acPower > 100000 ? panel.acPower / 10000 : panel.acPower;
       return sum + correctedPower;
@@ -322,14 +322,14 @@ const setShowNotification = (msg) => {
       myPanelsPower
     }));
     } catch (error) {
-      console.error("获取用户太阳能板失败:", error);
+      console.error("Failed to fetch user solar panels:", error);
     }
   };
 
   useEffect(() => {
     connectToBlockchain();
 
-    // 监听账户变化
+    // Listen for account changes
     if (window.ethereum) {
       window.ethereum.on('accountsChanged', () => {
         connectToBlockchain();
@@ -355,21 +355,21 @@ const setShowNotification = (msg) => {
 }, [lastClaimedAt]);
 
 
-  // 初始化地图和默认面板
+  // Initialize map and default panels
   useEffect(() => {
     const map = L.map("map", {
-      zoomControl: false, // 禁用默认缩放控件
-      attributionControl: false // 禁用归属控件
+      zoomControl: false, // Disable default zoom control
+      attributionControl: false // Disable attribution control
     }).setView([31, 120], 10);
 
-    // 使用深色地图主题
+    // Use dark map theme
     L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
       subdomains: 'abcd',
       maxZoom: 19
     }).addTo(map);
 
-    // 添加自定义控件
+    // Add custom controls
     L.control.zoom({
       position: 'bottomright'
     }).addTo(map);
@@ -377,16 +377,16 @@ const setShowNotification = (msg) => {
     setMapInstance(map);
 
 
-    // 添加提示信息
+    // Add hint text
     const infoControl = L.control({ position: 'bottomleft' });
     infoControl.onAdd = function(map) {
       const div = L.DomUtil.create('div', 'info-control');
-      div.innerHTML = '右键点击地图创建太阳能板';
+      div.innerHTML = 'Right-click the map to create a solar panel';
       return div;
     };
     infoControl.addTo(map);
 
-    // 添加默认太阳能板 (保留原代码中的默认面板)
+    // Add default solar panels (keep original defaults)
     const panelsToShow = showMyPanels ? myPanels : allPanels;
     const customIcon = L.icon({
       iconUrl: kakilogo,
@@ -407,8 +407,7 @@ const setShowNotification = (msg) => {
     };
   }, []);
 
-  // 在地图上展示太阳能板
-  // 在地图上展示太阳能板
+  // Render solar panels on the map
   useEffect(() => {
     if (!mapInstance) return;
 
@@ -434,7 +433,7 @@ const setShowNotification = (msg) => {
       let dcPower = panel.dcPower;
       let acPower = panel.acPower;
 
-      // 只要 lat 或 lng 超出地球范围，就猜测是乘了10000
+      // If lat/lng are out of range, assume values were scaled by 10000
       if (lat > 90 || lng > 180 || lat < -90 || lng < -180) {
         if (Math.abs(lat) > 90 || Math.abs(lng) > 180) {
         lat = lat / 10000;
@@ -452,23 +451,23 @@ const setShowNotification = (msg) => {
             <h3>Panel ID: ${panel.id}</h3>
             <div class="popup-stats">
               <div class="stat-item">
-                <span class="stat-label">所有者:</span>
+                <span class="stat-label">Owner:</span>
                 <span class="stat-value owner-address">${panel.owner.substring(0, 6)}...${panel.owner.substring(panel.owner.length - 4)}</span>
               </div>
               <div class="stat-item">
-                <span class="stat-label">电池温度:</span>
+                <span class="stat-label">Battery Temp:</span>
                 <span class="stat-value">${panel.batteryTemp/10000}°C</span>
               </div>
               <div class="stat-item">
-                <span class="stat-label">直流功率:</span>
+                <span class="stat-label">DC Power:</span>
                 <span class="stat-value">${panel.dcPower/10000}W</span>
               </div>
               <div class="stat-item">
-                <span class="stat-label">交流功率:</span>
+                <span class="stat-label">AC Power:</span>
                 <span class="stat-value">${panel.acPower/10000}W</span>
               </div>
             </div>
-            <button class="details-button">更多细节</button>
+            <button class="details-button">More details</button>
           </div>`,
           { className: "custom-popup-container" }
         );
@@ -484,7 +483,7 @@ const setShowNotification = (msg) => {
   }, [mapInstance, allPanels, myPanels, showMyPanels]);
 
 
-    // 添加从区块链获取的面板
+    // Add panels fetched from blockchain
 
 
   return (
@@ -495,64 +494,64 @@ const setShowNotification = (msg) => {
         <div className="header-overlay">
           <div className="header-content">
             <h2 className="header-title">Solar Panel Network</h2>
-            <p className="header-subtitle">右键点击地图创建太阳能板获得收益</p>
+            <p className="header-subtitle">Right-click the map to create a solar panel and earn rewards</p>
           </div>
         </div>
 
-        {/* 状态栏 */}
+        {/* Status bar */}
         <div className="stats-panel">
           <div className="stat-item">
             <div className="stat-value">{stats.totalPanels}</div>
-            <div className="stat-label">总面板数</div>
+            <div className="stat-label">Total panels</div>
           </div>
           <div className="stat-item">
             <div className="stat-value">{stats.totalPower}W</div>
-            <div className="stat-label">总发电量</div>
+            <div className="stat-label">Total generation</div>
           </div>
           <div className="stat-item">
             <div className="stat-value">{stats.myPanelsCount}</div>
-            <div className="stat-label">我的面板</div>
+            <div className="stat-label">My panels</div>
           </div>
           <div className="stat-item">
             <div className="stat-value">{stats.myPanelsPower}W</div>
-            <div className="stat-label">我的发电量</div>
+            <div className="stat-label">My generation</div>
           </div>
         </div>
-        {/* 奖励倒计时 & 领取按钮 */}
+        {/* Reward countdown & claim button */}
 <div className="reward-timer-panel">
   <p style={{ marginBottom: "5px" }}>
-    奖励倒计时：
+    Reward countdown:
     {cooldownRemaining !== null && cooldownRemaining > 0
-      ? `${Math.floor(cooldownRemaining / 60)}分 ${cooldownRemaining % 60}秒`
-      : "可领取"}
+      ? `${Math.floor(cooldownRemaining / 60)}m ${cooldownRemaining % 60}s`
+      : "Ready to claim"}
   </p>
   <button
     className="button"
     onClick={claimReward}
     disabled={cooldownRemaining > 0}
   >
-    领取奖励（{rewardPreview ? ethers.utils.formatUnits(rewardPreview, 18) : "加载中..."} SOLR）
+    Claim reward ({rewardPreview ? ethers.utils.formatUnits(rewardPreview, 18) : "Loading..."} SOLR)
   </button>
 </div>
 
 
-        {/* 控制按钮 */}
+        {/* Controls */}
         <div className="toggle-panel">
           <button
             className={`toggle-btn ${!showMyPanels ? "active" : ""}`}
             onClick={() => setShowMyPanels(false)}
           >
-            <i className="fas fa-globe"></i> 所有太阳能板
+            <i className="fas fa-globe"></i> All Solar Panels
           </button>
           <button
             className={`toggle-btn ${showMyPanels ? "active" : ""}`}
             onClick={() => setShowMyPanels(true)}
           >
-            <i className="fas fa-user"></i> 我的太阳能板
+            <i className="fas fa-user"></i> My Solar Panels
           </button>
         </div>
 
-        {/* 面板详情 */}
+        {/* Panel details */}
         {showPanelDetails && selectedPanel && (
           <PanelWindows
             panel={selectedPanel}
@@ -560,33 +559,33 @@ const setShowNotification = (msg) => {
           />
         )}
 
-        {/* 地图 */}
+        {/* Map */}
         <div id="map" className="map"></div>
 
-        {/* 加载指示器 */}
+        {/* Loading indicator */}
         {isLoading && (
           <div className="loading-overlay">
             <div className="spinner"></div>
-            <p>加载太阳能板数据...</p>
+            <p>Loading solar panel data...</p>
           </div>
         )}
       </div>
 
-      {/* 确认面板创建 */}
+      {/* Confirm panel creation */}
       {isConfirmingPanel && (
         <div className="overlay">
           <div className="confirmation-popup">
-            <h3>创建新太阳能板</h3>
-            <p>您想在此位置创建一个新的太阳能板吗？</p>
+            <h3>Create a new solar panel</h3>
+            <p>Do you want to create a new solar panel at this location?</p>
             <div className="popup-buttons">
-              <button className="btn-confirm" onClick={confirmCreatePanel}>确认</button>
-              <button className="btn-cancel" onClick={cancelCreatePanel}>取消</button>
+              <button className="btn-confirm" onClick={confirmCreatePanel}>Confirm</button>
+              <button className="btn-cancel" onClick={cancelCreatePanel}>Cancel</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* 交易脚本 */}
+      {/* Trade script */}
 
       {showTradeScript && (
         <TradeConfirm
@@ -604,7 +603,7 @@ const setShowNotification = (msg) => {
   <div className="overlay">
     <div className="loading-popup">
       <div className="spinner"></div>
-      <p>正在加载预测数据，请稍候...</p>
+      <p>Loading prediction data, please wait...</p>
     </div>
   </div>
 )}

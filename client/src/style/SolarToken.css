@@ -1,4 +1,4 @@
-/* 🌞 SolarToken 钱包整体容器 */
+/* 🌞 SolarToken wallet container */
 .solar-token-container {
   max-width: 500px;
   margin: auto;
@@ -12,16 +12,16 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/* 🔹 标题设计 */
+/* 🔹 Title styling */
 .solar-token-container h2 {
   font-size: 22px;
   font-weight: bold;
-  color: #ffd700; /* 金色 */
+  color: #ffd700; /* Gold */
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
   margin-bottom: 15px;
 }
 
-/* 🔹 钱包信息框 */
+/* 🔹 Wallet info box */
 .wallet-info {
   background: rgba(0, 0, 0, 0.2);
   padding: 12px;
@@ -30,17 +30,17 @@
   box-shadow: inset 0px 0px 10px rgba(255, 255, 255, 0.1);
 }
 
-/* 🔹 连接的钱包地址 */
+/* 🔹 Connected wallet address */
 .wallet-address {
   font-size: 14px;
   font-weight: bold;
-  color: #00ff99; /* 亮绿色 */
+  color: #00ff99; /* Bright green */
   word-break: break-all;
 }
 
-/* 🔹 SOLR 余额 */
+/* 🔹 SOLR balance */
 .solar-balance {
   font-size: 16px;
   font-weight: bold;
-  color: #ffd700; /* 金色 */
+  color: #ffd700; /* Gold */
 }

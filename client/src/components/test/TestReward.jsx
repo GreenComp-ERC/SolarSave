@@ -3,10 +3,10 @@ import { ethers } from "ethers";
 import SolarPanelsABI from "../../utils/test/SolarPanels.json";
 import PowerRewardABI from "../../utils/test/PowerReward.json";
 import "../../style/TestPanels.css";
-import ERC20ABI from "../../utils/test/SolarToken.json"; // ✅ 引入 SOLR ABI
-const rewardTokenAddress = "0x175da7583f3b085ac4Ab87AEd758c6Cd11A8b81e"; // ✅ 替换成你部署的 SOLR 合约地址
-const solarPanelAddress = "0x39Cb00Cf33827D78892b1c83aF166CB7c4FCB3C0"; // 替换为你的合约地址
-const powerRewardAddress = "0x6CACbd2FfC69843Ef182C365a16CDB6552600326"; // 替换为你的合约地址
+import ERC20ABI from "../../utils/test/SolarToken.json"; // ✅ SOLR ABI
+const rewardTokenAddress = "0x175da7583f3b085ac4Ab87AEd758c6Cd11A8b81e"; // ✅ Replace with your deployed SOLR contract
+const solarPanelAddress = "0x39Cb00Cf33827D78892b1c83aF166CB7c4FCB3C0"; // Replace with your contract address
+const powerRewardAddress = "0x6CACbd2FfC69843Ef182C365a16CDB6552600326"; // Replace with your contract address
 
 const TestReward = () => {
     const [account, setAccount] = useState("");
@@ -38,23 +38,23 @@ const TestReward = () => {
 
     const connect = async () => {
     if (!window.ethereum) {
-        alert("请安装 MetaMask");
+        alert("Please install MetaMask");
         return;
     }
 
-    // ✅ 1. 初始化 provider 和 signer
+    // ✅ 1. Initialize provider and signer
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
     const userAddress = await signer.getAddress();
     setAccount(userAddress);
-    console.log("当前账户地址：", userAddress); // ✅ 加上这个就能看到了
+    console.log("Current account address:", userAddress); // ✅ For debugging
 
-    // ✅ 2. 初始化合约实例
+    // ✅ 2. Initialize contract instances
     const panelContract = new ethers.Contract(solarPanelAddress, SolarPanelsABI.abi, signer);
     const rewardCtr = new ethers.Contract(powerRewardAddress, PowerRewardABI.abi, signer);
     const token = new ethers.Contract(rewardTokenAddress, ERC20ABI.abi, signer);
 
-    // ✅ 3. 更新合约状态
+    // ✅ 3. Update contract state
     setContract(panelContract);
     setRewardContract(rewardCtr);
 
@@ -81,17 +81,17 @@ const TestReward = () => {
         try {
             const tx = await rewardContract.claimReward();
             await tx.wait();
-            alert("✅ 奖励领取成功！");
+            alert("✅ Reward claimed successfully!");
             connect();
         } catch (e) {
-            console.error("❌ 领取失败", e);
-            alert("❌ 奖励领取失败！");
+            console.error("❌ Claim failed", e);
+            alert("❌ Reward claim failed!");
         }
     };
 
     const deposit = async () => {
     if (!depositAmount || isNaN(depositAmount) || Number(depositAmount) <= 0) {
-        alert("请输入有效的充值数量！");
+        alert("Please enter a valid deposit amount!");
         return;
     }
 
@@ -99,64 +99,64 @@ const TestReward = () => {
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const signer = provider.getSigner();
 
-        // 初始化 SOLR 合约实例
+        // Initialize SOLR contract instance
         const token = new ethers.Contract(rewardTokenAddress, ERC20ABI.abi, signer);
         const parsedAmount = ethers.utils.parseUnits(depositAmount, 18);
 
-        // 1️⃣ 授权 SOLR 给 PowerReward 合约
+        // 1️⃣ Approve SOLR for the PowerReward contract
         const approveTx = await token.approve(powerRewardAddress, parsedAmount);
         await approveTx.wait();
-        console.log("✅ 授权成功");
+        console.log("✅ Approval successful");
 
-        // 2️⃣ 执行充值
+        // 2️⃣ Execute deposit
         const depositTx = await rewardContract.deposit(parsedAmount);
         await depositTx.wait();
-        alert("✅ 充值成功！");
+        alert("✅ Deposit successful!");
     } catch (e) {
-        console.error("❌ 充值失败:", e);
-        alert("❌ 充值失败，请检查授权或网络！");
+        console.error("❌ Deposit failed:", e);
+        alert("❌ Deposit failed, check approval or network!");
     }
 };
 
 
     return (
         <div className="panel-container">
-            <h2>💰 PowerReward 奖励中心</h2>
-            <p className="account-text">当前地址：{account}</p>
+            <h2>💰 PowerReward Rewards Center</h2>
+            <p className="account-text">Current address: {account}</p>
 
-            {/* 显示面板 */}
+            {/* Panels */}
             <div className="panel-card">
-                <h3>我的太阳能板</h3>
-                {panels.length === 0 ? <p>暂无面板</p> : panels.map((p, i) => (
+                <h3>My solar panels</h3>
+                {panels.length === 0 ? <p>No panels</p> : panels.map((p, i) => (
                     <div className="panel-item" key={i}>
                         <p>📌 ID: {p.id.toString()}</p>
-                        <p>📍 位置: ({p.latitude.toString()}, {p.longitude.toString()})</p>
-                        <p>🔥 温度: {p.batteryTemperature.toString()}°C</p>
-                        <p>⚡ DC 功率: {p.dcPower.toString()}W</p>
-                        <p>🔌 AC 功率: {p.acPower.toString()}W</p>
+                        <p>📍 Location: ({p.latitude.toString()}, {p.longitude.toString()})</p>
+                        <p>🔥 Temperature: {p.batteryTemperature.toString()}°C</p>
+                        <p>⚡ DC Power: {p.dcPower.toString()}W</p>
+                        <p>🔌 AC Power: {p.acPower.toString()}W</p>
                     </div>
                 ))}
             </div>
 
-            {/* 奖励领取 */}
+            {/* Reward claim */}
             <div className="panel-card">
-                <h3>🎁 可领取奖励</h3>
+                <h3>🎁 Claimable rewards</h3>
                 <p>
-                    预计奖励：
+                    Estimated reward:
                     {rewardPreview && ethers.BigNumber.isBigNumber(rewardPreview)
                         ? ethers.utils.formatUnits(rewardPreview, 18)
-                        : "加载中..."} SOLR
+                        : "Loading..."} SOLR
                 </p>
 
 
-                {/* ✅ 倒计时区域 */}
+                {/* ✅ Countdown */}
                 {cooldownRemaining !== null && cooldownRemaining > 0 ? (
-                    <p>⏳ 距离下次可领取还有：{Math.floor(cooldownRemaining / 60)}分 {cooldownRemaining % 60}秒</p>
+                    <p>⏳ Time until next claim: {Math.floor(cooldownRemaining / 60)}m {cooldownRemaining % 60}s</p>
                 ) : (
-                    <p>✅ 现在可以领取奖励！</p>
+                    <p>✅ You can claim rewards now!</p>
                 )}
                 {poolBalance && (
-                    <p>🎯 当前奖池余额：{ethers.utils.formatUnits(poolBalance, 18)} SOLR</p>
+                    <p>🎯 Current reward pool balance: {ethers.utils.formatUnits(poolBalance, 18)} SOLR</p>
                 )}
 
                 <button
@@ -164,18 +164,18 @@ const TestReward = () => {
                     onClick={claimReward}
                     disabled={cooldownRemaining > 0}
                 >
-                    领取奖励
+                    Claim reward
                 </button>
             </div>
 
 
-            {/* 管理员充值面板 */}
+            {/* Admin deposit panel */}
             {isOwner && (
                 <div className="panel-card">
-                    <h3>🧑‍💼 管理员 SOLR 充值</h3>
-                    <input type="number" placeholder="输入充值数量" value={depositAmount}
+                          <h3>🧑‍💼 Admin SOLR Deposit</h3>
+                          <input type="number" placeholder="Enter deposit amount" value={depositAmount}
                            onChange={(e) => setDepositAmount(e.target.value)} style={{color: "black"}}/>
-                    <button className="button" onClick={deposit}>充值到奖励池</button>
+                          <button className="button" onClick={deposit}>Deposit to reward pool</button>
                 </div>
             )}
         </div>

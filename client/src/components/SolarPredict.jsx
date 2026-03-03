@@ -18,7 +18,7 @@ const SolarPredict = () => {
   const [animationDelay, setAnimationDelay] = useState(0);
   const containerRef = useRef(null);
 
-  // 图表颜色配置
+  // Chart color palette
   const chartColors = {
     primary: "#00a2ff",
     secondary: "#2ed573",
@@ -28,7 +28,7 @@ const SolarPredict = () => {
     gradient2: "#0078ff"
   };
 
-  // 获取太阳能数据
+  // Fetch solar data
   const fetchSolarData = async () => {
     setLoading(true);
     setData(null);
@@ -53,23 +53,23 @@ const SolarPredict = () => {
       const responseData = await response.json();
 
       if (responseData.status === "success") {
-        // 添加动画延迟效果
+        // Add animation delay
         setTimeout(() => {
           setData(responseData.data);
           setViewMode("compact");
           triggerCardAnimations();
         }, 500);
       } else {
-        setError("API 返回错误: " + responseData.message);
+        setError("API returned an error: " + responseData.message);
       }
     } catch (err) {
-      setError("数据获取失败: " + err.message);
+      setError("Failed to fetch data: " + err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  // 触发卡片动画
+  // Trigger card animation
   const triggerCardAnimations = () => {
     const cards = document.querySelectorAll('.pred-chart-preview-card');
     cards.forEach((card, index) => {
@@ -87,7 +87,7 @@ const SolarPredict = () => {
     fetchSolarData();
   }, []);
 
-  // 为图表转换数据格式
+  // Transform data for charts
   const transformDataForChart = (dataKey) => {
     if (!data || !data[dataKey]) return [];
 
@@ -103,7 +103,7 @@ const SolarPredict = () => {
     }));
   };
 
-  // 获取数据统计信息
+  // Get data statistics
   const getDataStats = (dataKey) => {
     if (!data || !data[dataKey]) return { min: 0, max: 0, avg: 0, trend: 0 };
 
@@ -116,7 +116,7 @@ const SolarPredict = () => {
     return { min, max, avg, trend };
   };
 
-  // 自定义Tooltip组件
+  // Custom Tooltip component
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
@@ -130,9 +130,9 @@ const SolarPredict = () => {
           fontSize: '14px',
           fontWeight: '600'
         }}>
-          <p style={{ margin: '0 0 8px 0', color: '#00a2ff' }}>{`时间: ${label}`}</p>
+          <p style={{ margin: '0 0 8px 0', color: '#00a2ff' }}>{`Time: ${label}`}</p>
           <p style={{ margin: '0', color: '#2ed573' }}>
-            {`数值: ${payload[0].value.toFixed(2)}`}
+            {`Value: ${payload[0].value.toFixed(2)}`}
           </p>
         </div>
       );
@@ -140,13 +140,13 @@ const SolarPredict = () => {
     return null;
   };
 
-  // 打开模态框
+  // Open modal
   const openChartModal = (chartKey) => {
     setActiveChart(chartKey);
     setModalOpen(true);
     document.body.style.overflow = "hidden";
 
-    // 添加模态框打开动画
+    // Add modal open animation
     setTimeout(() => {
       const modal = document.querySelector('.pred-modal-content');
       if (modal) {
@@ -155,7 +155,7 @@ const SolarPredict = () => {
     }, 10);
   };
 
-  // 关闭模态框
+  // Close modal
   const closeModal = () => {
     const modal = document.querySelector('.pred-modal-content');
     if (modal) {
@@ -172,7 +172,7 @@ const SolarPredict = () => {
     }
   };
 
-  // 渲染增强版图表卡片
+  // Render enhanced chart cards
   const renderEnhancedChartCards = () => {
     if (!data) return null;
 
@@ -192,7 +192,7 @@ const SolarPredict = () => {
               }}
               onClick={() => openChartModal(key)}
             >
-              {/* 卡片头部信息 */}
+              {/* Card header */}
               <div className="pred-card-header">
                 <h3 className="pred-chart-subtitle">{key}</h3>
                 <div className="pred-stats-badges">
@@ -203,29 +203,29 @@ const SolarPredict = () => {
                 </div>
               </div>
 
-              {/* 数据统计栏 */}
+              {/* Stats row */}
               <div className="pred-stats-row">
                 <div className="pred-stat-item">
-                  <span className="pred-stat-label">最小值</span>
+                  <span className="pred-stat-label">Min</span>
                   <span className="pred-stat-value" style={{ color: '#26d0ce' }}>
                     {stats.min.toFixed(2)}
                   </span>
                 </div>
                 <div className="pred-stat-item">
-                  <span className="pred-stat-label">平均值</span>
+                  <span className="pred-stat-label">Avg</span>
                   <span className="pred-stat-value" style={{ color: '#00a2ff' }}>
                     {stats.avg.toFixed(2)}
                   </span>
                 </div>
                 <div className="pred-stat-item">
-                  <span className="pred-stat-label">最大值</span>
+                  <span className="pred-stat-label">Max</span>
                   <span className="pred-stat-value" style={{ color: '#ff6b6b' }}>
                     {stats.max.toFixed(2)}
                   </span>
                 </div>
               </div>
 
-              {/* 增强版图表预览 */}
+              {/* Enhanced preview */}
               <div className="pred-chart-preview">
                 <ResponsiveContainer width="100%" height={120}>
                   <AreaChart data={chartData}>
@@ -249,9 +249,9 @@ const SolarPredict = () => {
                 </ResponsiveContainer>
               </div>
 
-              {/* 交互按钮 */}
+              {/* Action button */}
               <button className="pred-view-chart-btn">
-                <span>🔍 查看详情</span>
+                <span>🔍 View details</span>
                 <div className="pred-btn-glow"></div>
               </button>
             </div>
@@ -261,7 +261,7 @@ const SolarPredict = () => {
     );
   };
 
-  // 渲染增强版列表视图
+  // Render enhanced list view
   const renderEnhancedChartList = () => {
     if (!data) return null;
 
@@ -272,7 +272,7 @@ const SolarPredict = () => {
 
           return (
             <div key={key} className="pred-chart-box" style={{ animationDelay: `${index * 0.2}s` }}>
-              <h3 className="pred-chart-subtitle">{key} 数据趋势</h3>
+              <h3 className="pred-chart-subtitle">{key} Trend</h3>
               <ResponsiveContainer width="100%" height={400}>
                 <LineChart data={chartData}>
                   <defs>
@@ -320,7 +320,7 @@ const SolarPredict = () => {
     );
   };
 
-  // 渲染增强版模态框图表
+  // Render enhanced modal chart
   const renderEnhancedModalChart = () => {
     if (!activeChart || !data) return null;
 
@@ -330,14 +330,14 @@ const SolarPredict = () => {
     return (
       <div className="pred-modal-chart-container">
         <div className="pred-modal-header">
-          <h2 className="pred-modal-chart-title">{activeChart} 详细分析</h2>
+          <h2 className="pred-modal-chart-title">{activeChart} Detailed Analysis</h2>
           <div className="pred-modal-stats">
             <div className="pred-modal-stat">
-              <span className="pred-modal-stat-label">数据点</span>
+              <span className="pred-modal-stat-label">Data points</span>
               <span className="pred-modal-stat-value">{chartData.length}</span>
             </div>
             <div className="pred-modal-stat">
-              <span className="pred-modal-stat-label">变化趋势</span>
+              <span className="pred-modal-stat-label">Trend</span>
               <span className="pred-modal-stat-value" style={{ color: stats.trend >= 0 ? '#2ed573' : '#ff6b6b' }}>
                 {stats.trend >= 0 ? '+' : ''}{stats.trend.toFixed(2)}%
               </span>
@@ -395,7 +395,7 @@ const SolarPredict = () => {
 
   return (
     <div className="pred-test-container" ref={containerRef}>
-      {/* 动态粒子背景效果 */}
+      {/* Dynamic particle background */}
       <div className="pred-particles-container">
         {[...Array(20)].map((_, i) => (
           <div
@@ -413,39 +413,39 @@ const SolarPredict = () => {
       </div>
 
       <h1 className="pred-test-title">
-        ⚡ 太阳能数据可视化 ⚡
+        ⚡ Solar Data Visualization ⚡
         <div className="pred-title-glow"></div>
       </h1>
 
       <div className="pred-input-container">
         <div className="pred-coordinate-inputs">
           <label>
-            🌍 纬度坐标:
+            🌍 Latitude:
             <input
               type="number"
               value={lat}
               onChange={(e) => setLat(e.target.value)}
               className="pred-coordinate-input"
               step="0.0001"
-              placeholder="输入纬度坐标"
+              placeholder="Enter latitude"
             />
           </label>
           <label>
-            🗺️ 经度坐标:
+            🗺️ Longitude:
             <input
               type="number"
               value={lng}
               onChange={(e) => setLng(e.target.value)}
               className="pred-coordinate-input"
               step="0.0001"
-              placeholder="输入经度坐标"
+              placeholder="Enter longitude"
             />
           </label>
         </div>
 
         <div className="pred-time-controls">
           <label>
-            📅 开始日期:
+            📅 Start date:
             <input
               type="date"
               value={startDate}
@@ -454,7 +454,7 @@ const SolarPredict = () => {
             />
           </label>
           <label>
-            📅 结束日期:
+            📅 End date:
             <input
               type="date"
               value={endDate}
@@ -463,20 +463,20 @@ const SolarPredict = () => {
             />
           </label>
           <label>
-            ⏱️ 时间间隔:
+            ⏱️ Interval:
             <select
               value={interval}
               onChange={(e) => setInterval(e.target.value)}
               className="pred-time-interval-select"
             >
-              <option value="second">⚡ 秒级精度</option>
-              <option value="minute">⏰ 分钟级别</option>
-              <option value="hour">🕐 小时维度</option>
-              <option value="day">📊 日级统计</option>
+              <option value="second">⚡ Second-level</option>
+              <option value="minute">⏰ Minute-level</option>
+              <option value="hour">🕐 Hourly</option>
+              <option value="day">📊 Daily</option>
             </select>
           </label>
           <label>
-            📊 时间范围 (小时):
+            📊 Time range (hours):
             <div className="pred-range-container">
               <input
                 type="range"
@@ -486,7 +486,7 @@ const SolarPredict = () => {
                 onChange={(e) => setTimeRange(e.target.value)}
                 className="pred-time-range-slider"
               />
-              <span>🔥 {timeRange} 小时</span>
+              <span>🔥 {timeRange} hours</span>
             </div>
           </label>
         </div>
@@ -495,11 +495,11 @@ const SolarPredict = () => {
           {loading ? (
             <>
               <div className="pred-loading-spinner"></div>
-              🔄 数据获取中...
+              🔄 Fetching data...
             </>
           ) : (
             <>
-              🚀 获取太阳能数据
+              🚀 Fetch solar data
               <div className="pred-btn-particles"></div>
             </>
           )}
@@ -509,7 +509,7 @@ const SolarPredict = () => {
       {loading && (
         <div className="pred-loading-text">
           <div className="pred-spinner"></div>
-          <span>⚡ 正在分析太阳能数据...</span>
+          <span>⚡ Analyzing solar data...</span>
         </div>
       )}
 
@@ -526,13 +526,13 @@ const SolarPredict = () => {
               className={`pred-view-mode-btn ${viewMode === "compact" ? "active" : ""}`}
               onClick={() => setViewMode("compact")}
             >
-              🎯 卡片视图
+              🎯 Card view
             </button>
             <button
               className={`pred-view-mode-btn ${viewMode === "list" ? "active" : ""}`}
               onClick={() => setViewMode("list")}
             >
-              📊 列表视图
+              📊 List view
             </button>
           </div>
 
@@ -540,7 +540,7 @@ const SolarPredict = () => {
         </div>
       )}
 
-      {/* 增强版模态框 */}
+      {/* Enhanced modal */}
       {modalOpen && (
         <div className="pred-chart-modal">
           <div className="pred-modal-overlay" onClick={closeModal}></div>
@@ -553,7 +553,7 @@ const SolarPredict = () => {
         </div>
       )}
 
-      {/* 添加动态样式 */}
+      {/* Dynamic styles */}
       <style jsx>{`
         .pred-particles-container {
           position: fixed;

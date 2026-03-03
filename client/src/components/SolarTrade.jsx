@@ -17,7 +17,7 @@ const PowerChart = ({ data, chartType }) => {
   const [chartLoaded, setChartLoaded] = useState(false);
 
   useEffect(() => {
-    // 加载 Google Charts 库
+    // Load Google Charts
     if (!window.google || !window.google.charts) {
       const script = document.createElement('script');
       script.src = 'https://www.gstatic.com/charts/loader.js';
@@ -46,17 +46,17 @@ const PowerChart = ({ data, chartType }) => {
         const dataTable = window.google.visualization.arrayToDataTable(data);
 
         const options = {
-          title: "太阳能板输出比较",
+          title: "Solar Panel Output Comparison",
           backgroundColor: "transparent",
           colors: ["#4CAF50", "#2952E3"],
           titleTextStyle: { color: "#ffffff", fontSize: 16 },
           hAxis: {
-            title: "太阳能板",
+            title: "Solar Panels",
             textStyle: { color: "#cccccc" },
             titleTextStyle: { color: "#ffffff" }
           },
           vAxis: {
-            title: "功率 (W)",
+            title: "Power (W)",
             textStyle: { color: "#cccccc" },
             titleTextStyle: { color: "#ffffff" }
           },
@@ -97,7 +97,7 @@ const PowerChart = ({ data, chartType }) => {
 
         chart.draw(dataTable, options);
       } catch (error) {
-        console.error("绘制图表时发生错误:", error);
+        console.error("Error rendering chart:", error);
       }
     }
   }, [chartLoaded, data, chartType]);
@@ -107,7 +107,7 @@ const PowerChart = ({ data, chartType }) => {
       {!chartLoaded && (
         <div className="chart-loading">
           <div className="loading-spinner"></div>
-          <p>加载图表中...</p>
+          <p>Loading chart...</p>
         </div>
       )}
     </div>
@@ -130,7 +130,7 @@ const SolarTrade = () => {
   // Connect wallet
   const connectWallet = async () => {
     if (!window.ethereum) {
-      setConnectionError("请安装MetaMask钱包");
+      setConnectionError("Please install MetaMask");
       return;
     }
 
@@ -143,8 +143,8 @@ const SolarTrade = () => {
       setAccount(address);
       setConnectionError("");
     } catch (error) {
-      console.error("钱包连接失败:", error);
-      setConnectionError("钱包连接失败，请重试");
+      console.error("Wallet connection failed:", error);
+      setConnectionError("Wallet connection failed, please try again");
     } finally {
       setIsConnecting(false);
     }
@@ -178,7 +178,7 @@ const SolarTrade = () => {
         const ac = fix(panel.acPower);
         return {
           id: index + 1,
-          name: `太阳能板 ${index + 1}`,
+          name: `Solar Panel ${index + 1}`,
           lat: fix(panel.latitude),
           lng: fix(panel.longitude),
           dcPower: dc,
@@ -191,7 +191,7 @@ const SolarTrade = () => {
         setAllPanels(formattedPanels);
         setPanels(formattedPanels);
       } catch (error) {
-        console.error("获取用户太阳能板失败:", error);
+        console.error("Failed to fetch user solar panels:", error);
       }
     };
 
@@ -209,7 +209,7 @@ const SolarTrade = () => {
 
       // Prepare data for chart
       const chartData = [
-        ["太阳能板", "直流功率", "交流功率"],
+        ["Solar Panel", "DC Power", "AC Power"],
         ...panels.map(panel => [panel.name, panel.dcPower, panel.acPower])
       ];
 
@@ -217,7 +217,7 @@ const SolarTrade = () => {
     } else {
       setTotalDcPower(0);
       setTotalAcPower(0);
-      setCombinedData([["太阳能板", "直流功率", "交流功率"]]);
+      setCombinedData([["Solar Panel", "DC Power", "AC Power"]]);
     }
   }, [panels]);
 
@@ -257,7 +257,7 @@ const SolarTrade = () => {
       <div className="solar-trade-header">
         <div className="header-logo">
           <FiSun className="sun-icon" />
-          <h1>太阳能交易平台</h1>
+          <h1>Solar Energy Trading Platform</h1>
         </div>
         <div className="wallet-status">
           {account ? (
@@ -271,7 +271,7 @@ const SolarTrade = () => {
               onClick={connectWallet}
               disabled={isConnecting}
             >
-              {isConnecting ? "连接中..." : "连接钱包"}
+              {isConnecting ? "Connecting..." : "Connect Wallet"}
             </button>
           )}
           {connectionError && <div className="connection-error">{connectionError}</div>}
@@ -282,12 +282,12 @@ const SolarTrade = () => {
         {/* Left panel with solar panel selection */}
         <div className="left-panel">
           <div className="panel-header">
-            <h2>太阳能板管理</h2>
+            <h2>Solar Panel Management</h2>
             <button
               className="trade-button"
               onClick={() => setShowTradeScript(true)}
             >
-              交易能源
+              Trade Energy
             </button>
           </div>
 
@@ -297,7 +297,7 @@ const SolarTrade = () => {
               onChange={(e) => addPanelBack(parseInt(e.target.value))}
               className="panel-dropdown"
             >
-              <option value="">添加太阳能板</option>
+              <option value="">Add solar panel</option>
               {allPanels
                 .filter((panel) => !panels.some((p) => p.id === panel.id))
                 .map((panel) => (
@@ -332,14 +332,14 @@ const SolarTrade = () => {
                   <div className="panel-card-body">
                     <div className="power-meters">
                       <div className="power-meter dc">
-                        <div className="meter-label">直流功率</div>
+                        <div className="meter-label">DC Power</div>
                         <div className="meter-value">{panel.dcPower} W</div>
                         <div className="meter-bar">
                           <div className="meter-fill" style={{ width: `${Math.min(100, panel.dcPower / 30)}%` }}></div>
                         </div>
                       </div>
                       <div className="power-meter ac">
-                        <div className="meter-label">交流功率</div>
+                        <div className="meter-label">AC Power</div>
                         <div className="meter-value">{panel.acPower} W</div>
                         <div className="meter-bar">
                           <div className="meter-fill" style={{ width: `${Math.min(100, panel.acPower / 25)}%` }}></div>
@@ -348,10 +348,10 @@ const SolarTrade = () => {
                     </div>
                     <div className="panel-meta">
                       <div className="panel-location">
-                        <span>位置: {panel.lat.toFixed(2)}, {panel.lng.toFixed(2)}</span>
+                        <span>Location: {panel.lat.toFixed(2)}, {panel.lng.toFixed(2)}</span>
                       </div>
                       <div className="panel-efficiency">
-                        <span>效率: {panel.efficiency}%</span>
+                        <span>Efficiency: {panel.efficiency}%</span>
                       </div>
                     </div>
                   </div>
@@ -359,8 +359,8 @@ const SolarTrade = () => {
               ))
             ) : (
               <div className="no-panels-message">
-                <p>未选择太阳能板</p>
-                <p>请从下拉菜单添加</p>
+                <p>No panels selected</p>
+                <p>Add from the dropdown</p>
               </div>
             )}
           </div>
@@ -374,7 +374,7 @@ const SolarTrade = () => {
                 <FiBarChart2 />
               </div>
               <div className="stats-content">
-                <h3>总直流功率</h3>
+                <h3>Total DC Power</h3>
                 <div className="stats-value">{totalDcPower} <span>W</span></div>
               </div>
             </div>
@@ -383,7 +383,7 @@ const SolarTrade = () => {
                 <FiTrendingUp />
               </div>
               <div className="stats-content">
-                <h3>总交流功率</h3>
+                <h3>Total AC Power</h3>
                 <div className="stats-value">{totalAcPower} <span>W</span></div>
               </div>
             </div>
@@ -392,7 +392,7 @@ const SolarTrade = () => {
                 <FiPieChart />
               </div>
               <div className="stats-content">
-                <h3>平均效率</h3>
+                <h3>Average Efficiency</h3>
                 <div className="stats-value">
                   {totalDcPower > 0 ? Math.round((totalAcPower / totalDcPower) * 100) : 0}
                   <span>%</span>
@@ -403,14 +403,14 @@ const SolarTrade = () => {
 
           <div className="visualization-section">
             <div className="visualization-header">
-              <h2>功率可视化</h2>
+              <h2>Power Visualization</h2>
               <div className="chart-selector">
                 {["BarChart", "LineChart", "PieChart", "AreaChart"].map((type) => (
                   <button
                     key={type}
                     className={`chart-type-button ${chartType === type ? 'active' : ''}`}
                     onClick={() => setChartType(type)}
-                    title={type.replace('Chart', ' 图表')}
+                    title={type.replace('Chart', ' chart')}
                   >
                     {getChartIcon(type)}
                   </button>
@@ -426,8 +426,8 @@ const SolarTrade = () => {
                 />
               ) : (
                 <div className="no-data-message">
-                  <p>无可视化数据</p>
-                  <p>请添加太阳能板查看数据图表</p>
+                  <p>No visualization data</p>
+                  <p>Add solar panels to view charts</p>
                 </div>
               )}
             </div>

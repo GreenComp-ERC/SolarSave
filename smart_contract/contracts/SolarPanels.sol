@@ -14,7 +14,7 @@ contract SolarPanels {
         bool exists;
     }
 
-    address public shopContract; // ✅ 添加授权合约地址
+    address public shopContract; // ✅ Add authorized contract address
 
     uint256 public panelCount = 0;
     mapping(uint256 => Panel) public panels;
@@ -44,14 +44,14 @@ contract SolarPanels {
         address indexed to
     );
 
-    // ✅ 一次性设置 Shop 合约地址
+    // ✅ Set Shop contract address once
     function setShopContract(address _shop) external {
         require(shopContract == address(0), "Shop contract already set");
         require(_shop != address(0), "Invalid shop address");
         shopContract = _shop;
     }
 
-    // ✅ 新增权限控制修饰符
+    // ✅ Add access-control modifier
     modifier onlyOwnerOrShop(uint256 _panelId) {
         require(
             panels[_panelId].owner == msg.sender || msg.sender == shopContract,
@@ -114,7 +114,7 @@ contract SolarPanels {
         emit PanelUpdated(_panelId, _batteryTemperature, _dcPower, _acPower);
     }
 
-    // ✅ 修改：允许面板原 owner 或 shop 合约调用
+    // ✅ Change: allow original owner or Shop contract to call
     function transferPanelOwnership(uint256 _panelId, address _newOwner) public onlyOwnerOrShop(_panelId) {
         require(panels[_panelId].exists, "Panel does not exist");
         require(_newOwner != address(0), "New owner cannot be zero address");

@@ -5,19 +5,19 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract SolarToken is ERC20, Ownable {
-    uint256 public cap = 100000000 * 10 ** 18; // 1 亿 SOLR 作为总量上限
+    uint256 public cap = 100000000 * 10 ** 18; // 100 million SOLR as the total supply cap
 
     constructor() ERC20("SolarToken", "SOLR") Ownable(msg.sender) {
-        _mint(msg.sender, 1000000 * 10 ** 18); // 100 万 SOLR 初始供应
+        _mint(msg.sender, 1000000 * 10 ** 18); // 1 million SOLR initial supply
     }
 
-    // 仅限合约拥有者（管理员）可以铸造新的 SOLR
+    // Only the contract owner (admin) can mint new SOLR
     function mint(address to, uint256 amount) external onlyOwner {
         require(totalSupply() + amount <= cap, "over limit");
         _mint(to, amount);
     }
 
-    // 允许销毁 SOLR 代币
+    // Allow burning SOLR tokens
     function burn(uint256 amount) external {
         _burn(msg.sender, amount);
     }

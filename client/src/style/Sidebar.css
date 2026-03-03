@@ -1,4 +1,4 @@
-/* Cyberpunk Solar Theme Sidebar CSS - 更新版 */
+/* Cyberpunk Solar Theme Sidebar CSS - Updated */
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
@@ -17,7 +17,7 @@
   --transition-speed: 0.3s;
 }
 
-/* 基础样式保持不变 */
+/* Keep base styles unchanged */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -30,7 +30,7 @@ body {
   background-color: var(--dark-bg);
 }
 
-/* Cyberpunk Sidebar - 保持基本样式不变 */
+/* Cyberpunk Sidebar - Keep basic styles unchanged */
 .cyberpunk-sidebar {
   position: fixed;
   top: 0;
@@ -286,7 +286,7 @@ body {
   color: var(--solar-accent);
 }
 
-/* 更新的面板列表样式 */
+/* Updated panel list styles */
 .panels-section {
   flex: 1;
   display: flex;
@@ -321,7 +321,7 @@ body {
   color: rgba(255, 255, 255, 0.7);
 }
 
-/* 新增: 搜索和筛选控件 */
+/* Added: search and filter controls */
 .panel-controls {
   padding: 8px;
   border-bottom: 1px solid var(--dark-border);
@@ -401,7 +401,7 @@ body {
   background: rgba(0, 240, 255, 0.1);
 }
 
-/* 更新面板列表 */
+/* Updated panel list */
 .panel-list {
   flex: 1;
   overflow-y: auto;
@@ -418,7 +418,7 @@ body {
   gap: 12px;
 }
 
-/* 更新面板项目样式 - 紧凑版 */
+/* Updated panel item styles - compact */
 .panel-item {
   background: rgba(15, 18, 24, 0.8);
   border: 1px solid var(--dark-border);
@@ -519,7 +519,7 @@ body {
   color: white;
 }
 
-/* 新增: 分页控件 */
+/* Added: pagination controls */
 .pagination-controls {
   display: flex;
   align-items: center;
@@ -560,7 +560,7 @@ body {
   font-size: 14px;
 }
 
-/* 侧边栏切换按钮 */
+/* Sidebar toggle button */
 .sidebar-toggle-btn {
   position: fixed;
   top: 20px;
@@ -589,7 +589,7 @@ body {
   left: 20px;
 }
 
-/* 通知样式 */
+/* Notification styles */
 .notification {
   position: fixed;
   bottom: 20px;
@@ -613,7 +613,7 @@ body {
   color: var(--error);
 }
 
-/* 动画效果 */
+/* Animation effects */
 @keyframes slideIn {
   0% {
     transform: translateY(20px);
@@ -634,7 +634,7 @@ body {
   }
 }
 
-/* 滚动条样式 */
+/* Scrollbar styles */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -652,7 +652,7 @@ body {
   background: var(--solar-accent);
 }
 
-/* 虚拟列表滚动指示器 */
+/* Virtual list scroll indicator */
 .scroll-indicator {
   position: absolute;
   right: 0;
@@ -664,7 +664,7 @@ body {
   transition: top 0.1s;
 }
 
-/* 媒体查询以适应不同屏幕尺寸 */
+/* Media queries for different screen sizes */
 @media screen and (max-width: 768px) {
   .cyberpunk-sidebar {
     width: 280px;
@@ -694,7 +694,7 @@ body {
   }
 }
 
-/* 当列表为空时显示的动画样式 */
+/* Animation for empty list state */
 @keyframes pulse {
   0% {
     opacity: 0.6;
@@ -711,7 +711,7 @@ body {
   animation: pulse 2s infinite ease-in-out;
 }
 
-/* 高级数据显示样式 */
+/* Advanced data display styles */
 .panel-data-visual {
   width: 100%;
   height: 30px;
@@ -729,7 +729,7 @@ body {
   transition: width 0.5s;
 }
 
-/* 收藏和置顶面板功能样式 */
+/* Favorite and pin panel styles */
 .panel-actions {
   position: absolute;
   top: 8px;
@@ -763,7 +763,7 @@ body {
   background: rgba(255, 214, 0, 0.1);
 }
 
-/* 面板展开时的过渡效果 */
+/* Panel expand transition */
 .panel-details {
   animation: expandDown 0.3s ease-out;
   transform-origin: top center;
@@ -780,7 +780,7 @@ body {
   }
 }
 
-/* 面板项目中添加状态指示器 */
+/* Status indicator in panel items */
 .panel-status-indicator {
   position: absolute;
   top: 8px;
@@ -802,7 +802,7 @@ body {
   box-shadow: 0 0 5px var(--error);
 }
 
-/* 添加数据标签 */
+/* Add data labels */
 .panel-data-label {
   font-size: 10px;
   text-transform: uppercase;
@@ -812,7 +812,7 @@ body {
   margin-bottom: 2px;
 }
 
-/* 加载状态动画 */
+/* Loading state animation */
 .panel-loading {
   display: flex;
   justify-content: center;
@@ -838,7 +838,7 @@ body {
   }
 }
 
-/* 群组展开控制 */
+/* Group expand controls */
 .panel-group-header {
   padding: 8px;
   background: rgba(31, 41, 55, 0.6);

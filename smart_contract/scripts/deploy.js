@@ -1,7 +1,7 @@
 const hre = require("hardhat");
 
 async function main() {
-  const { ethers } = hre; // ✅ 从 hre 中安全解构
+  const { ethers } = hre; // ✅ Safely destructure from hre
   const [sender] = await ethers.getSigners();
 
   const to = "0x1d78aB9A7744430d64a5D9659E4FcB933Be78080";
@@ -12,7 +12,7 @@ async function main() {
     value: amount
   });
 
-  console.log("✅ 发送成功，交易哈希:", tx.hash);
+  console.log("✅ Sent successfully, tx hash:", tx.hash);
 }
 
 main().catch((error) => {

@@ -592,7 +592,7 @@
 }
 
 /* Countdown Animation */
-.reward-timer-panel p:has-text("可领取") {
+.reward-timer-panel p:has-text("Ready to claim") {
   color: var(--text-accent);
   animation: ready-pulse 1.5s ease-in-out infinite;
 }

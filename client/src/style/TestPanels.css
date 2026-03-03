@@ -1,4 +1,4 @@
-/* 🌞 SolarPanels 组件的整体容器 */
+/* 🌞 Overall container for the SolarPanels component */
 .panel-container {
     max-width: 900px;
     margin: 0 auto;
@@ -10,14 +10,14 @@
     color: white;
 }
 
-/* 账号文本 */
+/* Account text */
 .account-text {
     font-size: 16px;
     text-align: center;
     margin-bottom: 20px;
 }
 
-/* 🌟 太阳能板卡片 */
+/* 🌟 Solar panel card */
 .panel-card {
     background: rgba(0, 0, 0, 0.5);
     padding: 16px;
@@ -27,7 +27,7 @@
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/* 🔘 按钮 */
+/* 🔘 Button */
 .button {
     background: #ffcc00;
     color: black;
@@ -45,7 +45,7 @@
     transform: scale(1.05);
 }
 
-/* 🔄 刷新按钮 */
+/* 🔄 Refresh button */
 .refresh-button {
     background: #2c82c9;
     color: white;
@@ -55,7 +55,7 @@
     background: #1e6aa8;
 }
 
-/* 🔄 更新按钮 */
+/* 🔄 Update button */
 .update-button {
     background: #ff5722;
     color: white;
@@ -65,14 +65,14 @@
     background: #e64a19;
 }
 
-/* 📋 太阳能板列表 */
+/* 📋 Solar panel list */
 .panel-list {
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
-/* 🌍 单个太阳能板项 */
+/* 🌍 Single solar panel item */
 .panel-item {
     background: rgba(255, 255, 255, 0.1);
     padding: 12px;
@@ -85,25 +85,25 @@
     transform: scale(1.02);
 }
 
-/* 📌 太阳能板文本 */
+/* 📌 Solar panel text */
 .panel-item p {
     margin: 4px 0;
     font-size: 14px;
 }
 
-/* 🌟 输入框 */
+/* 🌟 Input field */
 input {
     width: 100%;
     padding: 8px;
     margin-top: 6px;
     border-radius: 6px;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.9); /* 使背景更清晰 */
-    color: black; /* ✅ 字体颜色改为黑色 */
+    background: rgba(255, 255, 255, 0.9); /* Make background clearer */
+    color: black; /* ✅ Set text color to black */
     font-size: 14px;
     outline: none;
 }
 
 input::placeholder {
-    color: rgba(0, 0, 0, 0.6); /* ✅ 使占位符字体颜色变为浅黑色 */
+    color: rgba(0, 0, 0, 0.6); /* ✅ Set placeholder text to light black */
 }

@@ -6,15 +6,15 @@ import { shortenAddress } from "../utils/shortenAddress";
 import SolarToken from "../utils/test/SolarToken.json";
 import Shop from "../utils/test/Shop.json";
 import SolarPanels from "../utils/test/SolarPanels.json";
-import "../style/Transactions.css"; // 引入CSS文件
+import "../style/Transactions.css"; // Import CSS
 const tokenAddress = "0x175da7583f3b085ac4Ab87AEd758c6Cd11A8b81e";
 const shopContractAddress = "0xb997c4257Bc9Ca4e68529A3d649D851562ca8b4c";
 const solarPanelsContractAddress = "0x39Cb00Cf33827D78892b1c83aF166CB7c4FCB3C0";
 
-// 太阳能面板卡片组件
+// Solar panel card component
 const PanelCard = ({ id, latitude, longitude, batteryTemp, dcPower, acPower, createdAt, owner, price, name, isMine, onList, onBuy, onCancel }) => {
 
-  // 计算电量百分比（假设最大1000W）
+  // Calculate power percentage (assume 1000W max)
   const dcPowerPercentage = Math.min(100, (dcPower / 1000) * 100);
   const acPowerPercentage = Math.min(100, (acPower / 1000) * 100);
   const isActive = dcPower > 0 && acPower > 0;
@@ -31,24 +31,24 @@ const PanelCard = ({ id, latitude, longitude, batteryTemp, dcPower, acPower, cre
 
           <div className="trans-status-indicator">
             <div className={`trans-status-dot ${isActive ? 'trans-status-active' : 'trans-status-inactive'}`}></div>
-            <span className="trans-status-text">{isActive ? '在线' : '离线'}</span>
+            <span className="trans-status-text">{isActive ? 'Online' : 'Offline'}</span>
           </div>
         </div>
 
         <div className="trans-performance-section">
           <div className="trans-performance-header">
-            <span className="trans-performance-title">实时性能</span>
+            <span className="trans-performance-title">Live performance</span>
             <div className="trans-price-badge">{isNaN(price) ? price : `${price} SOLR`}</div>
           </div>
 
           <div className="trans-metrics-grid">
             <div className="trans-metric-item">
-              <div className="trans-metric-label">位置坐标</div>
+              <div className="trans-metric-label">Coordinates</div>
               <div className="trans-metric-value">{latitude}°, {longitude}°</div>
             </div>
 
             <div className="trans-metric-item">
-              <div className="trans-metric-label">电池温度</div>
+              <div className="trans-metric-label">Battery temperature</div>
               <div className="trans-metric-value trans-temp-value">{batteryTemp}°C</div>
             </div>
           </div>
@@ -56,7 +56,7 @@ const PanelCard = ({ id, latitude, longitude, batteryTemp, dcPower, acPower, cre
           <div className="trans-power-section">
             <div className="trans-power-item">
               <div className="trans-power-header">
-                <span className="trans-power-label">直流功率</span>
+                <span className="trans-power-label">DC Power</span>
                 <span className="trans-power-value">{dcPower} W</span>
               </div>
               <div className="trans-power-bar">
@@ -66,7 +66,7 @@ const PanelCard = ({ id, latitude, longitude, batteryTemp, dcPower, acPower, cre
 
             <div className="trans-power-item">
               <div className="trans-power-header">
-                <span className="trans-power-label">交流功率</span>
+                <span className="trans-power-label">AC Power</span>
                 <span className="trans-power-value">{acPower} W</span>
               </div>
               <div className="trans-power-bar">
@@ -79,35 +79,35 @@ const PanelCard = ({ id, latitude, longitude, batteryTemp, dcPower, acPower, cre
         <div className="trans-card-footer">
           <div className="trans-footer-info">
             <div className="trans-info-item">
-              <span className="trans-info-label">创建时间</span>
+              <span className="trans-info-label">Created at</span>
               <span className="trans-info-value">{createdAt}</span>
             </div>
             <div className="trans-info-item">
-              <span className="trans-info-label">所有者</span>
+              <span className="trans-info-label">Owner</span>
               <span className="trans-info-value trans-owner-address">{shortenAddress(owner)}</span>
             </div>
           </div>
 
-          {/* 操作按钮区 */}
+          {/* Action buttons */}
           {isMine ? (
   <>
-    {price === "未上架" && (
+    {price === "Not listed" && (
       <button
         onClick={() => onList(id)}
         className="trans-action-button trans-list-button"
       >
         <span className="trans-button-icon">⚡</span>
-        上架出售
+        List for sale
       </button>
     )}
 
-    {price === "已上架" && (
+    {price === "Listed" && (
       <button
         onClick={() => onCancel(id)}
         className="trans-action-button trans-cancel-button"
       >
         <span className="trans-button-icon">❌</span>
-        下架
+        Unlist
       </button>
     )}
   </>
@@ -117,7 +117,7 @@ const PanelCard = ({ id, latitude, longitude, batteryTemp, dcPower, acPower, cre
     className="trans-action-button trans-list-button"
   >
     <span className="trans-button-icon">💰</span>
-    购买
+    Buy
   </button>
 )}
 
@@ -127,7 +127,7 @@ const PanelCard = ({ id, latitude, longitude, batteryTemp, dcPower, acPower, cre
   );
 };
 
-// 加载占位组件
+// Loading placeholder component
 const LoadingCard = () => (
     <div className="trans-panel-card trans-loading-card">
       <div className="trans-loading-content">
@@ -188,7 +188,7 @@ useEffect(() => {
         const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
 
-    // ✅ 正确创建 panel 合约并检查授权状态
+    // ✅ Create panel contract and check authorization
     const panelContract = new ethers.Contract(solarPanelsContractAddress, SolarPanels.abi, signer);
     const shopAddressOnChain = await panelContract.shopContract();
     const isValidShop =
@@ -208,15 +208,15 @@ useEffect(() => {
     const shopContract = new ethers.Contract(shopContractAddress, Shop.abi, provider);
     const solarPanelsContract = new ethers.Contract(solarPanelsContractAddress, SolarPanels.abi, signer);
 
-    // ✅ 获取商店商品数据
+    // ✅ Fetch shop items
 
 
-        // 获取商店商品数据
+        // Fetch shop items
         const itemCount = await shopContract.itemCount();
         let items = [];
         for (let i = 1; i <= itemCount; i++) {
   const item = await shopContract.getItem(i);
-  const pendingBuyers = await shopContract.getPendingBuyers(item.id); // 👈 添加这一行
+  const pendingBuyers = await shopContract.getPendingBuyers(item.id); // 👈 Add this line
 
   if (!item.purchased) {
     items.push({
@@ -230,16 +230,16 @@ useEffect(() => {
       dcPower: normalizeValue(item.dcPower.toNumber()),
       acPower: normalizeValue(item.acPower.toNumber()),
       createdAt: new Date(item.createdAt.toNumber() * 1000).toLocaleDateString(),
-      pendingBuyers: pendingBuyers, // 👈 添加到对象里
+      pendingBuyers: pendingBuyers, // 👈 Add to item object
     });
   }
 }
 
         setShopItems(items);
 
-        // 获取当前用户的太阳能板
+        // Fetch current user's solar panels
         const myPanelsData = await solarPanelsContract.getMyPanels();
-                // 在获取完 shopItems 之后判断每个面板是否已经上架
+                // Determine if panels are listed after fetching shopItems
         const shopPanelIds = new Set(items.map(item => item.id));
 
         const panels = myPanelsData.map((panel) => {
@@ -253,10 +253,10 @@ useEffect(() => {
             batteryTemp: normalizeValue(panel.batteryTemperature?.toNumber() || 0),
             dcPower: normalizeValue(panel.dcPower?.toNumber() || 0),
             acPower: normalizeValue(panel.acPower?.toNumber() || 0),
-            createdAt: panel.createdAt ? new Date(panel.createdAt.toNumber() * 1000).toLocaleDateString() : "未知",
+            createdAt: panel.createdAt ? new Date(panel.createdAt.toNumber() * 1000).toLocaleDateString() : "Unknown",
             owner: currentAccount,
-            name: `太阳能面板 #${panelId}`,
-            price: isListed ? "已上架" : "未上架",   // 👈 状态判断
+            name: `Solar Panel #${panelId}`,
+            price: isListed ? "Listed" : "Not listed",   // 👈 Status
             isMine: true,
             rawLatitude: panel.latitude.toNumber(),
             rawLongitude: panel.longitude.toNumber(),
@@ -272,7 +272,7 @@ useEffect(() => {
         setMyPanels(panels);
         setLoading(false);
       } catch (error) {
-        console.error("获取数据失败:", error);
+        console.error("Failed to fetch data:", error);
         setLoading(false);
       }
     };
@@ -280,13 +280,13 @@ useEffect(() => {
     if (currentAccount) {
       fetchData();
     } else {
-      // 如果没有账号，短暂延迟后显示
+      // If no account, show after a short delay
       setTimeout(() => setLoading(false), 500);
     }
   }, [currentAccount]);
   const handleBuy = async (itemId, price, seller) => {
   if (seller.toLowerCase() === currentAccount.toLowerCase()) {
-    alert("❌ 无法购买自己上架的太阳能面板");
+    alert("❌ You cannot buy your own listed solar panel");
     return;
   }
 
@@ -307,11 +307,11 @@ useEffect(() => {
     const tx = await shopContract.offerToBuy(itemId);
     await tx.wait();
 
-    alert("✅ 出价成功，等待卖家批准");
+    alert("✅ Offer submitted, waiting for seller approval");
     window.location.reload();
   } catch (err) {
-    console.error("购买失败", err);
-    alert("❌ 购买失败");
+    console.error("Purchase failed", err);
+    alert("❌ Purchase failed");
   }
 };
 
@@ -324,11 +324,11 @@ const cancelListing = async (itemId) => {
     const tx = await shopContract.cancelListing(itemId);
     await tx.wait();
 
-    alert(`✅ 面板 ${itemId} 已下架`);
+    alert(`✅ Panel ${itemId} has been unlisted`);
     window.location.reload();
   } catch (error) {
-    console.error("下架失败:", error);
-    alert("❌ 下架失败");
+    console.error("Unlisting failed:", error);
+    alert("❌ Unlisting failed");
   }
 };
 
@@ -339,10 +339,10 @@ const cancelListing = async (itemId) => {
       const panelContract = new ethers.Contract(solarPanelsContractAddress, SolarPanels.abi, signer);
       const tx = await panelContract.setShopContract(shopContractAddress);
       await tx.wait();
-      alert("✅ 已授权 Shop 合约");
+      alert("✅ Shop contract authorized");
     } catch (e) {
-      console.error("授权失败", e);
-      alert("授权失败");
+      console.error("Authorization failed", e);
+      alert("Authorization failed");
     }
   };
   const approveSale = async (itemId, buyer) => {
@@ -354,11 +354,11 @@ const cancelListing = async (itemId) => {
     const tx = await shop.approveSale(itemId, buyer);
     await tx.wait();
 
-    alert("✅ 成功批准交易！");
+    alert("✅ Sale approved successfully!");
     window.location.reload();
   } catch (e) {
-    console.error("批准失败:", e);
-    alert("❌ 批准失败");
+    console.error("Approval failed:", e);
+    alert("❌ Approval failed");
   }
 };
 
@@ -371,7 +371,7 @@ const cancelListing = async (itemId) => {
       const signer = provider.getSigner();
       const shopContract = new ethers.Contract(shopContractAddress, Shop.abi, signer);
 
-      // 将价格转换为Wei单位
+      // Convert price to Wei
       const priceInWei = ethers.utils.parseEther(listingPrice);
       const tx = await shopContract.listItem(
   selectedPanel.name,
@@ -382,29 +382,29 @@ const cancelListing = async (itemId) => {
   selectedPanel.rawDcPower,
   selectedPanel.rawAcPower,
   selectedPanel.rawCreatedAt,
-  selectedPanel.id  // 注意：你可能需要添加这个字段（时间戳，单位秒）
+  selectedPanel.id  // Note: you may need to add this field (timestamp in seconds)
 );
 
 
 
-      // 显示等待状态
+      // Show waiting state
       setShowModal(false);
       setSelectedPanel(null);
 
-      // 等待交易完成
+      // Wait for transaction completion
       await tx.wait();
 
-      // 更新界面
+      // Update UI
       setMyPanels((prevPanels) =>
         prevPanels.filter(panel => panel.id !== selectedPanel.id)
       );
 
-      // 成功通知
-      alert(`面板 ${selectedPanel.id} 已成功上架，价格为 ${listingPrice} SOLR`);
+      // Success notification
+      alert(`Panel ${selectedPanel.id} listed successfully for ${listingPrice} SOLR`);
       window.location.reload();
     } catch (error) {
-      console.error("上架失败:", error);
-      alert("上架失败，请重试");
+      console.error("Listing failed:", error);
+      alert("Listing failed, please try again");
     } finally {
       setLoading(false);
       setShowModal(false);
@@ -412,7 +412,7 @@ const cancelListing = async (itemId) => {
   };
 
   const allTransactions = [...shopItems];
-    // ✅ 只显示链上未售出的商品
+    // ✅ Only show unsold on-chain items
   const currentTransactions = shopItems.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -431,27 +431,27 @@ const cancelListing = async (itemId) => {
         <div className="trans-header">
           <h1 className="trans-main-title">
             <span className="trans-title-icon">⚡</span>
-            太阳能交易中心
+            Solar Energy Exchange
             <span className="trans-title-accent">SOLAR EXCHANGE</span>
           </h1>
         </div>
         {!isAuthorized && (
   <button className="trans-action-button" onClick={authorizeShopContract}>
-    🔐 授权 Shop 合约控制面板转移
+    🔐 Authorize Shop contract to control panel transfers
   </button>
 )}
 
         <div className="trans-layout">
-          {/* 我的太阳能板区域 */}
+          {/* My solar panels */}
 
           <div className="trans-sidebar">
             <div className="trans-section-card">
               <div className="trans-section-header">
                 <h2 className="trans-section-title">
                   <span className="trans-section-icon">🏠</span>
-                  我的能源设备
+                  My Energy Devices
                 </h2>
-                <div className="trans-panel-count">{myPanels.length} 台设备</div>
+                <div className="trans-panel-count">{myPanels.length} devices</div>
               </div>
 
               <div className="trans-panels-list">
@@ -475,7 +475,7 @@ const cancelListing = async (itemId) => {
 
                       ))}
 
-                      {/* 分页控件 */}
+                      {/* Pagination controls */}
                       {myPanelsTotalPages > 1 && (
                           <div className="trans-pagination">
                             <button
@@ -483,7 +483,7 @@ const cancelListing = async (itemId) => {
                                 disabled={myPanelsPage === 1}
                                 onClick={() => setMyPanelsPage(myPanelsPage - 1)}
                             >
-                              ← 上一页
+                              ← Previous
                             </button>
                             <div className="trans-pagination-info">
                               <span className="trans-current-page">{myPanelsPage}</span>
@@ -495,7 +495,7 @@ const cancelListing = async (itemId) => {
                                 disabled={myPanelsPage === myPanelsTotalPages}
                                 onClick={() => setMyPanelsPage(myPanelsPage + 1)}
                             >
-                              下一页 →
+                              Next →
                             </button>
                           </div>
                       )}
@@ -503,23 +503,23 @@ const cancelListing = async (itemId) => {
                 ) : (
                     <div className="trans-empty-state">
                       <div className="trans-empty-icon">🔋</div>
-                      <p className="trans-empty-text">您还没有太阳能板</p>
-                      <p className="trans-empty-subtext">快去获取您的第一台设备吧！</p>
+                      <p className="trans-empty-text">You don't have any solar panels yet</p>
+                      <p className="trans-empty-subtext">Get your first device now!</p>
                     </div>
                 )}
               </div>
             </div>
           </div>
 
-          {/* 太阳能面板商店区域 */}
+          {/* Solar panel store */}
           <div className="trans-main-content">
             <div className="trans-section-card">
               <div className="trans-section-header">
                 <h2 className="trans-section-title">
                   <span className="trans-section-icon">🛒</span>
-                  能源设备商店
+                  Energy Device Store
                 </h2>
-                <div className="trans-items-count">{allTransactions.length} 件商品</div>
+                <div className="trans-items-count">{allTransactions.length} items</div>
               </div>
 
               {loading ? (
@@ -538,16 +538,16 @@ const cancelListing = async (itemId) => {
 
 
 
-                            {/* 👇 若当前账户是卖家且有 pendingBuyers，则显示审批列表 */}
+                            {/* 👇 If current account is the seller and has pending buyers, show approvals */}
                             {transaction.pendingBuyers?.length > 0 && (
                             <div className="trans-approval-card">
-                              <h4 className="trans-approval-title">📝 待审批买家</h4>
+                              <h4 className="trans-approval-title">📝 Pending buyers</h4>
                               <div className="trans-approval-list">
                                 {transaction.pendingBuyers.map((buyer, idx) => (
                                   <div key={idx} className="trans-approval-entry">
                                     <span className="trans-approval-address">{shortenAddress(buyer)}</span>
                                     <button className="trans-approval-button" onClick={() => approveSale(transaction.id, buyer)}>
-                                      同意交易
+                                      Approve sale
                                     </button>
                                   </div>
                                 ))}
@@ -560,7 +560,7 @@ const cancelListing = async (itemId) => {
                       ))}
                     </div>
 
-                    {/* 商店分页 */}
+                    {/* Store pagination */}
                     {totalPages > 1 && (
                         <div className="trans-pagination trans-shop-pagination">
                           <button
@@ -568,7 +568,7 @@ const cancelListing = async (itemId) => {
                               disabled={currentPage === 1}
                               onClick={() => setCurrentPage(currentPage - 1)}
                           >
-                            ← 上一页
+                            ← Previous
                           </button>
                           <div className="trans-pagination-info">
                             <span className="trans-current-page">{currentPage}</span>
@@ -580,7 +580,7 @@ const cancelListing = async (itemId) => {
                               disabled={currentPage === totalPages}
                               onClick={() => setCurrentPage(currentPage + 1)}
                           >
-                            下一页 →
+                            Next →
                           </button>
                         </div>
                     )}
@@ -591,14 +591,14 @@ const cancelListing = async (itemId) => {
         </div>
       </div>
 
-      {/* 上架确认弹窗 */}
+      {/* Listing confirmation modal */}
       {showModal && selectedPanel && (
           <div className="trans-modal-overlay">
             <div className="trans-modal">
               <div className="trans-modal-header">
                 <h3 className="trans-modal-title">
                   <span className="trans-modal-icon">📈</span>
-                  设备上架出售
+                  List device for sale
                 </h3>
                 <button
                     className="trans-modal-close"
@@ -618,21 +618,21 @@ const cancelListing = async (itemId) => {
                 <div className="trans-modal-specs">
                   <div className="trans-spec-row">
                     <div className="trans-spec-item">
-                      <span className="trans-spec-label">位置</span>
+                      <span className="trans-spec-label">Location</span>
                       <span className="trans-spec-value">{selectedPanel.latitude}°, {selectedPanel.longitude}°</span>
                     </div>
                     <div className="trans-spec-item">
-                      <span className="trans-spec-label">温度</span>
+                      <span className="trans-spec-label">Temperature</span>
                       <span className="trans-spec-value">{selectedPanel.batteryTemp}°C</span>
                     </div>
                   </div>
                   <div className="trans-spec-row">
                     <div className="trans-spec-item">
-                      <span className="trans-spec-label">直流功率</span>
+                      <span className="trans-spec-label">DC Power</span>
                       <span className="trans-spec-value">{selectedPanel.dcPower} W</span>
                     </div>
                     <div className="trans-spec-item">
-                      <span className="trans-spec-label">交流功率</span>
+                      <span className="trans-spec-label">AC Power</span>
                       <span className="trans-spec-value">{selectedPanel.acPower} W</span>
                     </div>
                   </div>
@@ -640,7 +640,7 @@ const cancelListing = async (itemId) => {
               </div>
 
               <div className="trans-price-section">
-                <label className="trans-price-label">设置售价</label>
+                <label className="trans-price-label">Set price</label>
                 <div className="trans-price-input-group">
                   <input
                     type="number"
@@ -648,7 +648,7 @@ const cancelListing = async (itemId) => {
                     step="0.1"
                     value={listingPrice}
                     onChange={(e) => setListingPrice(e.target.value)}
-                    placeholder="输入价格"
+                    placeholder="Enter price"
                     className="trans-price-input"
                   />
                   <span className="trans-price-currency">SOLR</span>
@@ -662,14 +662,14 @@ const cancelListing = async (itemId) => {
                 onClick={listItemOnShop}
               >
                 <span className="trans-btn-icon">✅</span>
-                确认上架
+                Confirm listing
               </button>
               <button
                 className="trans-modal-btn trans-cancel-btn"
                 onClick={() => setShowModal(false)}
               >
                 <span className="trans-btn-icon">❌</span>
-                取消
+                Cancel
               </button>
             </div>
           </div>

@@ -17,7 +17,7 @@ interface ISolarPanels {
     }
 
     function getMyPanels() external view returns (Panel[] memory);
-    function getPanelsOf(address user) external view returns (Panel[] memory); // ✅ 新增函数声明
+    function getPanelsOf(address user) external view returns (Panel[] memory); // ✅ Add function declaration
 }
 
 contract PowerReward {
@@ -52,7 +52,7 @@ contract PowerReward {
         "Can only claim once per hour"
     );
 
-    // ✅ 改这里：用 getPanelsOf(msg.sender) 替代 getMyPanels()
+    // ✅ Change here: use getPanelsOf(msg.sender) instead of getMyPanels()
     ISolarPanels.Panel[] memory panels = solarPanelContract.getPanelsOf(msg.sender);
     require(panels.length > 0, "No panels found");
 
@@ -84,7 +84,7 @@ contract PowerReward {
         );
     }
 
-    // ✅ 使用用户地址获取面板
+    // ✅ Use user address to fetch panels
     function previewReward(address user) external view returns (uint256 estimatedReward) {
         if (block.timestamp - lastClaimedAt[user] < 1 hours) return 0;
 

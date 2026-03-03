@@ -5,9 +5,9 @@ module.exports = {
     "./public/index.html"
   ],
   safelist: [
-    { pattern: /^solar-/ } // 防止自定义类被裁剪
+    { pattern: /^solar-/ } // Prevent custom classes from being purged
   ],
-  darkMode: false, // 可选："media" 或 "class"
+  darkMode: false, // Options: "media" or "class"
 
   theme: {
     fontFamily: {

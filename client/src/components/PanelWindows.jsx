@@ -22,7 +22,7 @@ const PanelWindows = ({ panel, closeWindow }) => {
     setData(null);
 
     try {
-      // 修正异常坐标
+      // Normalize out-of-range coordinates
       let fixedLat = panel.lat;
       let fixedLng = panel.lng;
 
@@ -41,10 +41,10 @@ const PanelWindows = ({ panel, closeWindow }) => {
       if (response.data.status === "success") {
         setData(response.data.data);
       } else {
-        setError("API返回错误: " + response.data.message);
+        setError("API error: " + response.data.message);
       }
     } catch (err) {
-      setError("获取数据失败: " + err.message);
+      setError("Failed to fetch data: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -154,7 +154,7 @@ const PanelWindows = ({ panel, closeWindow }) => {
 
             <span className="control green" onClick={() => setExpanded(!expanded)}></span>
           </div>
-          <h3>太阳能面板信息</h3>
+          <h3>Solar Panel Info</h3>
         </div>
 
         <div className="panel-tabs">
@@ -166,7 +166,7 @@ const PanelWindows = ({ panel, closeWindow }) => {
             }
             }
           >
-            概览
+            Overview
           </button>
           <button
             className={`tab ${activeTab === 'charts' ? 'active' : ''}`}
@@ -176,7 +176,7 @@ const PanelWindows = ({ panel, closeWindow }) => {
           }
             }
           >
-            图表
+            Charts
           </button>
         </div>
 
@@ -187,31 +187,31 @@ const PanelWindows = ({ panel, closeWindow }) => {
                 <div className="stat-card">
                   <div className="stat-icon location-icon"></div>
                   <div className="stat-info">
-                    <h4>位置</h4>
-                    <p>纬度: {fixValue(panel.lat).toFixed(4)}</p>
-                    <p>经度: {fixValue(panel.lng).toFixed(4)}</p>
+                    <h4>Location</h4>
+                    <p>Latitude: {fixValue(panel.lat).toFixed(4)}</p>
+                    <p>Longitude: {fixValue(panel.lng).toFixed(4)}</p>
                   </div>
                 </div>
 
                 <div className="stat-card">
                   <div className="stat-icon power-icon"></div>
                   <div className="stat-info">
-                    <h4>功率</h4>
+                    <h4>Power</h4>
 
-                    <p>直流: <span className="highlight">{fixValue(panel.dcPower).toFixed(2)} W</span></p>
-                    <p>交流: <span className="highlight">{fixValue(panel.acPower).toFixed(2)} W</span></p>
+                    <p>DC: <span className="highlight">{fixValue(panel.dcPower).toFixed(2)} W</span></p>
+                    <p>AC: <span className="highlight">{fixValue(panel.acPower).toFixed(2)} W</span></p>
 
-                    <p>效率: <span className="highlight">{efficiency}%</span></p>
+                    <p>Efficiency: <span className="highlight">{efficiency}%</span></p>
                   </div>
                 </div>
 
                 <div className="stat-card">
                   <div className="stat-icon temp-icon"></div>
                   <div className="stat-info">
-                    <h4>温度</h4>
+                    <h4>Temperature</h4>
                     <p><span className="highlight">{fixValue(panel.batteryTemp)}°C</span></p>
                     <p className={panel.batteryTemp > 40 ? 'warning' : ''}>
-                      {panel.batteryTemp > 40 ? '温度偏高' : '正常范围'}
+                      {panel.batteryTemp > 40 ? 'High temperature' : 'Normal range'}
                     </p>
                   </div>
                 </div>
@@ -219,9 +219,9 @@ const PanelWindows = ({ panel, closeWindow }) => {
                 <div className="stat-card">
                   <div className={`stat-icon ${panel.occupied ? 'occupied-icon' : 'vacant-icon'}`}></div>
                   <div className="stat-info">
-                    <h4>状态</h4>
+                    <h4>Status</h4>
                     <p className={panel.occupied ? 'occupied' : 'vacant'}>
-                      {panel.occupied ? '已占用' : '空闲'}
+                      {panel.occupied ? 'Occupied' : 'Available'}
                     </p>
                   </div>
                 </div>
@@ -231,11 +231,11 @@ const PanelWindows = ({ panel, closeWindow }) => {
 
           {activeTab === 'charts' && (
             <div className="charts-content">
-              {loading && <div className="loading-spinner">加载数据中...</div>}
+              {loading && <div className="loading-spinner">Loading data...</div>}
               {error && <div className="error-message">{error}</div>}
 
               {data && Object.keys(data).length === 0 && (
-                <div className="no-data">无可用数据</div>
+                <div className="no-data">No data available</div>
               )}
 
               {data && Object.keys(data).map((key) => (

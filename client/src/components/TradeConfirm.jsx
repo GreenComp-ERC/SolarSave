@@ -1,4 +1,4 @@
-// SolarSave 交易脚本 - 中文化版本
+// SolarSave trade script
 
 import React, { useEffect, useState } from "react";
 import { SiEthereum } from "react-icons/si";
@@ -8,10 +8,10 @@ import { ethers } from "ethers";
 // import SolarPanels from "../utils/SolarPanels.json";
 import "../style/TradeConfirm.css";
 import SolarPanels from "../utils/test/SolarPanels.json";
-// const contractAddress = "0xF18dcE37a1736D18D2734c5611EE9433d8D9c2F2"; // 太阳能板合约地址
-const tokenAddress = "0x175da7583f3b085ac4Ab87AEd758c6Cd11A8b81e"; // ERC20 代币合约地址
-const recipientAddress = "0xf5CcA82D37db8d2B0503c20f0f21A3a8eD25F4E9"; // 资金接收地址
-const fixedPrice = ethers.utils.parseUnits("2", 18); // 2 ERC20 代币
+// const contractAddress = "0xF18dcE37a1736D18D2734c5611EE9433d8D9c2F2"; // Solar panel contract address
+const tokenAddress = "0x175da7583f3b085ac4Ab87AEd758c6Cd11A8b81e"; // ERC20 token contract address
+const recipientAddress = "0xf5CcA82D37db8d2B0503c20f0f21A3a8eD25F4E9"; // Funds recipient address
+const fixedPrice = ethers.utils.parseUnits("2", 18); // 2 ERC20 tokens
 const contractAddress = "0x39Cb00Cf33827D78892b1c83aF166CB7c4FCB3C0";
 const TradeConfirm = ({ close, lat, lng, batterTemp, dcPower, acPower, sandiaModuleName, cecInverterName }) => {
   const [provider, setProvider] = useState(null);
@@ -37,41 +37,41 @@ const TradeConfirm = ({ close, lat, lng, batterTemp, dcPower, acPower, sandiaMod
   const handleSubmit = async () => {
     if (!contract || !tokenContract || !signer) return;
     if (currentAccount && currentAccount.toLowerCase() === recipientAddress.toLowerCase()) {
-    alert("不能将面板注册给接收地址自己！");
+    alert("You cannot register a panel to the recipient address itself!");
     return;
   }
     setIsProcessing(true);
-    setTransactionStatus("正在初始化交易...");
+    setTransactionStatus("Initializing transaction...");
 
     try {
       const intLat = Math.floor(lat * 10000);
       const intLng = Math.floor(lng * 10000);
-      //   Math.round(lat * 10000), // 转换为整数以适应合约
+      //   Math.round(lat * 10000), // Convert to integers to fit contract
         //   Math.round(lng * 10000),
       const intbatteryTemp = Math.floor(batterTemp * 10000);
       const intdcpower = Math.max(0,Math.floor(dcPower * 10000));
       const intacpower = Math.max(0,Math.floor(acPower * 10000));
 
 
-      setTransactionStatus("正在发送 SOLR 代币...");
+      setTransactionStatus("Sending SOLR tokens...");
       const approvalTx = await tokenContract.transfer(recipientAddress, fixedPrice);
       await approvalTx.wait();
 
 
 
-      setTransactionStatus("正在注册太阳能面板...");
+      setTransactionStatus("Registering solar panel...");
       const tx = await contract.createPanel(intLat, intLng, intbatteryTemp, intdcpower, intacpower);
       await tx.wait();
 
-      setTransactionStatus("交易成功完成！");
+      setTransactionStatus("Transaction completed successfully!");
 
       setTimeout(() => {
-        close(); // 关闭弹窗
+        close(); // Close modal
       }, 1500);
 
     } catch (error) {
-      console.error("交易失败:", error);
-      setTransactionStatus("交易失败，请重试。");
+      console.error("Transaction failed:", error);
+      setTransactionStatus("Transaction failed, please try again.");
     } finally {
       setIsProcessing(false);
     }
@@ -86,7 +86,7 @@ const TradeConfirm = ({ close, lat, lng, batterTemp, dcPower, acPower, sandiaMod
     <div className="trade-modal-overlay">
       <div className="trade-modal-content">
         <div className="trade-modal-header">
-          <h2 className="trade-modal-title">注册太阳能面板</h2>
+          <h2 className="trade-modal-title">Register Solar Panel</h2>
           <button onClick={close} className="trade-close-button">×</button>
         </div>
 
@@ -99,7 +99,7 @@ const TradeConfirm = ({ close, lat, lng, batterTemp, dcPower, acPower, sandiaMod
           </div>
           <div className="trade-wallet-details">
             <p className="trade-wallet-address">{formatAddress(currentAccount)}</p>
-            <p className="trade-wallet-network">以太坊网络</p>
+            <p className="trade-wallet-network">Ethereum Network</p>
           </div>
           <div className="trade-wallet-glow"></div>
         </div>
@@ -107,36 +107,36 @@ const TradeConfirm = ({ close, lat, lng, batterTemp, dcPower, acPower, sandiaMod
         <div className="trade-panel-details">
           <h3 className="trade-section-title">
             <FaSolarPanel className="trade-section-icon"/>
-            面板信息
+            Panel Details
           </h3>
 
           <div className="trade-panel-specs">
-            {/* 地理位置 */}
+            {/* Location */}
             <div className="trade-spec-item">
               <FaLocationArrow className="trade-spec-icon"/>
               <div className="trade-spec-content">
-                <p className="trade-spec-label">地理位置</p>
-                <p className="trade-spec-value">纬度: {Math.floor(lat)}°</p>
-                <p className="trade-spec-value">经度: {Math.floor(lng)}°</p>
+                <p className="trade-spec-label">Location</p>
+                <p className="trade-spec-value">Latitude: {Math.floor(lat)}°</p>
+                <p className="trade-spec-value">Longitude: {Math.floor(lng)}°</p>
               </div>
             </div>
 
-            {/* 实时预测数据 */}
+            {/* Live data */}
             <div className="trade-spec-item">
               <FaWhmcs className="trade-spec-icon"/>
               <div className="trade-spec-content">
-                <p className="trade-spec-label">实时数据</p>
-                <p className="trade-spec-value">电池温度: {batterTemp}°C</p>
-                <p className="trade-spec-value">直流功率: {dcPower} W</p>
-                <p className="trade-spec-value">交流功率: {acPower} W</p>
+                <p className="trade-spec-label">Live Data</p>
+                <p className="trade-spec-value">Battery Temp: {batterTemp}°C</p>
+                <p className="trade-spec-value">DC Power: {dcPower} W</p>
+                <p className="trade-spec-value">AC Power: {acPower} W</p>
               </div>
             </div>
 
-            {/* 面板组件信息 */}
+            {/* Panel components */}
             <div className="trade-spec-item">
               <BsLightningChargeFill className="trade-spec-icon"/>
               <div className="trade-spec-content">
-                <p className="trade-spec-label">面板组件</p>
+                <p className="trade-spec-label">Panel Components</p>
                 <p className="trade-spec-value">{sandiaModuleName}</p>
                 <p className="trade-spec-value">{cecInverterName}</p>
               </div>
@@ -149,7 +149,7 @@ const TradeConfirm = ({ close, lat, lng, batterTemp, dcPower, acPower, sandiaMod
       <div className="trade-payment-section">
         <div className="trade-price-tag">
           <span className="trade-price-amount">2 SOLR</span>
-          <span className="trade-price-label">固定价格</span>
+          <span className="trade-price-label">Fixed price</span>
         </div>
 
         <button
@@ -161,13 +161,13 @@ const TradeConfirm = ({ close, lat, lng, batterTemp, dcPower, acPower, sandiaMod
           {isProcessing ? (
               <span className="trade-processing-text">{transactionStatus}</span>
           ) : (
-              <span>注册并支付</span>
+              <span>Register and Pay</span>
           )}
           <span className="trade-button-glow"></span>
         </button>
 
         {!currentAccount && (
-            <p className="trade-wallet-warning">请先连接您的钱包</p>
+            <p className="trade-wallet-warning">Please connect your wallet first</p>
         )}
       </div>
     </div>

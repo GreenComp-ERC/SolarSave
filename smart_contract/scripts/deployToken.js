@@ -2,11 +2,11 @@ const { ethers } = require("hardhat");
 
 async function main() {
     const SolarToken = await ethers.getContractFactory("SolarToken");
-    const token = await SolarToken.deploy(); // ⚠ 确保这里是 `deploy()`，没有参数
+    const token = await SolarToken.deploy(); // ⚠ Ensure this is `deploy()` with no args
 
-    await token.waitForDeployment(); // ⚠ 使用 `waitForDeployment()` 代替 `deployed()`
+    await token.waitForDeployment(); // ⚠ Use `waitForDeployment()` instead of `deployed()`
 
-    console.log(`🚀 SolarToken 部署成功！合约地址: ${token.target}`);
+    console.log(`🚀 SolarToken deployed successfully! Contract address: ${token.target}`);
 }
 
 main().catch((error) => {

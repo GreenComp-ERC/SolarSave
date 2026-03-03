@@ -1,76 +1,76 @@
 # SolarPVModel FastAPI
 
-`SolarPVModel FastAPI` 是基于 `FastAPI` 的 API 服务，提供太阳能光伏系统模拟和输出计算功能。通过集成 `SolarPVModel` 类和 OpenWeather API，支持对单个和多个地点的太阳能输出进行实时建模和分析。
-该库用于模拟实际太阳能板的运作
+`SolarPVModel FastAPI` is a FastAPI-based API service that provides solar PV system simulation and output calculations. By integrating the `SolarPVModel` class and the OpenWeather API, it supports real-time modeling and analysis of solar output for single and multiple locations.
+This library is used to simulate the operation of real solar panels.
 
 ---
 
-## 功能特点
+## Features
 
-- **单地点建模**：计算单个位置的太阳能光伏系统输出。
-- **多地点建模**：聚合多个地点的太阳能输出。
-- **实时天气数据集成**：获取实时天气数据，优化系统建模。
-- **高性能 REST API**：基于 FastAPI 框架，支持快速请求处理。
-
----
-
-## 环境要求
-
-- Python 3.8 及以上版本
-- OpenWeather API 密钥（放置于 `.env` 文件中）
-- 依赖库见 `requirements.txt`
+- **Single-location modeling**: Compute solar PV output for one location.
+- **Multi-location modeling**: Aggregate solar output across multiple locations.
+- **Real-time weather data integration**: Fetch live weather data to improve modeling.
+- **High-performance REST API**: FastAPI-based for fast request handling.
 
 ---
 
-## 安装步骤
+## Requirements
 
-1. 克隆此仓库：
+- Python 3.8 or later
+- OpenWeather API key (place it in the `.env` file)
+- Dependencies listed in `requirements.txt`
+
+---
+
+## Installation
+
+1. Clone this repository:
 
     ```bash
-    git clone <仓库地址>
-    cd <仓库目录>
+    git clone <repository-url>
+    cd <repository-dir>
     ```
 
-2. 安装依赖：
+2. Install dependencies:
 
     ```bash
     pip install -r requirements.txt
     ```
 
-3. 配置环境变量：
-    - 在项目根目录下创建 `.env` 文件，添加以下内容：
+3. Configure environment variables:
+    - Create a `.env` file in the project root and add the following:
     ```env
-    API_KEY=<你的_openweather_api_key>
+    API_KEY=<your_openweather_api_key>
     ```
 
-4. 启动 API 服务：
-    - 使用以下命令运行服务：
+4. Start the API service:
+    - Run the service with:
     ```bash
     uvicorn main:app --host 127.0.0.1 --port 8000 --reload
     ```
 
 ---
 
-## 使用方法
+## Usage
 
-### 可用接口
+### Available Endpoints
 
-#### 1. 根路径测试
-- **路径**：`/`
-- **方法**：`GET`
-- **功能**：测试 API 是否正常运行。
-- **示例响应**：
+#### 1. Root Path Test
+- **Path**: `/`
+- **Method**: `GET`
+- **Purpose**: Check whether the API is running.
+- **Example response**:
     ```json
     {
         "message": "SolarPVModel API is running!"
     }
     ```
 
-#### 2. 单地点建模
-- **路径**：`/run_model/`
-- **方法**：`POST`
-- **功能**：计算单个地点的太阳能光伏系统输出。
-- **请求体**：
+#### 2. Single-Location Modeling
+- **Path**: `/run_model/`
+- **Method**: `POST`
+- **Purpose**: Compute solar PV output for a single location.
+- **Request body**:
     ```json
     {
         "lat": 45.739,
@@ -80,7 +80,7 @@
         "freq": "60min"
     }
     ```
-- **示例响应**：
+- **Example response**:
     ```json
     {
         "status": "success",
@@ -93,11 +93,11 @@
     }
     ```
 
-#### 3. 多地点建模
-- **路径**：`/run_combined_model/`
-- **方法**：`POST`
-- **功能**：计算多个地点的太阳能光伏系统聚合输出。
-- **请求体**：
+#### 3. Multi-Location Modeling
+- **Path**: `/run_combined_model/`
+- **Method**: `POST`
+- **Purpose**: Compute aggregated solar PV output for multiple locations.
+- **Request body**:
     ```json
     {
         "coordinates": [
@@ -109,7 +109,7 @@
         "freq": "60min"
     }
     ```
-- **示例响应**：
+- **Example response**:
     ```json
     {
         "status": "success",

@@ -34,23 +34,23 @@ const Shop = () => {
   try {
     const tx = await panelContract.setShopContract(shopAddress);
     await tx.wait();
-    setIsAuthorized(true); // ✅ 授权成功后记录状态
-    alert("✅ 授权成功：Shop 合约已获得转移面板权限");
+    setIsAuthorized(true); // ✅ Record authorized state
+    alert("✅ Authorized: Shop contract can now transfer panels");
   } catch (error) {
-    console.error("授权失败：", error);
-    alert("❌ 授权失败，可能已设置或无权限");
+    console.error("Authorization failed:", error);
+    alert("❌ Authorization failed. It may already be set or you lack permission");
   }
 };
 
 
   const connectWallet = async () => {
-  if (!window.ethereum) return alert("请安装 MetaMask");
+  if (!window.ethereum) return alert("Please install MetaMask");
 
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const signer = provider.getSigner();
   const accounts = await provider.send("eth_requestAccounts", []);
 
-  // ✅ 确保先拿到账户再统一格式
+  // ✅ Ensure account is fetched before normalization
   const normalizedAccount = ethers.utils.getAddress(accounts[0]);
   setAccount(normalizedAccount);
 
@@ -102,7 +102,7 @@ const Shop = () => {
       }));
       setMyPanels(parsed);
     } catch (err) {
-      console.error("获取面板失败", err);
+      console.error("Failed to fetch panels", err);
     }
   };
 
@@ -112,15 +112,15 @@ const Shop = () => {
       const history = await shop.getPurchaseHistory(userAddress);
       setPurchaseHistory(history);
     } catch (e) {
-      console.error("获取购买记录失败", e);
+      console.error("Failed to fetch purchase history", e);
     }
   };
 
   const listItem = async () => {
     try {
       const panel = myPanels.find(p => p.id === newItem.panelId);
-      if (!panel) return alert("未找到对应面板信息");
-      if (!newItem.name || !newItem.price) return alert("请输入名称和价格");
+      if (!panel) return alert("Panel info not found");
+      if (!newItem.name || !newItem.price) return alert("Please enter a name and price");
 
       const tx = await shopContract.listItem(
         newItem.name,
@@ -134,11 +134,11 @@ const Shop = () => {
         panel.id
       );
       await tx.wait();
-      alert("上架成功");
+      alert("Listed successfully");
       fetchItems();
     } catch (e) {
-      console.error("上架失败", e);
-      alert("上架失败");
+      console.error("Listing failed", e);
+      alert("Listing failed");
     }
   };
 
@@ -152,16 +152,16 @@ const Shop = () => {
 
     const tx = await shopContract.offerToBuy(id);
     await tx.wait();
-    alert("出价成功，等待卖家批准");
-    fetchItems(); // 刷新状态
+    alert("Offer submitted, waiting for seller approval");
+    fetchItems(); // Refresh state
   } catch (e) {
-    console.error("出价失败", e);
-    alert("出价失败");
+    console.error("Offer failed", e);
+    alert("Offer failed");
   }
 };
 const approveSale = async (id, buyer) => {
   if (!isAuthorized) {
-  alert("⚠️ 尚未授权 Shop 合约控制权，请先点击上方按钮进行授权");
+  alert("⚠️ Shop contract not authorized. Please authorize using the button above");
   return;
 }
 
@@ -169,85 +169,85 @@ const approveSale = async (id, buyer) => {
     const item = items.find(it => it.id.toString() === id.toString());
     const [realOwner] = await panelContract.getPanel(item.panelId);
 
-    // 使用 ethers.getAddress 标准化地址，解决大小写不一致问题
+    // Normalize addresses with ethers.getAddress to avoid casing issues
     const normalizedAccount = ethers.utils.getAddress(account);
     const normalizedOwner = ethers.utils.getAddress(realOwner);
 
-    console.log("✅ 当前链上面板所有者:", normalizedOwner);
-    console.log("✅ 当前账户:", normalizedAccount);
-    console.log("✅ 商品卖家 seller:", item.seller);
+    console.log("✅ On-chain panel owner:", normalizedOwner);
+    console.log("✅ Current account:", normalizedAccount);
+    console.log("✅ Item seller:", item.seller);
 
     if (normalizedOwner !== normalizedAccount) {
-      alert("你不是该面板的实际拥有者，无法批准交易！");
+      alert("You are not the actual owner of this panel and cannot approve the sale!");
       return;
     }
 
     const tx = await shopContract.approveSale(id, buyer);
     await tx.wait();
 
-    alert(`交易成功：面板转移给 ${buyer}`);
+    alert(`Sale approved: panel transferred to ${buyer}`);
     fetchItems();
     fetchMyPurchases(shopContract, normalizedAccount);
   } catch (e) {
-    console.error("批准失败", e);
-    alert("批准失败");
+    console.error("Approval failed", e);
+    alert("Approval failed");
   }
 };
 
   return (
       <div className="panel-container">
-        <h2>🛒 Shop 合约测试面板</h2>
-        <p>当前账户: {account}</p>
+        <h2>🛒 Shop Contract Test Panel</h2>
+        <p>Current account: {account}</p>
         {!isAuthorized && (
   <button className="button" onClick={authorizeShopContract}>
-    🔐 授权 Shop 合约控制面板转移
+    🔐 Authorize Shop contract to transfer panels
   </button>
 )}
 
 
         <div className="panel-card">
-          <h3>上架我的太阳能板</h3>
-          {myPanels.length === 0 ? <p>无面板可上架</p> : myPanels.map((panel, idx) => (
+          <h3>List my solar panels</h3>
+          {myPanels.length === 0 ? <p>No panels to list</p> : myPanels.map((panel, idx) => (
               <div key={idx} className="panel-item">
-                <p>面板ID: {panel.id}</p>
-                <p>位置: ({panel.latitude}, {panel.longitude})</p>
-                <p>功率: AC {panel.acPower}W / DC {panel.dcPower}W</p>
-                <input type="text" style={{color: "black"}} placeholder="商品名"
+                  <p>Panel ID: {panel.id}</p>
+                  <p>Location: ({panel.latitude}, {panel.longitude})</p>
+                  <p>Power: AC {panel.acPower}W / DC {panel.dcPower}W</p>
+                  <input type="text" style={{color: "black"}} placeholder="Item name"
                        onChange={(e) => setNewItem({...newItem, name: e.target.value, panelId: panel.id})}/>
-                <input type="number" style={{color: "black"}} placeholder="价格 (Token)"
+                  <input type="number" style={{color: "black"}} placeholder="Price (Token)"
                        onChange={(e) => setNewItem({...newItem, price: e.target.value})}/>
-                <button className="button" onClick={listItem}>上架该面板</button>
+                  <button className="button" onClick={listItem}>List this panel</button>
               </div>
           ))}
         </div>
 
         <div className="panel-card">
-          <h3>📦 所有商品</h3>
+          <h3>📦 All items</h3>
           {items.filter(item => !item.purchased).map((item, idx) => (
               <div key={idx} className="panel-item">
                 <p>ID: {item.id?.toString?.() ?? "-"} - {item.name}</p>
-                <p>价格: {item.price?.toString?.() ?? "-"} Token</p>
-                <p>位置: ({item.latitude?.toString?.() ?? "-"}, {item.longitude?.toString?.() ?? "-"})</p>
-                <p>功率: 🔌 AC {item.acPower?.toString?.() ?? "-"}W, ⚡ DC {item.dcPower?.toString?.() ?? "-"}W</p>
-                <p>状态: {item.purchased ? "✅ 已售出" : "🟠 待售"}</p>
+                <p>Price: {item.price?.toString?.() ?? "-"} Token</p>
+                <p>Location: ({item.latitude?.toString?.() ?? "-"}, {item.longitude?.toString?.() ?? "-"})</p>
+                <p>Power: 🔌 AC {item.acPower?.toString?.() ?? "-"}W, ⚡ DC {item.dcPower?.toString?.() ?? "-"}W</p>
+                <p>Status: {item.purchased ? "✅ Sold" : "🟠 For sale"}</p>
 
                 {!item.purchased && (
                     <>
-                      {/* 出价按钮（买家可见） */}
+                      {/* Offer button (buyer view) */}
                       {!isAuthorized && (
                       <button className="button" onClick={authorizeShopContract}>
-                        🔐 授权 Shop 合约控制面板转移
+                        🔐 Authorize Shop contract to transfer panels
                       </button>
                     )}
 
 
-                      {/* 当前用户是卖家时，显示待批准买家列表 */}
+                      {/* If current user is the seller, show pending buyers */}
                       {ethers.utils.getAddress(item.seller) === ethers.utils.getAddress(account) && (
 
                           <div style={{marginTop: "10px"}}>
-                            <p>📝 待审批买家：</p>
+                            <p>📝 Pending buyers:</p>
                             {item.pendingBuyers?.length === 0 ? (
-                                <p>暂无申请</p>
+                                <p>No requests</p>
                             ) : (
                                 <ul>
                                   {item.pendingBuyers.map((buyer, i) => (
@@ -258,7 +258,7 @@ const approveSale = async (id, buyer) => {
                                             style={{marginLeft: "10px"}}
                                             onClick={() => approveSale(item.id, buyer)}
                                         >
-                                          同意交易
+                                          Approve sale
                                         </button>
                                       </li>
                                   ))}
@@ -274,12 +274,12 @@ const approveSale = async (id, buyer) => {
 
 
         <div className="panel-card">
-          <h3>🧾 我的购买记录</h3>
-          {purchaseHistory.length === 0 ? <p>暂无记录</p> : purchaseHistory.map((p, i) => (
+          <h3>🧾 My purchase history</h3>
+          {purchaseHistory.length === 0 ? <p>No records</p> : purchaseHistory.map((p, i) => (
               <div key={i} className="panel-item">
-                <p>面板 ID: {p.itemId?.toString?.() ?? "-"}</p>
-                <p>价格: {p.price?.toString?.() ?? "-"} Token</p>
-                <p>时间: {new Date(p.timestamp?.toNumber?.() * 1000).toLocaleString()}</p>
+                <p>Panel ID: {p.itemId?.toString?.() ?? "-"}</p>
+                <p>Price: {p.price?.toString?.() ?? "-"} Token</p>
+                <p>Time: {new Date(p.timestamp?.toNumber?.() * 1000).toLocaleString()}</p>
               </div>
           ))}
         </div>

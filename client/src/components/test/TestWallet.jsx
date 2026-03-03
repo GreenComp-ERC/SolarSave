@@ -3,7 +3,7 @@ import { Sun, Send, Wallet as WalletIcon, Loader, Copy, Check } from "lucide-rea
 import { ethers } from "ethers";
 import '../../style/Wallet.css';
 
-// 模拟 ethers 以便在示例中显示
+// Mock ethers for demo display
 const mockEthers = {
   providers: {
     Web3Provider: class {
@@ -19,7 +19,7 @@ const mockEthers = {
 
 };
 
-// 在实际应用中使用 ethers 而不是 mockEthers
+// Use ethers in production instead of mockEthers
 
 
 const SOLAR_TOKEN_ADDRESS = "0x175da7583f3b085ac4Ab87AEd758c6Cd11A8b81e";
@@ -65,7 +65,7 @@ const TestWallet = () => {
     setIsConnecting(true);
     try {
       if (!window.ethereum) {
-        alert("请安装 MetaMask!");
+        alert("Please install MetaMask!");
         return;
       }
       const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -81,7 +81,7 @@ const TestWallet = () => {
 
 
     } catch (error) {
-      console.error("连接钱包失败:", error);
+      console.error("Failed to connect wallet:", error);
     } finally {
       setIsConnecting(false);
     }
@@ -93,17 +93,17 @@ const TestWallet = () => {
       const balance = await contract.balanceOf(address);
       setBalance(ethers.utils.formatEther(balance));
     } catch (error) {
-      console.error("获取余额失败:", error);
+      console.error("Failed to fetch balance:", error);
     }
   };
 
   const sendToken = async () => {
     if (!recipient || !amount) {
-      alert("请输入接收地址和金额");
+      alert("Please enter a recipient address and amount");
       return;
     }
     if (!ethers.utils.isAddress(recipient)) {
-      alert("无效的钱包地址");
+      alert("Invalid wallet address");
       return;
     }
 
@@ -116,7 +116,7 @@ const TestWallet = () => {
       const tx = await contract.transfer(recipient, ethers.utils.parseEther(amount));
       await tx.wait();
 
-      // 更新交易历史
+      // Update transaction history
       setTxHistory([
         {
           recipient,
@@ -126,25 +126,25 @@ const TestWallet = () => {
         ...txHistory
       ]);
 
-      // 清空输入字段
+      // Clear input fields
       setRecipient("");
       setAmount("");
 
-      // 更新余额
+      // Update balance
       fetchBalance(account, provider);
     } catch (error) {
-      console.error("转账失败:", error);
+      console.error("Transfer failed:", error);
     } finally {
       setIsLoading(false);
     }
   };
   const mintToken = async () => {
   if (!mintAddress || !mintAmount) {
-    alert("请输入地址和数量");
+    alert("Please enter an address and amount");
     return;
   }
   if (!ethers.utils.isAddress(mintAddress)) {
-    alert("无效地址");
+    alert("Invalid address");
     return;
   }
 
@@ -157,18 +157,18 @@ const TestWallet = () => {
     const tx = await contract.mint(mintAddress, ethers.utils.parseEther(mintAmount));
     await tx.wait();
 
-    alert("铸币成功！");
+    alert("Mint successful!");
     fetchBalance(account, provider);
   } catch (err) {
-    console.error("铸币失败:", err);
-    alert("铸币失败，可能不是合约 owner");
+    console.error("Mint failed:", err);
+    alert("Mint failed, you may not be the contract owner");
   } finally {
     setIsMinting(false);
   }
 };
 
 
-  // 地址格式化
+  // Address formatting
   const formatAddress = (addr) => {
     if (!addr) return "";
     return `${addr.substring(0, 6)}...${addr.substring(addr.length - 4)}`;
@@ -176,29 +176,29 @@ const TestWallet = () => {
 
   return (
     <div className="wallet-container">
-      {/* 标题区域 */}
+      {/* Header */}
       <div className="wallet-header">
         <Sun className="wallet-sun-icon" />
         <h1 className="wallet-title">
-          SolarToken 钱包
+          SolarToken Wallet
         </h1>
       </div>
 
-      {/* 账户信息 */}
+      {/* Account info */}
       <div className="wallet-content">
         {account ? (
           <div className="wallet-account-info">
             <div className="wallet-connection-status">
               <div className="wallet-status-indicator">
                 <div className="wallet-status-dot"></div>
-                <span className="wallet-status-text">已连接</span>
+                <span className="wallet-status-text">Connected</span>
               </div>
               <button
                 onClick={copyToClipboard}
                 className="wallet-copy-btn"
               >
                 {isCopied ? <Check size={14} className="wallet-copy-icon" /> : <Copy size={14} className="wallet-copy-icon" />}
-                {isCopied ? "已复制" : "复制地址"}
+                {isCopied ? "Copied" : "Copy address"}
               </button>
             </div>
 
@@ -207,7 +207,7 @@ const TestWallet = () => {
             </div>
 
             <div className="wallet-balance">
-              <span className="wallet-balance-label">SOLR 余额:</span>
+              <span className="wallet-balance-label">SOLR Balance:</span>
               <div className="wallet-balance-value">
                 <Sun className="wallet-balance-icon" />
                 <span className="wallet-balance-amount">{balance}</span>
@@ -225,17 +225,17 @@ const TestWallet = () => {
             ) : (
               <WalletIcon className="wallet-btn-icon" />
             )}
-            {isConnecting ? "连接中..." : "连接钱包"}
+            {isConnecting ? "Connecting..." : "Connect Wallet"}
           </button>
         )}
       </div>
-      {/* 铸币区域（仅管理员可用） */}
+      {/* Minting section (admin only) */}
     {account && isOwner &&(
       <div className="wallet-transfer-section">
-        <h2 className="wallet-section-title">铸造 SOLR（管理员）</h2>
+        <h2 className="wallet-section-title">Mint SOLR (Admin)</h2>
         <div className="wallet-form">
           <div className="wallet-input-group">
-            <label className="wallet-label">接收地址</label>
+            <label className="wallet-label">Recipient address</label>
             <input
               type="text"
               value={mintAddress}
@@ -246,7 +246,7 @@ const TestWallet = () => {
           </div>
 
           <div className="wallet-input-group">
-            <label className="wallet-label">数量</label>
+            <label className="wallet-label">Amount</label>
             <div className="wallet-amount-input">
               <input
                 type="number"
@@ -269,21 +269,21 @@ const TestWallet = () => {
             ) : (
               <Send className="wallet-btn-icon" />
             )}
-            {isMinting ? "铸造中..." : "铸造 SOLR"}
+            {isMinting ? "Minting..." : "Mint SOLR"}
           </button>
         </div>
       </div>
     )}
 
 
-      {/* 转账区域 */}
+      {/* Transfer */}
       {account && (
         <div className="wallet-transfer-section">
-          <h2 className="wallet-section-title">发送 SOLR</h2>
+          <h2 className="wallet-section-title">Send SOLR</h2>
 
           <div className="wallet-form">
             <div className="wallet-input-group">
-              <label className="wallet-label">接收地址</label>
+              <label className="wallet-label">Recipient address</label>
               <input
                 type="text"
                 value={recipient}
@@ -294,7 +294,7 @@ const TestWallet = () => {
             </div>
 
             <div className="wallet-input-group">
-              <label className="wallet-label">数量</label>
+              <label className="wallet-label">Amount</label>
               <div className="wallet-amount-input">
                 <input
                   type="number"
@@ -317,16 +317,16 @@ const TestWallet = () => {
               ) : (
                 <Send className="wallet-btn-icon" />
               )}
-              {isLoading ? "处理中..." : "发送 SOLR"}
+              {isLoading ? "Processing..." : "Send SOLR"}
             </button>
           </div>
         </div>
       )}
 
-      {/* 交易历史 */}
+      {/* Transaction history */}
       {account && txHistory.length > 0 && (
         <div className="wallet-history-section">
-          <h2 className="wallet-section-title">最近交易</h2>
+          <h2 className="wallet-section-title">Recent Transactions</h2>
           <div className="wallet-history-list">
             {txHistory.map((tx, index) => (
               <div key={index} className="wallet-history-item">
@@ -335,7 +335,7 @@ const TestWallet = () => {
                   <span className="wallet-history-amount">{tx.amount} SOLR</span>
                 </div>
                 <div className="wallet-history-address">
-                  发送至: {formatAddress(tx.recipient)}
+                  Sent to: {formatAddress(tx.recipient)}
                 </div>
               </div>
             ))}

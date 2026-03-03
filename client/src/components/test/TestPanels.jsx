@@ -3,7 +3,7 @@ import { ethers } from "ethers";
 import SolarPanels from "../../utils/test/SolarPanels.json";
 import "../../style/TestPanels.css";
 
-const contractAddress = "0x39Cb00Cf33827D78892b1c83aF166CB7c4FCB3C0"; // 你的 SolarPanels 合约地址
+const contractAddress = "0x39Cb00Cf33827D78892b1c83aF166CB7c4FCB3C0"; // Your SolarPanels contract address
 
 const TestPanels = () => {
     const [contract, setContract] = useState(null);
@@ -29,7 +29,7 @@ const TestPanels = () => {
 
     const connectWallet = async () => {
         if (!window.ethereum) {
-            alert("请安装 MetaMask!");
+            alert("Please install MetaMask!");
             return;
         }
 
@@ -46,7 +46,7 @@ const TestPanels = () => {
     };
 
     const createPanel = async () => {
-        if (!contract) return alert("未连接合约");
+        if (!contract) return alert("Contract not connected");
 
         try {
             const tx = await contract.createPanel(
@@ -57,12 +57,12 @@ const TestPanels = () => {
                 newPanel.acPower
             );
             await tx.wait();
-            alert("🌞 太阳能板创建成功!");
+            alert("🌞 Solar panel created!");
             fetchPanels(contract);
             fetchMyPanels(contract);
         } catch (error) {
-            console.error("创建失败:", error);
-            alert("❌ 太阳能板创建失败！");
+            console.error("Creation failed:", error);
+            alert("❌ Solar panel creation failed!");
         }
     };
 
@@ -72,7 +72,7 @@ const TestPanels = () => {
             const allPanels = await contractInstance.getAllPanels();
             setPanels(allPanels);
         } catch (error) {
-            console.error("❌ 获取所有太阳能板失败:", error);
+            console.error("❌ Failed to fetch all solar panels:", error);
         }
     };
 
@@ -82,103 +82,103 @@ const TestPanels = () => {
             const myPanelsData = await contractInstance.getMyPanels();
             setMyPanels(myPanelsData);
         } catch (error) {
-            console.error("❌ 获取用户太阳能板失败:", error);
+            console.error("❌ Failed to fetch user solar panels:", error);
         }
     };
 
     const updatePanel = async (id, batteryTemp, dcPower, acPower) => {
-        if (!contract) return alert("未连接合约");
+        if (!contract) return alert("Contract not connected");
 
         try {
             const tx = await contract.updatePanel(id, batteryTemp, dcPower, acPower);
             await tx.wait();
-            alert("✅ 面板更新成功!");
+            alert("✅ Panel updated!");
             fetchPanels();
             fetchMyPanels();
         } catch (error) {
-            console.error("❌ 面板更新失败:", error);
-            alert("更新失败！");
+            console.error("❌ Panel update failed:", error);
+            alert("Update failed!");
         }
     };
 
     const transferPanel = async () => {
-        if (!contract) return alert("未连接合约");
+        if (!contract) return alert("Contract not connected");
 
         try {
             const tx = await contract.transferPanelOwnership(transfer.panelId, transfer.newOwner);
             await tx.wait();
-            alert("✅ 面板转让成功!");
+            alert("✅ Panel transfer successful!");
             fetchPanels();
             fetchMyPanels();
         } catch (error) {
-            console.error("❌ 面板转让失败:", error);
-            alert("转让失败！");
+            console.error("❌ Panel transfer failed:", error);
+            alert("Transfer failed!");
         }
     };
 
     return (
         <div className="panel-container">
-            <h2>🌞 SolarPanels 测试 DApp</h2>
-            <p className="account-text">🟢 当前账户: {account}</p>
+            <h2>🌞 SolarPanels Test DApp</h2>
+            <p className="account-text">🟢 Current account: {account}</p>
 
-            {/* 创建 */}
+            {/* Create */}
             <div className="panel-card">
-                <h3>创建太阳能板</h3>
-                <input type="number" style={{ color: "black" }} placeholder="纬度" onChange={(e) => setNewPanel({ ...newPanel, lat: e.target.value })} />
-                <input type="number" style={{ color: "black" }} placeholder="经度" onChange={(e) => setNewPanel({ ...newPanel, lng: e.target.value })} />
-                <input type="number" style={{ color: "black" }} placeholder="电池温度 (°C)" value={newPanel.batteryTemp} onChange={(e) => setNewPanel({ ...newPanel, batteryTemp: e.target.value })} />
-                <input type="number" style={{ color: "black" }} placeholder="直流功率 (W)" value={newPanel.dcPower} onChange={(e) => setNewPanel({ ...newPanel, dcPower: e.target.value })} />
-                <input type="number" style={{ color: "black" }} placeholder="交流功率 (W)" value={newPanel.acPower} onChange={(e) => setNewPanel({ ...newPanel, acPower: e.target.value })} />
-                <button className="button" onClick={createPanel}>创建太阳能板</button>
+                <h3>Create solar panel</h3>
+                <input type="number" style={{ color: "black" }} placeholder="Latitude" onChange={(e) => setNewPanel({ ...newPanel, lat: e.target.value })} />
+                <input type="number" style={{ color: "black" }} placeholder="Longitude" onChange={(e) => setNewPanel({ ...newPanel, lng: e.target.value })} />
+                <input type="number" style={{ color: "black" }} placeholder="Battery temperature (°C)" value={newPanel.batteryTemp} onChange={(e) => setNewPanel({ ...newPanel, batteryTemp: e.target.value })} />
+                <input type="number" style={{ color: "black" }} placeholder="DC power (W)" value={newPanel.dcPower} onChange={(e) => setNewPanel({ ...newPanel, dcPower: e.target.value })} />
+                <input type="number" style={{ color: "black" }} placeholder="AC power (W)" value={newPanel.acPower} onChange={(e) => setNewPanel({ ...newPanel, acPower: e.target.value })} />
+                <button className="button" onClick={createPanel}>Create solar panel</button>
             </div>
 
-            {/* 所有面板 */}
+            {/* All panels */}
             <div className="panel-card">
-                <h3>所有太阳能板</h3>
-                <button className="button refresh-button" onClick={fetchPanels}>刷新</button>
+                <h3>All solar panels</h3>
+                <button className="button refresh-button" onClick={fetchPanels}>Refresh</button>
                 <div className="panel-list">
-                    {panels.length === 0 ? <p>暂无数据</p> : panels.map((panel, index) => (
+                    {panels.length === 0 ? <p>No data</p> : panels.map((panel, index) => (
                         <div key={index} className="panel-item">
                             <p>📌 ID: {panel.id.toString()}</p>
-                            <p>📍 坐标: ({panel.latitude.toString()}, {panel.longitude.toString()})</p>
-                            <p>🔥 温度: {panel.batteryTemperature.toString()}°C</p>
-                            <p>⚡ DC 功率: {panel.dcPower.toString()}W</p>
-                            <p>🔌 AC 功率: {panel.acPower.toString()}W</p>
-                            <p>👤 所有者: {panel.owner.toString()}</p>
+                            <p>📍 Coordinates: ({panel.latitude.toString()}, {panel.longitude.toString()})</p>
+                            <p>🔥 Temperature: {panel.batteryTemperature.toString()}°C</p>
+                            <p>⚡ DC Power: {panel.dcPower.toString()}W</p>
+                            <p>🔌 AC Power: {panel.acPower.toString()}W</p>
+                            <p>👤 Owner: {panel.owner.toString()}</p>
                         </div>
                     ))}
                 </div>
             </div>
 
-            {/* 我的面板 */}
+            {/* My panels */}
             <div className="panel-card">
-                <h3>我的太阳能板</h3>
-                <button className="button refresh-button" onClick={fetchMyPanels}>刷新</button>
+                <h3>My solar panels</h3>
+                <button className="button refresh-button" onClick={fetchMyPanels}>Refresh</button>
                 <div className="panel-list">
-                    {myPanels.length === 0 ? <p>暂无数据</p> : myPanels.map((panel, index) => (
+                    {myPanels.length === 0 ? <p>No data</p> : myPanels.map((panel, index) => (
                         <div key={index} className="panel-item">
                             <p>📌 ID: {panel.id.toString()}</p>
-                            <p>📍 坐标: ({panel.latitude.toString()}, {panel.longitude.toString()})</p>
-                            <p>🔥 温度: {panel.batteryTemperature.toString()}°C</p>
-                            <p>⚡ DC 功率: {panel.dcPower.toString()}W</p>
-                            <p>🔌 AC 功率: {panel.acPower.toString()}W</p>
-                            <p>👤 所有者: {panel.owner.toString()}</p>
+                            <p>📍 Coordinates: ({panel.latitude.toString()}, {panel.longitude.toString()})</p>
+                            <p>🔥 Temperature: {panel.batteryTemperature.toString()}°C</p>
+                            <p>⚡ DC Power: {panel.dcPower.toString()}W</p>
+                            <p>🔌 AC Power: {panel.acPower.toString()}W</p>
+                            <p>👤 Owner: {panel.owner.toString()}</p>
 
-                            <input type="number" style={{ color: "black" }} placeholder="新温度" onChange={(e) => setNewPanel({ ...newPanel, batteryTemp: e.target.value })} />
-                            <input type="number" style={{ color: "black" }} placeholder="新直流功率" onChange={(e) => setNewPanel({ ...newPanel, dcPower: e.target.value })} />
-                            <input type="number" style={{ color: "black" }} placeholder="新交流功率" onChange={(e) => setNewPanel({ ...newPanel, acPower: e.target.value })} />
-                            <button className="button update-button" onClick={() => updatePanel(panel.id.toString(), newPanel.batteryTemp, newPanel.dcPower, newPanel.acPower)}>更新</button>
+                            <input type="number" style={{ color: "black" }} placeholder="New temperature" onChange={(e) => setNewPanel({ ...newPanel, batteryTemp: e.target.value })} />
+                            <input type="number" style={{ color: "black" }} placeholder="New DC power" onChange={(e) => setNewPanel({ ...newPanel, dcPower: e.target.value })} />
+                            <input type="number" style={{ color: "black" }} placeholder="New AC power" onChange={(e) => setNewPanel({ ...newPanel, acPower: e.target.value })} />
+                            <button className="button update-button" onClick={() => updatePanel(panel.id.toString(), newPanel.batteryTemp, newPanel.dcPower, newPanel.acPower)}>Update</button>
                         </div>
                     ))}
                 </div>
             </div>
 
-            {/* 面板所有权转让 */}
+            {/* Panel ownership transfer */}
             <div className="panel-card">
-                <h3>转让面板所有权</h3>
-                <input type="number" placeholder="面板 ID" style={{ color: "black" }} onChange={(e) => setTransfer({ ...transfer, panelId: e.target.value })} />
-                <input type="text" placeholder="新所有者地址" style={{ color: "black" }} onChange={(e) => setTransfer({ ...transfer, newOwner: e.target.value })} />
-                <button className="button transfer-button" onClick={transferPanel}>转让所有权</button>
+                <h3>Transfer panel ownership</h3>
+                <input type="number" placeholder="Panel ID" style={{ color: "black" }} onChange={(e) => setTransfer({ ...transfer, panelId: e.target.value })} />
+                <input type="text" placeholder="New owner address" style={{ color: "black" }} onChange={(e) => setTransfer({ ...transfer, newOwner: e.target.value })} />
+                <button className="button transfer-button" onClick={transferPanel}>Transfer ownership</button>
             </div>
         </div>
     );

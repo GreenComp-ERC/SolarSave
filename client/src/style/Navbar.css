@@ -1,4 +1,4 @@
-/* Navbar.css - 为升级后的导航栏提供炫酷现代的样式 */
+/* Navbar.css - Sleek, modern styles for the updated navbar */
 
 :root {
   --primary: #2952e3;
@@ -467,7 +467,7 @@
   }
 }
 
-/* 滚动条样式 */
+/* Scrollbar styles */
 .modal-container::-webkit-scrollbar {
   width: 6px;
 }

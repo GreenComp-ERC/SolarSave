@@ -1,21 +1,21 @@
-# 使用 Node.js 作为基础镜像
+# Use Node.js as the base image
 FROM node:18
 
-# 设置工作目录
+# Set the working directory
 WORKDIR /app
 
-# 复制 package.json 和 yarn.lock
+# Copy package.json and yarn.lock
 
 COPY yarn.lock ./
 
-# 安装依赖
+# Install dependencies
 RUN yarn install
 
-# 复制智能合约项目文件
+# Copy smart contract project files
 COPY . .
 
-# 暴露端口（如果需要本地网络）
+# Expose port (if needed for local network)
 EXPOSE 8545
 
-# 启动 Hardhat 本地开发网络
+# Start Hardhat local dev network
 CMD ["npx", "hardhat", "node"]

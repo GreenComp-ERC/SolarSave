@@ -1,19 +1,19 @@
 const hre = require("hardhat");
 
 async function main() {
-    console.log("🚀 部署 SolarPanels 合约...");
+    console.log("🚀 Deploying SolarPanels contract...");
 
     const SolarPanels = await hre.ethers.getContractFactory("SolarPanels");
     const solarPanels = await SolarPanels.deploy();
 
     await solarPanels.waitForDeployment();
 
-    console.log(`✅ SolarPanels 合约已部署到: ${solarPanels.target}`);
+    console.log(`✅ SolarPanels contract deployed to: ${solarPanels.target}`);
 }
 
-// 🚨 运行部署脚本
+// 🚨 Run the deployment script
 main().catch((error) => {
-    console.error("❌ 部署失败:", error);
+    console.error("❌ Deployment failed:", error);
     process.exitCode = 1;
 });
 

@@ -9,8 +9,8 @@ import SolarPanels from "../utils/test/SolarPanels.json";
 import "../style/Sidebar.css";
 
 const contractAddress = "0x39Cb00Cf33827D78892b1c83aF166CB7c4FCB3C0";
-const PANELS_PER_PAGE = 4; // 每页显示的面板数量
-// 修复面板位置和功率数值的函数
+const PANELS_PER_PAGE = 4; // Panels per page
+// Normalize panel location and power values
 const fixPanelData = (panel) => {
   let { lat, lng, batteryTemp, dcPower, acPower } = panel;
 
@@ -46,20 +46,20 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [notification, setNotification] = useState({ show: false, message: "", type: "" });
 
-    // 分页状态
+    // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
-    // 搜索和过滤
+    // Search and filter
     const [searchTerm, setSearchTerm] = useState("");
     const [sortOrder, setSortOrder] = useState({ field: "id", ascending: true });
     const [expandedPanelId, setExpandedPanelId] = useState(null);
 
-    // 获取导航栏高度来计算侧边栏的顶部偏移
-    const [navbarHeight, setNavbarHeight] = useState(64); // 默认值
+    // Get navbar height to calculate sidebar offset
+    const [navbarHeight, setNavbarHeight] = useState(64); // Default value
 
     useEffect(() => {
         connectWallet();
 
-        // 获取实际的navbar高度
+        // Get actual navbar height
         const navbar = document.querySelector('.navbar');
         if (navbar) {
             setNavbarHeight(navbar.offsetHeight);
@@ -72,7 +72,7 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
         }
     }, [account]);
 
-    // 重置页码当视图改变时
+    // Reset page when view changes
     useEffect(() => {
         setCurrentPage(1);
     }, [showMyPanels, searchTerm]);
@@ -86,7 +86,7 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
 
     const connectWallet = async () => {
         if (!window.ethereum) {
-            showNotification("请安装 MetaMask!", "error");
+            showNotification("Please install MetaMask!", "error");
             return;
         }
 
@@ -105,29 +105,29 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
                 fetchMyPanels(contractInstance)
             ]);
 
-            showNotification("钱包连接成功！");
+            showNotification("Wallet connected!");
         } catch (error) {
-            console.error("连接失败:", error);
-            showNotification("钱包连接失败", "error");
+            console.error("Connection failed:", error);
+            showNotification("Wallet connection failed", "error");
         } finally {
             setIsLoading(false);
         }
     };
 
     const createPanel = async () => {
-        if (!contract) return showNotification("未连接合约", "error");
-        if (!newPanel.lat || !newPanel.lng) return showNotification("请输入经纬度", "error");
+        if (!contract) return showNotification("Contract not connected", "error");
+        if (!newPanel.lat || !newPanel.lng) return showNotification("Please enter latitude and longitude", "error");
 
         try {
             setIsLoading(true);
             const tx = await contract.createPanel(newPanel.lat, newPanel.lng, 30, 1000, 900);
             await tx.wait();
-            showNotification("🌞 太阳能板创建成功!");
+            showNotification("🌞 Solar panel created!");
             setNewPanel({ lat: "", lng: "" });
             await Promise.all([fetchPanels(contract), fetchMyPanels(contract)]);
         } catch (error) {
-            console.error("创建失败:", error);
-            showNotification("❌ 太阳能板创建失败！", "error");
+            console.error("Creation failed:", error);
+            showNotification("❌ Solar panel creation failed!", "error");
         } finally {
             setIsLoading(false);
         }
@@ -152,8 +152,8 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
 
     setPanels(fixed);
   } catch (error) {
-    console.error("❌ 获取所有太阳能板失败:", error);
-    showNotification("获取太阳能板失败", "error");
+    console.error("❌ Failed to fetch all solar panels:", error);
+    showNotification("Failed to fetch solar panels", "error");
   }
 };
 
@@ -178,13 +178,13 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
 
     setMyPanels(fixed);
   } catch (error) {
-    console.error("❌ 获取用户太阳能板失败:", error);
-    showNotification("获取用户太阳能板失败", "error");
+    console.error("❌ Failed to fetch user solar panels:", error);
+    showNotification("Failed to fetch user solar panels", "error");
   }
 };
 
 
-    // 过滤面板
+    // Filter panels
     const filterPanels = (panelsData) => {
         if (!searchTerm) return panelsData;
 
@@ -196,7 +196,7 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
         );
     };
 
-    // 排序面板
+    // Sort panels
     const sortPanels = (panelsData) => {
         return [...panelsData].sort((a, b) => {
             let compareA, compareB;
@@ -227,7 +227,7 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
         });
     };
 
-    // 处理排序点击
+    // Handle sort click
     const handleSortClick = (field) => {
         if (sortOrder.field === field) {
             setSortOrder({ field, ascending: !sortOrder.ascending });
@@ -236,12 +236,12 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
         }
     };
 
-    // 分页控制
+    // Pagination controls
     const handlePageChange = (newPage) => {
         setCurrentPage(newPage);
     };
 
-    // 准备显示的面板
+    // Prepare panels to display
     const currentData = showMyPanels ? myPanels : panels;
     const filteredData = filterPanels(currentData);
     const sortedData = sortPanels(filteredData);
@@ -251,7 +251,7 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
     const indexOfFirstPanel = indexOfLastPanel - PANELS_PER_PAGE;
     const currentPanels = sortedData.slice(indexOfFirstPanel, indexOfLastPanel);
 
-    // 展开和收缩面板详情
+    // Expand and collapse panel details
     const togglePanelExpand = (id) => {
         if (expandedPanelId === id) {
             setExpandedPanelId(null);
@@ -284,18 +284,18 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
                                 <div className="account-icon">
                                     <Sun size={18} />
                                 </div>
-                                <h2>账户信息</h2>
+                                <h2>Account Info</h2>
                             </div>
                             {account ? (
                                 <div className="account-details">
                                     <div className="address">
                                         <span title={account}>{accountShort}</span>
                                     </div>
-                                    <div className="status connected">已连接</div>
+                                    <div className="status connected">Connected</div>
                                 </div>
                             ) : (
                                 <button className="connect-button" onClick={connectWallet}>
-                                    连接钱包
+                                    Connect Wallet
                                 </button>
                             )}
                         </div>
@@ -303,13 +303,13 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
                         <div className="create-panel-card">
                             <div className="card-header">
                                 <PlusCircle size={18} />
-                                <h3>创建太阳能板</h3>
+                                <h3>Create Solar Panel</h3>
                             </div>
                             <div className="form-group">
                                 <div className="input-group">
                                     <input
                                         type="number"
-                                        placeholder="纬度"
+                                        placeholder="Latitude"
                                         value={newPanel.lat}
                                         onChange={(e) => setNewPanel({ ...newPanel, lat: e.target.value })}
                                     />
@@ -317,7 +317,7 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
                                 <div className="input-group">
                                     <input
                                         type="number"
-                                        placeholder="经度"
+                                        placeholder="Longitude"
                                         value={newPanel.lng}
                                         onChange={(e) => setNewPanel({ ...newPanel, lng: e.target.value })}
                                     />
@@ -328,7 +328,7 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
                                 onClick={createPanel}
                                 disabled={isLoading}
                             >
-                                {isLoading ? "处理中..." : "创建太阳能板"}
+                                {isLoading ? "Processing..." : "Create Solar Panel"}
                             </button>
                         </div>
 
@@ -338,14 +338,14 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
                                 onClick={() => setShowMyPanels(false)}
                             >
                                 <Globe size={16} />
-                                <span>所有面板</span>
+                                <span>All Panels</span>
                             </button>
                             <button
                                 className={`switch-button ${showMyPanels ? "active" : ""}`}
                                 onClick={() => setShowMyPanels(true)}
                             >
                                 <Lock size={16} />
-                                <span>我的面板</span>
+                                <span>My Panels</span>
                             </button>
                         </div>
 
@@ -353,23 +353,23 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
                             <div className="panels-header">
                                 <h3>
                                     {showMyPanels ? (
-                                        <><Lock size={16} /> 我的太阳能板</>
+                                        <><Lock size={16} /> My Solar Panels</>
                                     ) : (
-                                        <><Globe size={16} /> 所有太阳能板</>
+                                        <><Globe size={16} /> All Solar Panels</>
                                     )}
                                 </h3>
                                 <span className="panel-count">
-                                    {filteredData.length}个
+                                    {filteredData.length} panels
                                 </span>
                             </div>
 
-                            {/* 搜索和筛选 */}
+                            {/* Search and filter */}
                             <div className="panel-controls">
                                 <div className="search-box">
                                     <Search size={14} />
                                     <input
                                         type="text"
-                                        placeholder="搜索面板ID、位置..."
+                                        placeholder="Search panel ID, location..."
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
                                     />
@@ -386,21 +386,21 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
                                     <button
                                         className={`sort-button ${sortOrder.field === 'id' ? 'active' : ''}`}
                                         onClick={() => handleSortClick('id')}
-                                        title="按ID排序"
+                                        title="Sort by ID"
                                     >
                                         ID {sortOrder.field === 'id' && (sortOrder.ascending ? '↑' : '↓')}
                                     </button>
                                     <button
                                         className={`sort-button ${sortOrder.field === 'temperature' ? 'active' : ''}`}
                                         onClick={() => handleSortClick('temperature')}
-                                        title="按温度排序"
+                                        title="Sort by temperature"
                                     >
                                         <Thermometer size={12} /> {sortOrder.field === 'temperature' && (sortOrder.ascending ? '↑' : '↓')}
                                     </button>
                                     <button
                                         className={`sort-button ${sortOrder.field === 'power' ? 'active' : ''}`}
                                         onClick={() => handleSortClick('power')}
-                                        title="按功率排序"
+                                        title="Sort by power"
                                     >
                                         <Zap size={12} /> {sortOrder.field === 'power' && (sortOrder.ascending ? '↑' : '↓')}
                                     </button>
@@ -412,7 +412,7 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
                                     <div className="empty-state">
                                         <List size={32} />
                                         <p>
-                                            {searchTerm ? '没有匹配的太阳能板' : '暂无太阳能板数据'}
+                                            {searchTerm ? 'No matching solar panels' : 'No solar panel data'}
                                         </p>
                                     </div>
                                 ) : (
@@ -442,19 +442,19 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
                                             {expandedPanelId === panel.id.toString() && (
                                                 <div className="panel-details">
                                                     <div className="panel-detail location">
-                                                        <span className="label">位置</span>
+                                                        <span className="label">Location</span>
                                                         <span className="value">{panel.latitude.toString()}°, {panel.longitude.toString()}°</span>
                                                     </div>
                                                     <div className="panel-detail">
-                                                        <span className="label">DC功率</span>
+                                                        <span className="label">DC Power</span>
                                                         <span className="value">{panel.dcPower.toString()}W</span>
                                                     </div>
                                                     <div className="panel-detail">
-                                                        <span className="label">AC功率</span>
+                                                        <span className="label">AC Power</span>
                                                         <span className="value">{panel.acPower.toString()}W</span>
                                                     </div>
                                                     <div className="panel-owner" title={panel.owner}>
-                                                        <span className="label">所有者</span>
+                                                        <span className="label">Owner</span>
                                                         <span className="value">{`${panel.owner.substring(0, 6)}...${panel.owner.substring(panel.owner.length - 4)}`}</span>
                                                     </div>
                                                 </div>
@@ -464,14 +464,14 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
                                 )}
                             </div>
 
-                            {/* 分页控件 */}
+                            {/* Pagination controls */}
                             {totalPages > 1 && (
                                 <div className="pagination-controls">
                                     <button
                                         onClick={() => handlePageChange(1)}
                                         disabled={currentPage === 1}
                                         className="page-button"
-                                        title="第一页"
+                                        title="First page"
                                     >
                                         <ChevronsLeft size={16} />
                                     </button>
@@ -479,7 +479,7 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
                                         onClick={() => handlePageChange(currentPage - 1)}
                                         disabled={currentPage === 1}
                                         className="page-button"
-                                        title="上一页"
+                                        title="Previous page"
                                     >
                                         <ChevronLeft size={16} />
                                     </button>
@@ -490,7 +490,7 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
                                         onClick={() => handlePageChange(currentPage + 1)}
                                         disabled={currentPage === totalPages}
                                         className="page-button"
-                                        title="下一页"
+                                        title="Next page"
                                     >
                                         <ChevronRight size={16} />
                                     </button>
@@ -498,7 +498,7 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
                                         onClick={() => handlePageChange(totalPages)}
                                         disabled={currentPage === totalPages}
                                         className="page-button"
-                                        title="最后一页"
+                                        title="Last page"
                                     >
                                         <ChevronsRight size={16} />
                                     </button>
@@ -512,7 +512,7 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
             <button
                 className={`sidebar-toggle-btn ${sidebarOpen ? "open" : "closed"}`}
                 onClick={toggleSidebar}
-                aria-label={sidebarOpen ? "关闭侧边栏" : "打开侧边栏"}
+                aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
                 style={{
                     top: `${navbarHeight + 10}px`,
                     zIndex: 1001
