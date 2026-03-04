@@ -34,7 +34,6 @@ const Navbar = ({ logoSize = "w-16" }) => {
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [toolsDropdown, setToolsDropdown] = useState(false);
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false); // ✅ Connect wallet modal
-  const [isTestWalletModalOpen, setIsTestWalletModalOpen] = useState(false); // ✅ Token test in toolbar
   const [isTestRewardModalOpen, setIsTestRewardModalOpen] = useState(false); // ✅ Reward test modal
 
 
@@ -59,8 +58,9 @@ const Navbar = ({ logoSize = "w-16" }) => {
   }, []);
 
   return (
-    <nav className={`cyberpunk-navbar ${scrolled ? "scrolled" : ""}`}>
-      <div className="navbar-content">
+    <>
+      <nav className={`cyberpunk-navbar ${scrolled ? "scrolled" : ""}`}>
+        <div className="navbar-content">
         <div className="logo-section">
           <div className="logo-wrapper">
             <Sun className="logo-icon" />
@@ -156,7 +156,7 @@ const Navbar = ({ logoSize = "w-16" }) => {
             <NavBarItem title="Block Explorer" icon={<Globe size={18} />} />
 
             <li onClick={() => {
-              setIsTestWalletModalOpen(true);  // ✅ Open test wallet
+              setIsTokenModalOpen(true);
               setToolsDropdown(false);
             }}>
               <Wallet size={18}/>
@@ -182,6 +182,8 @@ const Navbar = ({ logoSize = "w-16" }) => {
           </ul>
         </div>
       )}
+
+      </nav>
 
       {/* Modals */}
       {isTokenModalOpen && (
@@ -212,19 +214,18 @@ const Navbar = ({ logoSize = "w-16" }) => {
         </div>
       )}
       {isWalletModalOpen && (
-    <div className="modal-overlay">
-      <div className="modal-container">
-        <button
-          className="modal-close-btn"
-          onClick={() => setIsWalletModalOpen(false)}
-        >
-          <X size={20} />
-        </button>
-        <WalletModel /> {/* ✅ Wallet.jsx */}
-      </div>
-    </div>
-  )}
-
+        <div className="modal-overlay">
+          <div className="modal-container">
+            <button
+              className="modal-close-btn"
+              onClick={() => setIsWalletModalOpen(false)}
+            >
+              <X size={20} />
+            </button>
+            <WalletModel /> {/* ✅ Wallet.jsx */}
+          </div>
+        </div>
+      )}
 
       {isTestPanelsModalOpen && (
         <div className="modal-overlay">
@@ -240,30 +241,22 @@ const Navbar = ({ logoSize = "w-16" }) => {
         </div>
       )}
       {isAboutOpen && (
+        <About onClose={() => setIsAboutOpen(false)} />
+      )}
+      {isTestRewardModalOpen && (
         <div className="modal-overlay">
-          <div className="modal-container">
-            <button className="modal-close-btn" onClick={() => setIsAboutOpen(false)}>
+          <div className="modal-container large">
+            <button
+              className="modal-close-btn"
+              onClick={() => setIsTestRewardModalOpen(false)}
+            >
               <X size={20} />
             </button>
-            <About />
+            <TestReward />
           </div>
         </div>
       )}
-      {isTestRewardModalOpen && (
-  <div className="modal-overlay">
-    <div className="modal-container large">
-      <button
-        className="modal-close-btn"
-        onClick={() => setIsTestRewardModalOpen(false)}
-      >
-        <X size={20} />
-      </button>
-      <TestReward />
-    </div>
-  </div>
-)}
-
-    </nav>
+    </>
   );
 };
 

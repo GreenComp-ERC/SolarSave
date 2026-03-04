@@ -1,4 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
+import { FiSun } from "react-icons/fi";
 import { ethers } from "ethers";
 import { TransactionContext } from "../context/TransactionContext";
 import dummyData from "../utils/dummyData";
@@ -431,9 +432,8 @@ const cancelListing = async (itemId) => {
       <div className="trans-container">
         <div className="trans-header">
           <h1 className="trans-main-title">
-            <span className="trans-title-icon">⚡</span>
+            <FiSun className="trans-title-icon" />
             Solar Energy Exchange
-            <span className="trans-title-accent">SOLAR EXCHANGE</span>
           </h1>
         </div>
         {!isAuthorized && (

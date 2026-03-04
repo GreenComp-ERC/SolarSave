@@ -15,6 +15,7 @@
   --cyberpunk-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
   --neon-border: 1px solid rgba(0, 240, 255, 0.3);
   --transition-speed: 0.3s;
+  --sidebar-width: 320px;
 }
 
 /* Keep base styles unchanged */
@@ -25,7 +26,7 @@
 }
 
 body {
-  font-family: 'Rajdhani', sans-serif;
+  font-family: var(--font-sans);
   color: #ffffff;
   background-color: var(--dark-bg);
 }
@@ -36,18 +37,23 @@ body {
   top: 0;
   left: 0;
   height: 100vh;
-  width: 320px;
-  background: var(--dark-bg);
+  width: var(--sidebar-width);
+  background: rgba(15, 23, 42, 0.72);
   border-right: var(--neon-border);
-  box-shadow: var(--cyberpunk-shadow);
+  box-shadow:
+    0 22px 50px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
   transition: transform var(--transition-speed);
   z-index: 100;
   overflow-y: auto;
   overflow-x: hidden;
+  font-family: var(--font-display);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
 }
 
 .cyberpunk-sidebar.closed {
-  transform: translateX(-320px);
+  transform: translateX(calc(-1 * var(--sidebar-width)));
 }
 
 .cyberpunk-sidebar.open {
@@ -66,6 +72,9 @@ body {
   padding: 10px 0;
   border-bottom: 1px solid var(--dark-border);
   margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .logo-container {
@@ -90,14 +99,53 @@ body {
   filter: drop-shadow(0 0 5px rgba(255, 214, 0, 0.5));
 }
 
+.lock-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid var(--dark-border);
+  background: rgba(15, 18, 24, 0.8);
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.lock-toggle:hover {
+  border-color: var(--solar-accent);
+  color: var(--solar-accent);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+}
+
+.lock-toggle.locked {
+  color: var(--solar-yellow);
+  border-color: rgba(255, 214, 0, 0.35);
+  box-shadow: 0 0 10px rgba(255, 214, 0, 0.15);
+}
+
+.sidebar-hover-zone {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 14px;
+  height: 100vh;
+  z-index: 999;
+}
+
 /* Account Card */
 .account-card {
-  background: var(--dark-card);
+  background: rgba(15, 23, 42, 0.72);
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 8px;
-  border: 1px solid var(--dark-border);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
 }
 
 .account-header {
@@ -176,11 +224,15 @@ body {
 
 /* Create Panel Form */
 .create-panel-card {
-  background: var(--dark-card);
+  background: rgba(15, 23, 42, 0.72);
   border-radius: 8px;
   padding: 16px;
-  border: 1px solid var(--dark-border);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
 }
 
 .card-header {

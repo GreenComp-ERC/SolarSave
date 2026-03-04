@@ -5,9 +5,12 @@
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  background-color: #0f0e13;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-top: 1px solid var(--glass-border);
   color: white;
-  font-family: "Open Sans", sans-serif;
+  font-family: var(--font-sans);
 }
 
 .footer-content {

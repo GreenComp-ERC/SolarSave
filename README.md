@@ -10,24 +10,24 @@ SolarSave is designed for individuals, communities, and organizations aiming to 
 
 ## **Key Features**
 
-### ? **Interactive Solar Map**
+### **Interactive Solar Map**
 - **View and Create Solar Panels**: Users can view existing solar panels on the map or create new ones by selecting coordinates.
 - **Real-Time Status Display**: Displays the real-time status of solar panels (e.g., coordinates, battery temperature, DC power, AC power, and owner information).
 
-### ? **Efficiency Prediction**
+### **Efficiency Prediction**
 - **Location-Based Power Generation Prediction**: Predicts solar power generation efficiency at a specific location based on historical data and weather conditions.
 - **AI Optimization Suggestions**: Provides specific recommendations, such as cleaning solar panels or adjusting installation angles, to improve power generation efficiency.
 
-### ? **Blockchain Integration**
+### **Blockchain Integration**
 - **Device Registration**: Registers solar panels on the blockchain for transparent data management.
 - **Data Submission**: Submits solar energy production data and earns SolarToken based on contributions.
 - **Ownership Transactions**: Supports secure transactions of solar panel ownership between users.
 
-### ? **Real-Time Monitoring**
+### **Real-Time Monitoring**
 - **Performance Dashboard**: Users can view real-time solar panel power generation, historical data, and predicted efficiency.
 - **Historical Data Visualization**: Analyzes historical trends to make better decisions.
 
-### ? **Reward Mechanism**
+### **Reward Mechanism**
 - **SolarToken Incentives**: Rewards users for submitting energy data or optimizing energy usage.
 - **Wallet Support**: Supports reward withdrawals to Ethereum-compatible wallets like MetaMask.
 

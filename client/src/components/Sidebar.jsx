@@ -3,7 +3,7 @@ import { ethers } from "ethers";
 import {
   Sun, List, ChevronLeft, ChevronRight, Zap, Thermometer,
   Globe, Lock, PlusCircle, Search, Filter, ChevronsLeft,
-  ChevronsRight, ArrowUpDown
+    ChevronsRight, ArrowUpDown, Unlock
 } from "lucide-react";
 import SolarPanels from "../utils/test/SolarPanels.json";
 import contractAddresses from "../utils/contractAddress.json";
@@ -36,7 +36,7 @@ const fixPanelData = (panel) => {
 };
 
 
-const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
+const Sidebar = ({ sidebarOpen, toggleSidebar, onVisibilityChange }) => {
     const [contract, setContract] = useState(null);
     const [account, setAccount] = useState("");
     const [accountShort, setAccountShort] = useState("");
@@ -46,6 +46,8 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
     const [newPanel, setNewPanel] = useState({ lat: "", lng: "" });
     const [isLoading, setIsLoading] = useState(false);
     const [notification, setNotification] = useState({ show: false, message: "", type: "" });
+    const [isLocked, setIsLocked] = useState(true);
+    const [isHovering, setIsHovering] = useState(false);
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
@@ -261,23 +263,48 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
         }
     };
 
+    const isVisible = isLocked ? sidebarOpen : isHovering;
+
+    useEffect(() => {
+        if (onVisibilityChange) {
+            onVisibilityChange(isVisible);
+        }
+    }, [isVisible, onVisibilityChange]);
+
     return (
         <>
+            {!isLocked && (
+                <div
+                    className="sidebar-hover-zone"
+                    onMouseEnter={() => setIsHovering(true)}
+                    onMouseLeave={() => setIsHovering(false)}
+                />
+            )}
             <div
-                className={`cyberpunk-sidebar ${sidebarOpen ? "open" : "closed"}`}
+                className={`cyberpunk-sidebar ${isVisible ? "open" : "closed"} ${isLocked ? "locked" : "unlocked"}`}
                 style={{
                     top: `${navbarHeight}px`,
                     height: `calc(100vh - ${navbarHeight}px)`,
                     zIndex: 1000
                 }}
+                onMouseEnter={() => !isLocked && setIsHovering(true)}
+                onMouseLeave={() => !isLocked && setIsHovering(false)}
             >
-                {sidebarOpen && (
+                {isVisible && (
                     <div className="sidebar-content">
                         <div className="sidebar-header">
                             <div className="logo-container">
                                 <Sun className="sun-icon" size={24} />
                                 <h1>Solar<span>Chain</span></h1>
                             </div>
+                            <button
+                                className={`lock-toggle ${isLocked ? "locked" : "unlocked"}`}
+                                onClick={() => setIsLocked(!isLocked)}
+                                aria-label={isLocked ? "Unlock sidebar" : "Lock sidebar"}
+                                title={isLocked ? "Unlock sidebar" : "Lock sidebar"}
+                            >
+                                {isLocked ? <Lock size={16} /> : <Unlock size={16} />}
+                            </button>
                         </div>
 
                         <div className="account-card">
@@ -510,17 +537,19 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
                 )}
             </div>
 
-            <button
-                className={`sidebar-toggle-btn ${sidebarOpen ? "open" : "closed"}`}
-                onClick={toggleSidebar}
-                aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
-                style={{
-                    top: `${navbarHeight + 10}px`,
-                    zIndex: 1001
-                }}
-            >
-                {sidebarOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
-            </button>
+            {isLocked && (
+                <button
+                    className={`sidebar-toggle-btn ${sidebarOpen ? "open" : "closed"}`}
+                    onClick={toggleSidebar}
+                    aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
+                    style={{
+                        top: `${navbarHeight + 10}px`,
+                        zIndex: 1001
+                    }}
+                >
+                    {sidebarOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
+                </button>
+            )}
 
             {notification.show && (
                 <div className={`notification ${notification.type}`}>

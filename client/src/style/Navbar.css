@@ -20,17 +20,21 @@
   top: 0;
   left: 0;
   height: var(--navbar-height);
-  background: linear-gradient(90deg, var(--darker) 0%, var(--dark) 100%);
-  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.5);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow);
+  border-bottom: 1px solid var(--glass-border);
   z-index: 10001;
   transition: all 0.3s ease;
 }
 
 .cyberpunk-navbar.scrolled {
-  background: rgba(7, 7, 17, 0.95);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.7);
-  height: 60px;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow);
+  height: var(--navbar-height);
 }
 
 .navbar-content {
@@ -349,10 +353,13 @@
   background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(5px);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   z-index: 10005;
   animation: fadeIn 0.3s ease;
+  padding: calc(var(--navbar-height) + 16px) 16px 24px;
+  box-sizing: border-box;
+  overflow-y: auto;
 }
 
 @keyframes fadeIn {
@@ -365,7 +372,9 @@
 }
 
 .modal-container {
-  background: #0f0f1a;
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
   border-radius: 10px;
   padding: 2rem;
   width: 90%;
@@ -373,8 +382,11 @@
   max-height: 80vh;
   overflow-y: auto;
   position: relative;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(41, 82, 227, 0.3);
+  margin: 0 auto;
+  box-shadow:
+    0 22px 50px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(148, 163, 184, 0.24);
   animation: modalSlideUp 0.3s ease forwards;
 }
 

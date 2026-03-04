@@ -18,6 +18,7 @@ const contractAddress = contractAddresses.solarPanels;
 
 const MapSection = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarVisible, setSidebarVisible] = useState(true);
   const [selectedPanel, setSelectedPanel] = useState(null);
   const [showPanelDetails, setShowPanelDetails] = useState(false);
   const [showTradeScript, setShowTradeScript] = useState(false);
@@ -533,9 +534,13 @@ const setShowNotification = (msg) => {
 
   return (
     <div className="map-section">
-      <Sidebar sidebarOpen={sidebarOpen} toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+      <Sidebar
+        sidebarOpen={sidebarOpen}
+        toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+        onVisibilityChange={setSidebarVisible}
+      />
 
-      <div className={`map-container ${sidebarOpen ? "with-sidebar" : "no-sidebar"}`}>
+      <div className={`map-container ${sidebarVisible ? "with-sidebar" : "no-sidebar"}`}>
         <div className="header-overlay">
           <div className="header-content">
             <h2 className="header-title">Solar Panel Network</h2>

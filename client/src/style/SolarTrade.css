@@ -21,23 +21,24 @@
 .solar-trade-container {
   display: flex;
   flex-direction: column;
-  background-color: var(--dark-bg);
+  background-color: transparent;
   color: var(--text-primary);
   min-height: 100vh;
-  font-family: 'Inter', 'Helvetica Neue', sans-serif;
+  font-family: var(--font-sans);
 }
 
 /* Header styles */
 .solar-trade-header {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   padding: 1rem 2rem;
-  background-color: rgba(21, 25, 35, 0.8);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--border-color);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid var(--glass-border);
   position: sticky;
-  top: 0;
+  top: var(--navbar-height);
   z-index: 10;
 }
 
@@ -45,6 +46,8 @@
   display: flex;
   align-items: center;
   gap: 1rem;
+  justify-content: center;
+  grid-column: 2;
 }
 
 .sun-icon {
@@ -82,17 +85,20 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  justify-self: end;
+  grid-column: 3;
 }
 
 .wallet-connected {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background-color: rgba(41, 82, 227, 0.1);
-  border: 1px solid rgba(41, 82, 227, 0.3);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   padding: 0.5rem 1rem;
   border-radius: 50px;
-  backdrop-filter: blur(4px);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .status-icon {
@@ -150,19 +156,21 @@
   flex: 1;
   gap: 1.5rem;
   padding: 1.5rem;
-  height: calc(100vh - 4.5rem);
+  min-height: calc(100vh - var(--navbar-height) - 4.5rem);
 }
 
 /* Left panel styles */
 .left-panel {
   flex: 0 0 350px;
-  background-color: var(--panel-bg);
+  background: var(--glass-bg);
   border-radius: 12px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: var(--card-shadow);
-  border: 1px solid var(--border-color);
+  box-shadow: var(--glass-shadow);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .panel-header {
@@ -170,7 +178,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .panel-header h2 {
@@ -203,9 +211,9 @@
 .panel-dropdown {
   width: 100%;
   padding: 0.75rem 1rem;
-  background-color: #232631;
+  background: rgba(15, 23, 42, 0.6);
   color: var(--text-primary);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--glass-border);
   border-radius: 6px;
   appearance: none;
   font-size: 0.95rem;
@@ -241,13 +249,17 @@
 }
 
 .panel-card {
-  background-color: #232631;
+  background: rgba(15, 23, 42, 0.6);
   border-radius: 8px;
   margin-bottom: 1rem;
   overflow: hidden;
   transition: all var(--transition-speed) ease;
-  border: 1px solid var(--border-color);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--glass-border);
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
   cursor: pointer;
 }
 
@@ -380,14 +392,16 @@
 }
 
 .stats-card {
-  background-color: var(--panel-bg);
+  background: var(--glass-bg);
   border-radius: 12px;
   padding: 1.25rem;
   display: flex;
   align-items: center;
   gap: 1rem;
-  box-shadow: var(--card-shadow);
-  border: 1px solid var(--border-color);
+  box-shadow: var(--glass-shadow);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   transition: all var(--transition-speed) ease;
 }
 
@@ -533,19 +547,23 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 10010;
   backdrop-filter: blur(4px);
 }
 
 .modal-content {
-  background-color: var(--panel-bg);
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
   border-radius: 12px;
   width: 80%;
   max-width: 800px;
   max-height: 80vh;
   overflow: auto;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  border: 1px solid var(--border-color);
+  box-shadow:
+    0 22px 50px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(148, 163, 184, 0.24);
   animation: modalFadeIn 0.3s ease;
 }
 

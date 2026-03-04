@@ -3,10 +3,14 @@
     max-width: 900px;
     margin: 0 auto;
     padding: 20px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(15, 23, 42, 0.72);
     border-radius: 12px;
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(8px);
+    box-shadow:
+        0 22px 50px rgba(0, 0, 0, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    border: 1px solid rgba(148, 163, 184, 0.24);
     color: white;
 }
 
@@ -19,12 +23,17 @@
 
 /* 🌟 Solar panel card */
 .panel-card {
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(15, 23, 42, 0.72);
     padding: 16px;
     border-radius: 10px;
     margin-bottom: 20px;
     text-align: center;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(148, 163, 184, 0.24);
+    box-shadow:
+        0 12px 30px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
 }
 
 /* 🔘 Button */
@@ -74,11 +83,13 @@
 
 /* 🌍 Single solar panel item */
 .panel-item {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(15, 23, 42, 0.65);
     padding: 12px;
     border-radius: 6px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(148, 163, 184, 0.24);
     transition: transform 0.3s ease-in-out;
+    backdrop-filter: blur(12px) saturate(140%);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
 }
 
 .panel-item:hover {
@@ -97,13 +108,13 @@ input {
     padding: 8px;
     margin-top: 6px;
     border-radius: 6px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.9); /* Make background clearer */
-    color: black; /* ✅ Set text color to black */
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    background: rgba(15, 23, 42, 0.6);
+    color: #e2e8f0;
     font-size: 14px;
     outline: none;
 }
 
 input::placeholder {
-    color: rgba(0, 0, 0, 0.6); /* ✅ Set placeholder text to light black */
+    color: rgba(226, 232, 240, 0.6);
 }
