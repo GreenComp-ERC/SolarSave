@@ -65,7 +65,7 @@ npm run dev
 ### **3. Simulator Setup**
 Install Python dependencies and run the simulator:
 ```bash
-cd ../Simulator
+cd Simulator
 pip install -r requirements.txt
 python main.py
 Or run in the terminal:
@@ -74,7 +74,7 @@ uvicorn main:app --reload
 
 ### **4. Smart Contract Deployment (Local Hardhat)**
 ```bash
-cd ../smart_contract
+cd smart_contract
 npm install
 npx hardhat node
 ```
