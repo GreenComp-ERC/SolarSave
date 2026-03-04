@@ -1,14 +1,22 @@
 const hre = require("hardhat");
+const { readAddresses, writeAddresses } = require("./addressStore");
 
 async function main() {
-  const tokenAddress = "0x175da7583f3b085ac4Ab87AEd758c6Cd11A8b81e";
-  const solarPanelsAddress = "0x39Cb00Cf33827D78892b1c83aF166CB7c4FCB3C0";
+  const stored = readAddresses();
+  const tokenAddress = process.env.TOKEN_ADDRESS || stored.token;
+  const solarPanelsAddress = process.env.SOLAR_PANELS_ADDRESS || stored.solarPanels;
+
+  if (!tokenAddress || !solarPanelsAddress) {
+    throw new Error("Missing token or SolarPanels address. Deploy them first or set TOKEN_ADDRESS and SOLAR_PANELS_ADDRESS.");
+  }
 
   console.log("🚀 Starting Shop contract deployment...");
   const Shop = await hre.ethers.getContractFactory("Shop");
   const shop = await Shop.deploy(tokenAddress, solarPanelsAddress);
 
   await shop.waitForDeployment(); // ✅ Deployment wait for newer ethers
+
+  writeAddresses({ shop: shop.target, token: tokenAddress, solarPanels: solarPanelsAddress });
 
   console.log(`✅ Shop contract deployed to: ${shop.target}`);
   console.log(`🔗 Token address: ${tokenAddress}`);

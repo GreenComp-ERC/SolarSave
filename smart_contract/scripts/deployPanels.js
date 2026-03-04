@@ -1,4 +1,5 @@
 const hre = require("hardhat");
+const { writeAddresses } = require("./addressStore");
 
 async function main() {
     console.log("🚀 Deploying SolarPanels contract...");
@@ -8,6 +9,7 @@ async function main() {
 
     await solarPanels.waitForDeployment();
 
+    writeAddresses({ solarPanels: solarPanels.target });
     console.log(`✅ SolarPanels contract deployed to: ${solarPanels.target}`);
 }
 

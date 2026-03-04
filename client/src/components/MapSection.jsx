@@ -7,13 +7,14 @@ import TradeConfirm from "./TradeConfirm";
 import kakilogo from "../../images/kali.png";
 import { TransactionContext } from "../context/TransactionContext";
 import PowerRewardABI from "../utils/test/PowerReward.json";
+import contractAddresses from "../utils/contractAddress.json";
 import ERC20ABI from "../utils/test/SolarToken.json";
 import { ethers } from "ethers";
 // import SolarPanels from "../utils/SolarPanels.json";
 import SolarPanels from "../utils/test/SolarPanels.json";
 import "../style/MapSection.css";
 import axios from "axios";
-const contractAddress = "0x39Cb00Cf33827D78892b1c83aF166CB7c4FCB3C0";
+const contractAddress = contractAddresses.solarPanels;
 
 const MapSection = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -32,10 +33,14 @@ const MapSection = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isPredicting, setIsPredicting] = useState(false);
 
-  const powerRewardAddress = "0x6CACbd2FfC69843Ef182C365a16CDB6552600326";
-  const rewardTokenAddress = "0x175da7583f3b085ac4Ab87AEd758c6Cd11A8b81e";
+  const powerRewardAddress = contractAddresses.powerReward;
+  const rewardTokenAddress = contractAddresses.token;
 
   const [rewardContract, setRewardContract] = useState(null);
+  const [tokenContract, setTokenContract] = useState(null);
+  const [isRewardOwner, setIsRewardOwner] = useState(false);
+  const [fundAmount, setFundAmount] = useState("1000");
+  const [isFunding, setIsFunding] = useState(false);
   const [cooldownRemaining, setCooldownRemaining] = useState(null);
   const [lastClaimedAt, setLastClaimedAt] = useState(null);
   const [rewardPreview, setRewardPreview] = useState(null);
@@ -67,9 +72,18 @@ const MapSection = () => {
     // ✅ Initialize contracts correctly
     const contractInstance = new ethers.Contract(contractAddress, SolarPanels.abi, signer);
     const rewardCtr = new ethers.Contract(powerRewardAddress, PowerRewardABI.abi, signer);
+    const tokenCtr = new ethers.Contract(rewardTokenAddress, ERC20ABI.abi, signer);
 
     setContract(contractInstance);
     setRewardContract(rewardCtr);
+    setTokenContract(tokenCtr);
+
+    try {
+      const owner = await tokenCtr.owner();
+      setIsRewardOwner(owner.toLowerCase() === accounts[0].toLowerCase());
+    } catch (e) {
+      setIsRewardOwner(false);
+    }
 
     // ✅ Fetch reward-related info
     const last = await rewardCtr.lastClaimedAt(accounts[0]);
@@ -103,6 +117,37 @@ const MapSection = () => {
     alert("❌ Reward claim failed!");
   }
 };
+
+  const fundRewards = async () => {
+    if (!rewardContract || !tokenContract) {
+      alert("Contract not connected");
+      return;
+    }
+    if (!isRewardOwner) {
+      alert("Only the token owner can fund rewards.");
+      return;
+    }
+    if (!fundAmount || Number(fundAmount) <= 0) {
+      alert("Enter a valid fund amount");
+      return;
+    }
+
+    setIsFunding(true);
+    try {
+      const amountWei = ethers.utils.parseEther(fundAmount);
+      const approveTx = await tokenContract.approve(powerRewardAddress, amountWei);
+      await approveTx.wait();
+
+      const tx = await rewardContract.deposit(amountWei);
+      await tx.wait();
+      alert("✅ Reward pool funded successfully!");
+    } catch (e) {
+      console.error("❌ Funding failed:", e);
+      alert("❌ Funding failed!");
+    } finally {
+      setIsFunding(false);
+    }
+  };
 
 
   const getClosestTimestamp = (keys, target) => {
@@ -532,6 +577,26 @@ const setShowNotification = (msg) => {
   >
     Claim reward ({rewardPreview ? ethers.utils.formatUnits(rewardPreview, 18) : "Loading..."} SOLR)
   </button>
+
+  {isRewardOwner && (
+    <div className="reward-fund-controls">
+      <input
+        type="number"
+        min="1"
+        step="1"
+        value={fundAmount}
+        onChange={(e) => setFundAmount(e.target.value)}
+        placeholder="Fund amount"
+      />
+      <button
+        className="button"
+        onClick={fundRewards}
+        disabled={isFunding}
+      >
+        {isFunding ? "Funding..." : "Fund reward pool"}
+      </button>
+    </div>
+  )}
 </div>
 
 

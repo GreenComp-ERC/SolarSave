@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Sun, Send, Wallet as WalletIcon, Loader, Copy, Check } from "lucide-react";
 import { ethers } from "ethers";
 import '../../style/Wallet.css';
+import contractAddresses from "../../utils/contractAddress.json";
 
 // Mock ethers for demo display
 const mockEthers = {
@@ -22,7 +23,7 @@ const mockEthers = {
 // Use ethers in production instead of mockEthers
 
 
-const SOLAR_TOKEN_ADDRESS = "0x175da7583f3b085ac4Ab87AEd758c6Cd11A8b81e";
+const SOLAR_TOKEN_ADDRESS = contractAddresses.token;
 const ERC20_ABI = [
   "function balanceOf(address owner) view returns (uint256)",
   "function transfer(address to, uint256 amount) public returns (bool)",

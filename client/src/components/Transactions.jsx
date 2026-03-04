@@ -6,10 +6,11 @@ import { shortenAddress } from "../utils/shortenAddress";
 import SolarToken from "../utils/test/SolarToken.json";
 import Shop from "../utils/test/Shop.json";
 import SolarPanels from "../utils/test/SolarPanels.json";
+import contractAddresses from "../utils/contractAddress.json";
 import "../style/Transactions.css"; // Import CSS
-const tokenAddress = "0x175da7583f3b085ac4Ab87AEd758c6Cd11A8b81e";
-const shopContractAddress = "0xb997c4257Bc9Ca4e68529A3d649D851562ca8b4c";
-const solarPanelsContractAddress = "0x39Cb00Cf33827D78892b1c83aF166CB7c4FCB3C0";
+const tokenAddress = contractAddresses.token;
+const shopContractAddress = contractAddresses.shop;
+const solarPanelsContractAddress = contractAddresses.solarPanels;
 
 // Solar panel card component
 const PanelCard = ({ id, latitude, longitude, batteryTemp, dcPower, acPower, createdAt, owner, price, name, isMine, onList, onBuy, onCancel }) => {

@@ -2,7 +2,7 @@
 
 ## **Overview**
 
-**SolarSave** is an open-source platform dedicated to optimizing solar energy usage through blockchain, IoT, and artificial intelligence (AI) technologies. This project allows users to track solar energy production in real-time, predict efficiency, and incentivize energy-saving behaviors through a reward mechanism (SolarToken, abbreviated as SQC).
+**SolarSave** is an open-source platform dedicated to optimizing solar energy usage through blockchain, IoT, and artificial intelligence (AI) technologies. This project allows users to track solar energy production in real-time, predict efficiency, and incentivize energy-saving behaviors through a reward mechanism (SolarToken, abbreviated as SOLR).
 
 SolarSave is designed for individuals, communities, and organizations aiming to reduce energy costs, lower carbon footprints, and participate in the renewable energy revolution.
 
@@ -41,7 +41,7 @@ SolarSave is designed for individuals, communities, and organizations aiming to 
 | **React.js**  | Frontend interface and interactive dashboard |
 | **Solidity**  | Smart contract development        |
 | **Hardhat**   | Blockchain development and testing |
-| **Web3.js**   | Frontend-blockchain interaction   |
+| **ethers.js** | Frontend-blockchain interaction   |
 | **Docker**    | Deployment and containerization   |
 
 ---
@@ -72,16 +72,37 @@ Or run in the terminal:
 uvicorn main:app --reload
 ```
 
-### **4. Smart Contract Deployment**
-Use Hardhat to deploy smart contracts:
+### **4. Smart Contract Deployment (Local Hardhat)**
 ```bash
 cd ../smart_contract
 npm install
-npx hardhat run scripts/deploy.js --network ganache
-(Each smart contract deployment file can be run separately)
+npx hardhat node
+```
+In a second terminal:
+```bash
+cd smart_contract
+npx hardhat run scripts/deployAll.js --network localhost
 ```
 
-> **Note**: Replace the network with Ethereum mainnet or testnet as needed.
+This script also:
+- Authorizes the Shop contract in SolarPanels
+- Airdrops SOLR to local accounts
+- Funds the PowerReward pool
+
+Optional environment variables:
+- `AIRDROP_AMOUNT` (default `1000` SOLR)
+- `REWARD_FUND_AMOUNT` (default `10000` SOLR)
+- `AIRDROP_ACCOUNTS` (comma-separated addresses)
+
+The deployment scripts write addresses to:
+- `smart_contract/scripts/contractAddress.json`
+- `client/src/utils/contractAddress.json` (auto-synced for the frontend)
+
+### **5. MetaMask (Local)**
+- Network: `Hardhat Local`
+- RPC URL: `http://127.0.0.1:8545`
+- Chain ID: `31337`
+- Import a Hardhat account private key to get test ETH
 
 ---
 
@@ -90,12 +111,13 @@ npx hardhat run scripts/deploy.js --network ganache
 ```
 SolarSave/
 ├── client/                         # Frontend code
-│   ├── components/                 # Shared React components
-│   ├── pages/                      # Page components
-│   ├── styles/                     # CSS and style files
-│   ├── utils/                      # Utility functions
-│   ├── Aapp.js                     # Main application file
-│   ├── index.js                    # Entry file
+│   ├── src/                        # Frontend source
+│   │   ├── components/             # Shared React components
+│   │   ├── style/                  # CSS and style files
+│   │   ├── utils/                  # Utility functions
+│   │   ├── App.jsx                 # Main application file
+│   │   ├── index.jsx               # Entry file
+│   ├── package.json
 │   └── package.json
 ├── Simulator/                      # Simulator
 │   ├── SolarPVModel.py             # Solar panel logic simulation
@@ -103,10 +125,11 @@ SolarSave/
 │   ├── requirements.txt            # Python dependencies
 ├── smart_contract/                 # Smart contracts
 │   ├── contracts/                  # Smart contract files
-│   │   ├── SolarPanelStore.sol     # Solar panel management contract
-│   │   ├── MessageStore.sol        # Chat feature contract (optional)
+│   │   ├── SolarPanels.sol         # Solar panel registry
+│   │   ├── Shop.sol                # Panel marketplace
+│   │   ├── PowerReward.sol         # Reward distribution
+│   │   ├── SolarToken.sol          # ERC-20 token (SOLR)
 │   ├── scripts/                    # Deployment and interaction scripts
-│   ├── test/                       # Contract tests
 │   ├── hardhat.config.js           # Hardhat configuration
 │   ├── package.json
 │   ├── README.md                   # Smart contract documentation
@@ -136,76 +159,14 @@ SolarSave/
 
 ## **Smart Contract Features**
 
-### **Core Functions**
+### **Core Contracts**
+- **SolarPanels.sol**: create/update panels, query all panels, query panels by owner.
+- **Shop.sol**: list panels for sale, buy panels, approve sales.
+- **PowerReward.sol**: claim rewards based on panel DC power; owner can deposit reward tokens.
+- **SolarToken.sol**: ERC-20 token (SOLR) used for payments and rewards.
 
-#### **SolarPanelCreate.sol**
-1. **createPanel**  
-   Creates a new solar panel, recording its location (latitude and longitude), battery temperature, DC power, AC power, and owner information.
-
-2. **updatePanel**  
-   Allows the owner to update the solar panel's battery temperature, DC power, and AC power every 24 hours.
-
-3. **getPanel**  
-   Queries detailed information about a specific solar panel, including owner, location, power generation data, and last update time.
-
-4. **getTotalPanels**  
-   Retrieves the total number of registered solar panels for statistics and frontend display.
-
----
-
-#### **PanelTrade.sol**
-1. **createPanel**  
-   Registers a new solar panel, including location description, status (e.g., "Active"), transaction count, and ownership information.
-
-2. **purchasePanel**  
-   Allows users to purchase a solar panel by paying tokens, completing secure ownership transfer, and recording transaction history.
-
-3. **updatePanel**  
-   Updates the transaction count, status, or power generation data of a solar panel. Only the owner has permission to perform this operation.
-
-4. **getPanel**  
-   Queries detailed information about a specific solar panel, including transaction history and status.
-
----
-
-#### **GiveRewards.sol**
-1. **registerPanel**  
-   Registers a solar panel to participate in the reward mechanism while recording DC power and AC power data.
-
-2. **distributeRewards**  
-   Calculates rewards based on the solar panel's power generation data (DC power and AC power) and distributes them to the owner every 24 hours.
-
-3. **updatePanel**  
-   Updates the panel's power generation data (DC power and AC power). Only the owner has permission to perform this operation.
-
-4. **claimRewards**  
-   Allows users to withdraw accumulated SolarToken rewards to their personal wallets.
-
-5. **getPanel**  
-   Queries information about a specific solar panel, including power generation data and reward status.
-
----
-
-#### **SolarToken.sol**
-1. **ERC-20 Standard**  
-   The token is named `SolarToken` with the symbol `SQC`, compliant with the ERC-20 standard.
-
-2. **Mint Tokens**  
-   The contract owner can mint new tokens to distribute rewards to users.
-
-3. **Burn Tokens**  
-   The contract owner can burn unused tokens to reduce the total supply.
-
----
-
-### **Integration Notes**
-These contracts are modularly designed, each responsible for specific functions:
-- **SolarPanelCreate.sol**: Manages solar panel creation and maintenance.
-- **PanelTrade.sol**: Supports user transactions and status management.
-- **GiveRewards.sol**: Automatically distributes rewards based on power generation.
-- **SolarToken.sol**: As a smart token, manages the distribution and management of rewards.
-
-The combination of these contracts enables comprehensive solar panel lifecycle management, including creation, updates, transactions, incentives, and reward distribution.
+### **Local Rewards Note**
+For local testing, the reward contract must hold SOLR. Deposit SOLR from the owner account before claiming rewards.
 
 ---
 

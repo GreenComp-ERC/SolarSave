@@ -1,4 +1,5 @@
 const { ethers } = require("hardhat");
+const { writeAddresses } = require("./addressStore");
 
 async function main() {
     const SolarToken = await ethers.getContractFactory("SolarToken");
@@ -6,6 +7,7 @@ async function main() {
 
     await token.waitForDeployment(); // ⚠ Use `waitForDeployment()` instead of `deployed()`
 
+    writeAddresses({ token: token.target });
     console.log(`🚀 SolarToken deployed successfully! Contract address: ${token.target}`);
 }
 

@@ -3,11 +3,12 @@ import { ethers } from "ethers";
 import ShopABI from "../../utils/test/Shop.json";
 import ERC20ABI from "../../utils/test/SolarToken.json";
 import SolarPanelsABI from "../../utils/test/SolarPanels.json";
+import contractAddresses from "../../utils/contractAddress.json";
 import "../../style/TestPanels.css";
 
-const shopAddress = "0xb997c4257Bc9Ca4e68529A3d649D851562ca8b4c";
-const tokenAddress = "0x175da7583f3b085ac4Ab87AEd758c6Cd11A8b81e";
-const panelContractAddress = "0x39Cb00Cf33827D78892b1c83aF166CB7c4FCB3C0";
+const shopAddress = contractAddresses.shop;
+const tokenAddress = contractAddresses.token;
+const panelContractAddress = contractAddresses.solarPanels;
 
 const Shop = () => {
   const [account, setAccount] = useState("");

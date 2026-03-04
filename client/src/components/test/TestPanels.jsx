@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import SolarPanels from "../../utils/test/SolarPanels.json";
+import contractAddresses from "../../utils/contractAddress.json";
 import "../../style/TestPanels.css";
 
-const contractAddress = "0x39Cb00Cf33827D78892b1c83aF166CB7c4FCB3C0"; // Your SolarPanels contract address
+const contractAddress = contractAddresses.solarPanels; // Your SolarPanels contract address
 
 const TestPanels = () => {
     const [contract, setContract] = useState(null);

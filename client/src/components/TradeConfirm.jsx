@@ -8,11 +8,12 @@ import { ethers } from "ethers";
 // import SolarPanels from "../utils/SolarPanels.json";
 import "../style/TradeConfirm.css";
 import SolarPanels from "../utils/test/SolarPanels.json";
+import contractAddresses from "../utils/contractAddress.json";
 // const contractAddress = "0xF18dcE37a1736D18D2734c5611EE9433d8D9c2F2"; // Solar panel contract address
-const tokenAddress = "0x175da7583f3b085ac4Ab87AEd758c6Cd11A8b81e"; // ERC20 token contract address
+const tokenAddress = contractAddresses.token; // ERC20 token contract address
 const recipientAddress = "0xf5CcA82D37db8d2B0503c20f0f21A3a8eD25F4E9"; // Funds recipient address
 const fixedPrice = ethers.utils.parseUnits("2", 18); // 2 ERC20 tokens
-const contractAddress = "0x39Cb00Cf33827D78892b1c83aF166CB7c4FCB3C0";
+const contractAddress = contractAddresses.solarPanels;
 const TradeConfirm = ({ close, lat, lng, batterTemp, dcPower, acPower, sandiaModuleName, cecInverterName }) => {
   const [provider, setProvider] = useState(null);
   const [signer, setSigner] = useState(null);
@@ -23,19 +24,44 @@ const TradeConfirm = ({ close, lat, lng, batterTemp, dcPower, acPower, sandiaMod
   const [transactionStatus, setTransactionStatus] = useState("");
 
   useEffect(() => {
-    if (window.ethereum) {
+    const initWallet = async () => {
+      if (!window.ethereum) return;
+
       const web3Provider = new ethers.providers.Web3Provider(window.ethereum);
+      await window.ethereum.request({ method: "eth_requestAccounts" });
       const web3Signer = web3Provider.getSigner();
+
       setProvider(web3Provider);
       setSigner(web3Signer);
       setContract(new ethers.Contract(contractAddress, SolarPanels.abi, web3Signer));
-      setTokenContract(new ethers.Contract(tokenAddress, ["function transfer(address to, uint256 amount) public returns (bool)"], web3Signer));
-      web3Signer.getAddress().then(setCurrentAccount);
+      setTokenContract(
+        new ethers.Contract(
+          tokenAddress,
+          ["function transfer(address to, uint256 amount) public returns (bool)"],
+          web3Signer
+        )
+      );
+
+      const address = await web3Signer.getAddress();
+      setCurrentAccount(address);
+    };
+
+    initWallet();
+
+    if (window.ethereum) {
+      const onAccountsChanged = (accounts) => {
+        setCurrentAccount(accounts?.[0] || null);
+      };
+      window.ethereum.on("accountsChanged", onAccountsChanged);
+      return () => window.ethereum.removeListener("accountsChanged", onAccountsChanged);
     }
   }, []);
 
   const handleSubmit = async () => {
-    if (!contract || !tokenContract || !signer) return;
+    if (!contract || !tokenContract || !signer) {
+      setTransactionStatus("Wallet not ready. Please reconnect MetaMask.");
+      return;
+    }
     if (currentAccount && currentAccount.toLowerCase() === recipientAddress.toLowerCase()) {
     alert("You cannot register a panel to the recipient address itself!");
     return;

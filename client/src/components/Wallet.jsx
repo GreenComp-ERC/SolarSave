@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Sun, Send, Wallet as WalletIcon, Loader, Copy, Check } from "lucide-react";
 import { ethers } from "ethers";
+import contractAddresses from "../utils/contractAddress.json";
 
 import '../style/Wallet.css';
 
@@ -23,7 +24,7 @@ const mockEthers = {
 // Use ethers in production instead of mockEthers
 
 
-const SOLAR_TOKEN_ADDRESS = "0x175da7583f3b085ac4Ab87AEd758c6Cd11A8b81e";
+const SOLAR_TOKEN_ADDRESS = contractAddresses.token;
 const ERC20_ABI = [
   "function balanceOf(address owner) view returns (uint256)",
   "function transfer(address to, uint256 amount) public returns (bool)",
@@ -40,6 +41,9 @@ const Wallet = () => {
   const [isConnecting, setIsConnecting] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [txHistory, setTxHistory] = useState([]);
+  const [isOwner, setIsOwner] = useState(false);
+  const [mintAmount, setMintAmount] = useState("1000");
+  const [isMinting, setIsMinting] = useState(false);
 
   useEffect(() => {
     if (window.ethereum) {
@@ -65,10 +69,21 @@ const Wallet = () => {
 
       setAccount(accounts[0]);
       fetchBalance(accounts[0], provider);
+      await fetchOwnerStatus(accounts[0], provider);
     } catch (error) {
       console.error("Failed to connect wallet:", error);
     } finally {
       setIsConnecting(false);
+    }
+  };
+
+  const fetchOwnerStatus = async (address, provider) => {
+    try {
+      const contract = new ethers.Contract(SOLAR_TOKEN_ADDRESS, ERC20_ABI, provider);
+      const owner = await contract.owner();
+      setIsOwner(owner.toLowerCase() === address.toLowerCase());
+    } catch (error) {
+      setIsOwner(false);
     }
   };
 
@@ -158,6 +173,32 @@ const Wallet = () => {
     return `${addr.substring(0, 6)}...${addr.substring(addr.length - 4)}`;
   };
 
+  const mintToSelf = async () => {
+    if (!isOwner) {
+      alert("Only the token owner can mint SOLR.");
+      return;
+    }
+    if (!mintAmount || Number(mintAmount) <= 0) {
+      alert("Enter a valid mint amount");
+      return;
+    }
+
+    setIsMinting(true);
+    try {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(SOLAR_TOKEN_ADDRESS, ERC20_ABI, signer);
+      const tx = await contract.mint(account, ethers.utils.parseEther(mintAmount));
+      await tx.wait();
+      await fetchBalance(account, provider);
+    } catch (error) {
+      console.error("Mint failed:", error);
+      alert("Mint failed, please check console.");
+    } finally {
+      setIsMinting(false);
+    }
+  };
+
   return (
     <div className="wallet-container">
       {/* Header */}
@@ -197,6 +238,30 @@ const Wallet = () => {
                 <span className="wallet-balance-amount">{balance}</span>
               </div>
             </div>
+
+            {isOwner && (
+              <div className="wallet-section">
+                <h3 className="wallet-section-title">Owner Tools</h3>
+                <div className="wallet-input-row">
+                  <input
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={mintAmount}
+                    onChange={(e) => setMintAmount(e.target.value)}
+                    placeholder="Mint amount"
+                    className="wallet-input"
+                  />
+                  <button
+                    onClick={mintToSelf}
+                    className="wallet-btn"
+                    disabled={isMinting}
+                  >
+                    {isMinting ? "Minting..." : "Mint SOLR to my wallet"}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <button

@@ -4,9 +4,10 @@ import SolarPanelsABI from "../../utils/test/SolarPanels.json";
 import PowerRewardABI from "../../utils/test/PowerReward.json";
 import "../../style/TestPanels.css";
 import ERC20ABI from "../../utils/test/SolarToken.json"; // ✅ SOLR ABI
-const rewardTokenAddress = "0x175da7583f3b085ac4Ab87AEd758c6Cd11A8b81e"; // ✅ Replace with your deployed SOLR contract
-const solarPanelAddress = "0x39Cb00Cf33827D78892b1c83aF166CB7c4FCB3C0"; // Replace with your contract address
-const powerRewardAddress = "0x6CACbd2FfC69843Ef182C365a16CDB6552600326"; // Replace with your contract address
+import contractAddresses from "../../utils/contractAddress.json";
+const rewardTokenAddress = contractAddresses.token; // ✅ Replace with your deployed SOLR contract
+const solarPanelAddress = contractAddresses.solarPanels; // Replace with your contract address
+const powerRewardAddress = contractAddresses.powerReward; // Replace with your contract address
 
 const TestReward = () => {
     const [account, setAccount] = useState("");

@@ -7,9 +7,10 @@ import {
 import TradeScript from "./TradeConfirm";
 import PanelWindows from "./PanelWindows";
 import SolarPanels from "../utils/test/SolarPanels.json";
+import contractAddresses from "../utils/contractAddress.json";
 import "../style/SolarTrade.css";
 
-const contractAddress = "0x39Cb00Cf33827D78892b1c83aF166CB7c4FCB3C0";
+const contractAddress = contractAddresses.solarPanels;
 
 // This component handles the chart display using a more reliable approach
 const PowerChart = ({ data, chartType }) => {

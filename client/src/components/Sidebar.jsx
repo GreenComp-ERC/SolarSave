@@ -6,9 +6,10 @@ import {
   ChevronsRight, ArrowUpDown
 } from "lucide-react";
 import SolarPanels from "../utils/test/SolarPanels.json";
+import contractAddresses from "../utils/contractAddress.json";
 import "../style/Sidebar.css";
 
-const contractAddress = "0x39Cb00Cf33827D78892b1c83aF166CB7c4FCB3C0";
+const contractAddress = contractAddresses.solarPanels;
 const PANELS_PER_PAGE = 4; // Panels per page
 // Normalize panel location and power values
 const fixPanelData = (panel) => {
