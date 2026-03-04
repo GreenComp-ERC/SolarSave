@@ -2,6 +2,9 @@ require("@nomicfoundation/hardhat-toolbox");
 require("@nomicfoundation/hardhat-ethers");
 require("dotenv").config();
 
+const alchemyKey = process.env.ALCHEMY_API_KEY;
+const sepoliaKey = process.env.SEPOLIA_PRIVATE_KEY;
+
 module.exports = {
   solidity: {
     version: "0.8.20",
@@ -15,8 +18,8 @@ module.exports = {
 
   networks: {
     sepolia: {
-      url: `https://eth-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
-      accounts: [process.env.SEPOLIA_PRIVATE_KEY],
+      url: `https://eth-sepolia.g.alchemy.com/v2/${alchemyKey ?? ""}`,
+      accounts: sepoliaKey ? [sepoliaKey] : [],
       gas: "auto", // Allow auto gas estimation
       gasPrice: 10000000000, // 10 Gwei (adjustable)
     },
