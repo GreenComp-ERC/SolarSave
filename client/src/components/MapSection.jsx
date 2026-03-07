@@ -7,9 +7,8 @@ import TradeConfirm from "./TradeConfirm";
 import FactoryConfirm from "./FactoryConfirm";
 import kakilogo from "../../images/kali.png";
 import { TransactionContext } from "../context/TransactionContext";
-import PowerRewardABI from "../utils/test/PowerReward.json";
+import EnergyExchangeABI from "../utils/test/EnergyExchange.json";
 import contractAddresses from "../utils/contractAddress.json";
-import ERC20ABI from "../utils/test/SolarToken.json";
 import { ethers } from "ethers";
 // import SolarPanels from "../utils/SolarPanels.json";
 import SolarPanels from "../utils/test/SolarPanels.json";
@@ -46,14 +45,9 @@ const MapSection = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isPredicting, setIsPredicting] = useState(false);
 
-  const powerRewardAddress = contractAddresses.powerReward;
-  const rewardTokenAddress = contractAddresses.token;
+  const energyExchangeAddress = contractAddresses.energyExchange;
 
-  const [rewardContract, setRewardContract] = useState(null);
-  const [tokenContract, setTokenContract] = useState(null);
-  const [isRewardOwner, setIsRewardOwner] = useState(false);
-  const [fundAmount, setFundAmount] = useState("1000");
-  const [isFunding, setIsFunding] = useState(false);
+  const [exchangeContract, setExchangeContract] = useState(null);
   const [cooldownRemaining, setCooldownRemaining] = useState(null);
   const [lastClaimedAt, setLastClaimedAt] = useState(null);
   const [rewardPreview, setRewardPreview] = useState(null);
@@ -66,6 +60,7 @@ const MapSection = () => {
     myPanelsPower: 0
   });
   const [markers, setMarkers] = useState([]);
+  const isClaimable = rewardPreview && ethers.BigNumber.isBigNumber(rewardPreview) && rewardPreview.gt(0);
 
   // Connect wallet & contracts
   const connectToBlockchain = async () => {
@@ -85,26 +80,17 @@ const MapSection = () => {
     // ✅ Initialize contracts correctly
     const contractInstance = new ethers.Contract(contractAddress, SolarPanels.abi, signer);
     const factoryInstance = new ethers.Contract(factoryAddress, FACTORY_ABI, signer);
-    const rewardCtr = new ethers.Contract(powerRewardAddress, PowerRewardABI.abi, signer);
-    const tokenCtr = new ethers.Contract(rewardTokenAddress, ERC20ABI.abi, signer);
+    const exchangeCtr = new ethers.Contract(energyExchangeAddress, EnergyExchangeABI.abi, signer);
 
     setContract(contractInstance);
     setFactoryContract(factoryInstance);
-    setRewardContract(rewardCtr);
-    setTokenContract(tokenCtr);
-
-    try {
-      const owner = await tokenCtr.owner();
-      setIsRewardOwner(owner.toLowerCase() === accounts[0].toLowerCase());
-    } catch (e) {
-      setIsRewardOwner(false);
-    }
+    setExchangeContract(exchangeCtr);
 
     // ✅ Fetch reward-related info
-    const last = await rewardCtr.lastClaimedAt(accounts[0]);
+    const last = await exchangeCtr.lastClaimedAt(accounts[0]);
     setLastClaimedAt(last.toNumber());
 
-    const preview = await rewardCtr.previewReward(accounts[0]);
+    const preview = await exchangeCtr.previewPersonalReward(accounts[0]);
     setRewardPreview(preview);
 
     // ✅ Fetch panels
@@ -121,11 +107,19 @@ const MapSection = () => {
 };
   const claimReward = async () => {
   try {
-    if (!rewardContract) {
+    if (!exchangeContract) {
       alert("Contract not connected");
       return;
     }
-    const tx = await rewardContract.claimReward();
+
+    const accountToCheck = currentAccount || (await window.ethereum.request({ method: "eth_requestAccounts" }))[0];
+    const preview = await exchangeContract.previewPersonalReward(accountToCheck);
+    if (!preview || !ethers.BigNumber.isBigNumber(preview) || preview.lte(0)) {
+      alert("No reward to claim yet.");
+      return;
+    }
+
+    const tx = await exchangeContract.claimPersonalReward();
     await tx.wait();
     alert("✅ Reward claimed successfully!");
     await connectToBlockchain(); // Refresh rewardPreview and cooldown
@@ -135,36 +129,7 @@ const MapSection = () => {
   }
 };
 
-  const fundRewards = async () => {
-    if (!rewardContract || !tokenContract) {
-      alert("Contract not connected");
-      return;
-    }
-    if (!isRewardOwner) {
-      alert("Only the token owner can fund rewards.");
-      return;
-    }
-    if (!fundAmount || Number(fundAmount) <= 0) {
-      alert("Enter a valid fund amount");
-      return;
-    }
-
-    setIsFunding(true);
-    try {
-      const amountWei = ethers.utils.parseEther(fundAmount);
-      const approveTx = await tokenContract.approve(powerRewardAddress, amountWei);
-      await approveTx.wait();
-
-      const tx = await rewardContract.deposit(amountWei);
-      await tx.wait();
-      alert("✅ Reward pool funded successfully!");
-    } catch (e) {
-      console.error("❌ Funding failed:", e);
-      alert("❌ Funding failed!");
-    } finally {
-      setIsFunding(false);
-    }
-  };
+  
 
 
   const getClosestTimestamp = (keys, target) => {
@@ -748,30 +713,11 @@ const setShowNotification = (msg) => {
   <button
     className="button"
     onClick={claimReward}
-    disabled={cooldownRemaining > 0}
+    disabled={cooldownRemaining > 0 || !isClaimable}
   >
     Claim reward ({rewardPreview ? ethers.utils.formatUnits(rewardPreview, 18) : "Loading..."} SOLR)
   </button>
 
-  {isRewardOwner && (
-    <div className="reward-fund-controls">
-      <input
-        type="number"
-        min="1"
-        step="1"
-        value={fundAmount}
-        onChange={(e) => setFundAmount(e.target.value)}
-        placeholder="Fund amount"
-      />
-      <button
-        className="button"
-        onClick={fundRewards}
-        disabled={isFunding}
-      >
-        {isFunding ? "Funding..." : "Fund reward pool"}
-      </button>
-    </div>
-  )}
 </div>
 
 

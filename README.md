@@ -48,36 +48,44 @@ SolarSave is designed for individuals, communities, and organizations aiming to 
 
 ## **Installation and Running**
 
-### **1. Clone the Project**
+### **1. Prerequisites**
+- **Node.js**: 18+ (LTS recommended)
+- **Python**: 3.9+ (3.10+ recommended)
+- **Git**: latest
+- **MetaMask**: for local wallet interactions
+
+### **2. Clone the Project**
 ```bash
 git clone https://github.com/GreenComp-ERC/SolarSave.git
 cd SolarSave
 ```
 
-### **2. Frontend Setup**
-Navigate to the `client` directory and install dependencies:
+### **3. Install Dependencies**
+Frontend:
 ```bash
 cd client
 npm install
-npm run dev
 ```
 
-### **3. Simulator Setup**
-Install Python dependencies and run the simulator:
+Smart contracts:
 ```bash
-cd Simulator
-pip install -r requirements.txt
-python main.py
-Or run in the terminal:
-uvicorn main:app --reload
-```
-
-### **4. Smart Contract Deployment (Local Hardhat)**
-```bash
-cd smart_contract
+cd ../smart_contract
 npm install
+```
+
+Simulator:
+```bash
+cd ../Simulator
+pip install -r requirements.txt
+```
+
+### **4. Start Local Blockchain**
+```bash
+cd ../smart_contract
 npx hardhat node
 ```
+
+### **5. Deploy Contracts (Local Hardhat)**
 In a second terminal:
 ```bash
 cd smart_contract
@@ -88,21 +96,35 @@ This script also:
 - Authorizes the Shop contract in SolarPanels
 - Airdrops SOLR to local accounts
 - Funds the PowerReward pool
-
-Optional environment variables:
-- `AIRDROP_AMOUNT` (default `1000` SOLR)
-- `REWARD_FUND_AMOUNT` (default `10000` SOLR)
-- `AIRDROP_ACCOUNTS` (comma-separated addresses)
+- Syncs `Simulator/.env` for the simulator
 
 The deployment scripts write addresses to:
 - `smart_contract/scripts/contractAddress.json`
 - `client/src/utils/contractAddress.json` (auto-synced for the frontend)
 
-### **5. MetaMask (Local)**
+### **6. Start the Simulator**
+```bash
+cd ../Simulator
+python -m uvicorn main:app --reload
+```
+
+### **7. Start the Frontend**
+```bash
+cd ../client
+npm run dev
+```
+
+### **8. MetaMask (Local)**
 - Network: `Hardhat Local`
 - RPC URL: `http://127.0.0.1:8545`
 - Chain ID: `31337`
 - Import a Hardhat account private key to get test ETH
+
+---
+
+## **Troubleshooting**
+- **Global Supply / Global Demand is 0**: make sure the simulator is running and that at least one solar panel and factory are created on-chain.
+- **Rewards are 0**: the energy simulator must run at least one step to update the market and reward balances.
 
 ---
 

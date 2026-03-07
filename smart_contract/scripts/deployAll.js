@@ -1,9 +1,51 @@
 const hre = require("hardhat");
+const fs = require("fs");
+const path = require("path");
 const { writeAddresses } = require("./addressStore");
+
+const writeSimulatorEnv = (privateKey) => {
+  if (!privateKey) {
+    console.warn("\nSkipping simulator env sync: DEPLOYER_PRIVATE_KEY or SIMULATOR_PRIVATE_KEY not set.");
+    return;
+  }
+
+  const envPath = path.join(__dirname, "..", "..", "Simulator", ".env");
+  const envLines = [
+    "ENABLE_ENERGY_SIM=true",
+    `SIMULATOR_PRIVATE_KEY=${privateKey}`,
+    "SIMULATOR_RPC_URL=http://127.0.0.1:8545",
+    "SIMULATOR_STEP_SECONDS=60"
+  ];
+
+  fs.writeFileSync(envPath, envLines.join("\n") + "\n", { encoding: "utf-8" });
+  console.log("\nSimulator .env synced:", envPath);
+  console.log("Restart the simulator to apply new settings.");
+};
+
+const resolveSimulatorKey = (ownerAddress, ethers) => {
+  const explicitKey = process.env.DEPLOYER_PRIVATE_KEY || process.env.SIMULATOR_PRIVATE_KEY || "";
+  if (explicitKey) {
+    return explicitKey;
+  }
+
+  const mnemonic = process.env.HARDHAT_MNEMONIC || "test test test test test test test test test test test junk";
+  try {
+    const wallet = ethers.Wallet.fromPhrase(mnemonic);
+    if (wallet.address.toLowerCase() === ownerAddress.toLowerCase()) {
+      return wallet.privateKey;
+    }
+    console.warn("\nSkipping simulator env sync: derived mnemonic address does not match deployer.");
+  } catch (error) {
+    console.warn("\nSkipping simulator env sync: failed to derive private key from mnemonic.");
+  }
+
+  return "";
+};
 
 async function main() {
   const { ethers } = hre;
   const [owner, ...signers] = await ethers.getSigners();
+  const simulatorKey = resolveSimulatorKey(owner.address, ethers);
 
   console.log("\nDeploying contracts...");
 
@@ -19,6 +61,10 @@ async function main() {
   const factory = await FactoryRegistry.deploy();
   await factory.waitForDeployment();
 
+  const EnergyExchange = await ethers.getContractFactory("EnergyExchange");
+  const energyExchange = await EnergyExchange.deploy(token.target);
+  await energyExchange.waitForDeployment();
+
   const Shop = await ethers.getContractFactory("Shop");
   const shop = await Shop.deploy(token.target, panels.target);
   await shop.waitForDeployment();
@@ -31,6 +77,7 @@ async function main() {
     token: token.target,
     solarPanels: panels.target,
     factory: factory.target,
+    energyExchange: energyExchange.target,
     shop: shop.target,
     powerReward: reward.target,
   });
@@ -39,6 +86,7 @@ async function main() {
   console.log("- SolarToken:", token.target);
   console.log("- SolarPanels:", panels.target);
   console.log("- FactoryRegistry:", factory.target);
+  console.log("- EnergyExchange:", energyExchange.target);
   console.log("- Shop:", shop.target);
   console.log("- PowerReward:", reward.target);
 
@@ -74,6 +122,13 @@ async function main() {
   const depositTx = await reward.deposit(fundAmount);
   await depositTx.wait();
   console.log("Reward pool funded:", fundAmount.toString());
+
+  console.log("\nFunding exchange reward pool...");
+  const exchangeFundTx = await token.mint(energyExchange.target, fundAmount);
+  await exchangeFundTx.wait();
+  console.log("Exchange pool funded:", fundAmount.toString());
+
+  writeSimulatorEnv(simulatorKey);
 }
 
 main().catch((error) => {

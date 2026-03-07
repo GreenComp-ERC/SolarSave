@@ -6,9 +6,114 @@ from SolarPVModel import SolarPVModel
 import os
 from dotenv import load_dotenv
 import uvicorn
+import asyncio
+import json
+import string
+from web3 import Web3
+from eth_account import Account
 # Load environment variables
 load_dotenv()
 api_key = "0771554279f9204c977c7bf619352830"
+ENABLE_ENERGY_SIM = os.getenv("ENABLE_ENERGY_SIM", "false").lower() == "true"
+SIMULATOR_RPC_URL = os.getenv("SIMULATOR_RPC_URL", "http://127.0.0.1:8545")
+SIMULATOR_PRIVATE_KEY = os.getenv("SIMULATOR_PRIVATE_KEY", "")
+SIMULATOR_STEP_SECONDS = int(os.getenv("SIMULATOR_STEP_SECONDS", "3600"))
+
+CONTRACT_ADDRESS_PATH = os.path.join(
+    os.path.dirname(__file__),
+    "..",
+    "smart_contract",
+    "scripts",
+    "contractAddress.json"
+)
+
+SOLAR_PANELS_ABI = [
+    {
+        "inputs": [],
+        "name": "getAllPanels",
+        "outputs": [
+            {
+                "components": [
+                    {"internalType": "uint256", "name": "id", "type": "uint256"},
+                    {"internalType": "address", "name": "owner", "type": "address"},
+                    {"internalType": "uint256", "name": "latitude", "type": "uint256"},
+                    {"internalType": "uint256", "name": "longitude", "type": "uint256"},
+                    {"internalType": "uint256", "name": "batteryTemperature", "type": "uint256"},
+                    {"internalType": "uint256", "name": "dcPower", "type": "uint256"},
+                    {"internalType": "uint256", "name": "acPower", "type": "uint256"},
+                    {"internalType": "uint256", "name": "createdAt", "type": "uint256"},
+                    {"internalType": "bool", "name": "exists", "type": "bool"}
+                ],
+                "internalType": "struct SolarPanels.Panel[]",
+                "name": "",
+                "type": "tuple[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    }
+]
+
+FACTORY_ABI = [
+    {
+        "inputs": [],
+        "name": "getAllFactories",
+        "outputs": [
+            {
+                "components": [
+                    {"internalType": "uint256", "name": "id", "type": "uint256"},
+                    {"internalType": "address", "name": "owner", "type": "address"},
+                    {"internalType": "uint256", "name": "latitude", "type": "uint256"},
+                    {"internalType": "uint256", "name": "longitude", "type": "uint256"},
+                    {"internalType": "uint256", "name": "powerConsumption", "type": "uint256"},
+                    {"internalType": "uint256", "name": "createdAt", "type": "uint256"},
+                    {"internalType": "bool", "name": "exists", "type": "bool"}
+                ],
+                "internalType": "struct FactoryRegistry.Factory[]",
+                "name": "",
+                "type": "tuple[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    }
+]
+
+ENERGY_EXCHANGE_ABI = [
+    {
+        "inputs": [
+            {"internalType": "address[]", "name": "users", "type": "address[]"},
+            {"internalType": "uint256[]", "name": "userEnergy", "type": "uint256[]"},
+            {"internalType": "uint256", "name": "totalEnergy", "type": "uint256"},
+            {"internalType": "uint256", "name": "demandEnergy", "type": "uint256"}
+        ],
+        "name": "updateMarketStep",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {"internalType": "uint256", "name": "factoryId", "type": "uint256"},
+            {"internalType": "uint256", "name": "energyAmount", "type": "uint256"}
+        ],
+        "name": "consumeFactoryEnergy",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {"internalType": "uint256", "name": "", "type": "uint256"}
+        ],
+        "name": "factoryEnergyBalance",
+        "outputs": [
+            {"internalType": "uint256", "name": "", "type": "uint256"}
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    }
+]
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -21,6 +126,164 @@ app.add_middleware(
     allow_methods=["*"],  # Allow all HTTP methods
     allow_headers=["*"],  # Allow all HTTP headers
 )
+
+
+def load_contract_addresses():
+    try:
+        with open(CONTRACT_ADDRESS_PATH, "r", encoding="utf-8") as handle:
+            return json.load(handle)
+    except Exception:
+        return {}
+
+
+def normalize_private_key(raw_key):
+    if not raw_key:
+        return None, "SIMULATOR_PRIVATE_KEY is not set"
+
+    cleaned = raw_key.strip()
+    if not cleaned or "<" in cleaned or ">" in cleaned:
+        return None, "SIMULATOR_PRIVATE_KEY is not set to a real private key"
+
+    if cleaned.startswith("0x"):
+        cleaned = cleaned[2:]
+
+    if len(cleaned) != 64:
+        return None, "SIMULATOR_PRIVATE_KEY must be 64 hex characters (with or without 0x prefix)"
+
+    if any(ch not in string.hexdigits for ch in cleaned):
+        return None, "SIMULATOR_PRIVATE_KEY contains non-hex characters"
+
+    return "0x" + cleaned.lower(), None
+
+
+def build_web3():
+    normalized_key, error = normalize_private_key(SIMULATOR_PRIVATE_KEY)
+    if error:
+        print(f"Energy simulator disabled: {error}")
+        return None, None
+
+    w3 = Web3(Web3.HTTPProvider(SIMULATOR_RPC_URL))
+    if not w3.is_connected():
+        print("Energy simulator disabled: unable to connect to RPC")
+        return None, None
+
+    account = Account.from_key(normalized_key)
+    return w3, account
+
+
+def send_transaction(w3, account, tx, nonce):
+    tx.update({
+        "nonce": nonce,
+        "gas": tx.get("gas", 500000),
+        "chainId": w3.eth.chain_id
+    })
+
+    latest_block = w3.eth.get_block("latest")
+    base_fee = latest_block.get("baseFeePerGas")
+    if base_fee is not None:
+        max_priority_fee = w3.eth.max_priority_fee
+        tx.update({
+            "maxFeePerGas": int(base_fee * 2 + max_priority_fee),
+            "maxPriorityFeePerGas": int(max_priority_fee)
+        })
+    else:
+        tx.update({
+            "gasPrice": w3.eth.gas_price
+        })
+    signed = account.sign_transaction(tx)
+    raw_tx = getattr(signed, "rawTransaction", None) or signed.raw_transaction
+    tx_hash = w3.eth.send_raw_transaction(raw_tx)
+    w3.eth.wait_for_transaction_receipt(tx_hash)
+    return nonce + 1
+
+
+def calculate_market_step(panels, factories):
+    total_dc = 0
+    user_dc = {}
+    total_demand = 0
+
+    for panel in panels:
+        dc_power = panel[5]
+        total_dc += dc_power
+        owner = panel[1]
+        user_dc[owner] = user_dc.get(owner, 0) + dc_power
+
+    for factory in factories:
+        total_demand += factory[4]
+
+    users = []
+    user_energy = []
+    for owner, dc_power in user_dc.items():
+        if dc_power > 0:
+            users.append(owner)
+            user_energy.append(dc_power)
+
+    return users, user_energy, total_dc, total_demand
+
+
+async def market_loop():
+    w3, account = build_web3()
+    if not w3 or not account:
+        print("Energy simulator disabled: missing RPC or private key")
+        return
+
+    addresses = load_contract_addresses()
+    panels_address = addresses.get("solarPanels")
+    factory_address = addresses.get("factory")
+    exchange_address = addresses.get("energyExchange")
+
+    if not panels_address or not factory_address or not exchange_address:
+        print("Energy simulator disabled: missing contract addresses")
+        return
+
+    panels_contract = w3.eth.contract(address=panels_address, abi=SOLAR_PANELS_ABI)
+    factory_contract = w3.eth.contract(address=factory_address, abi=FACTORY_ABI)
+    exchange_contract = w3.eth.contract(address=exchange_address, abi=ENERGY_EXCHANGE_ABI)
+
+    while True:
+        try:
+            panels = panels_contract.functions.getAllPanels().call()
+            factories = factory_contract.functions.getAllFactories().call()
+
+            users, user_energy, total_energy, total_demand = calculate_market_step(panels, factories)
+
+            nonce = w3.eth.get_transaction_count(account.address)
+            update_tx = exchange_contract.functions.updateMarketStep(
+                users,
+                user_energy,
+                total_energy,
+                total_demand
+            ).build_transaction({
+                "from": account.address
+            })
+            nonce = send_transaction(w3, account, update_tx, nonce)
+
+            for factory in factories:
+                factory_id = factory[0]
+                consumption = factory[4]
+                balance = exchange_contract.functions.factoryEnergyBalance(factory_id).call()
+                if balance == 0:
+                    continue
+                to_consume = consumption if balance >= consumption else balance
+                if to_consume == 0:
+                    continue
+                consume_tx = exchange_contract.functions.consumeFactoryEnergy(
+                    factory_id,
+                    to_consume
+                ).build_transaction({
+                    "from": account.address
+                })
+                nonce = send_transaction(w3, account, consume_tx, nonce)
+        except Exception as exc:
+            print(f"Energy simulator step failed: {exc}")
+
+        await asyncio.sleep(SIMULATOR_STEP_SECONDS)
+
+
+@app.on_event("startup")
+async def startup_event():
+    if ENABLE_ENERGY_SIM:
+        asyncio.create_task(market_loop())
 
 # Define input models
 class SolarRequest(BaseModel):
