@@ -460,6 +460,55 @@ body {
   padding: 8px;
 }
 
+/* Factories Section */
+.factories-section {
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px solid var(--dark-border);
+}
+
+.factories-switch {
+  margin-top: 8px;
+}
+
+.factory-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.factory-item {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 8px;
+  padding: 10px;
+  transition: border-color 0.2s ease;
+}
+
+.factory-item:hover {
+  border-color: rgba(255, 122, 0, 0.5);
+}
+
+.factory-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.factory-id {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.factory-metrics {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
 .empty-state {
   display: flex;
   flex-direction: column;

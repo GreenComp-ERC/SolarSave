@@ -4,6 +4,7 @@ import "leaflet/dist/leaflet.css";
 import Sidebar from "./Sidebar";
 import PanelWindows from "./PanelWindows";
 import TradeConfirm from "./TradeConfirm";
+import FactoryConfirm from "./FactoryConfirm";
 import kakilogo from "../../images/kali.png";
 import { TransactionContext } from "../context/TransactionContext";
 import PowerRewardABI from "../utils/test/PowerReward.json";
@@ -15,6 +16,11 @@ import SolarPanels from "../utils/test/SolarPanels.json";
 import "../style/MapSection.css";
 import axios from "axios";
 const contractAddress = contractAddresses.solarPanels;
+const factoryAddress = contractAddresses.factory;
+const FACTORY_ABI = [
+  "function getAllFactories() view returns (tuple(uint256 id,address owner,uint256 latitude,uint256 longitude,uint256 powerConsumption,uint256 createdAt,bool exists)[])",
+  "function getFactoriesOf(address user) view returns (tuple(uint256 id,address owner,uint256 latitude,uint256 longitude,uint256 powerConsumption,uint256 createdAt,bool exists)[])"
+];
 
 const MapSection = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -22,14 +28,20 @@ const MapSection = () => {
   const [selectedPanel, setSelectedPanel] = useState(null);
   const [showPanelDetails, setShowPanelDetails] = useState(false);
   const [showTradeScript, setShowTradeScript] = useState(false);
+  const [showFactoryModal, setShowFactoryModal] = useState(false);
   const [isConfirmingPanel, setIsConfirmingPanel] = useState(false);
   const [pendingPanelLocation, setPendingPanelLocation] = useState(null);
+  const [pendingFactoryLocation, setPendingFactoryLocation] = useState(null);
   const [mapInstance, setMapInstance] = useState(null);
+  const [contextMenu, setContextMenu] = useState(null);
   const { currentAccount, connectWallet } = useContext(TransactionContext);
   const [tradeScriptData, setTradeScriptData] = useState(null);
   const [contract, setContract] = useState(null);
+  const [factoryContract, setFactoryContract] = useState(null);
   const [allPanels, setAllPanels] = useState([]);
   const [myPanels, setMyPanels] = useState([]);
+  const [allFactories, setAllFactories] = useState([]);
+  const [myFactories, setMyFactories] = useState([]);
   const [showMyPanels, setShowMyPanels] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isPredicting, setIsPredicting] = useState(false);
@@ -72,10 +84,12 @@ const MapSection = () => {
 
     // ✅ Initialize contracts correctly
     const contractInstance = new ethers.Contract(contractAddress, SolarPanels.abi, signer);
+    const factoryInstance = new ethers.Contract(factoryAddress, FACTORY_ABI, signer);
     const rewardCtr = new ethers.Contract(powerRewardAddress, PowerRewardABI.abi, signer);
     const tokenCtr = new ethers.Contract(rewardTokenAddress, ERC20ABI.abi, signer);
 
     setContract(contractInstance);
+    setFactoryContract(factoryInstance);
     setRewardContract(rewardCtr);
     setTokenContract(tokenCtr);
 
@@ -96,6 +110,8 @@ const MapSection = () => {
     // ✅ Fetch panels
     await fetchPanels(contractInstance);
     await fetchMyPanels(contractInstance);
+    await fetchFactories(factoryInstance);
+    await fetchMyFactories(factoryInstance, accounts[0]);
 
   } catch (error) {
     console.error("Failed to connect to blockchain:", error);
@@ -203,7 +219,7 @@ const MapSection = () => {
   };
 
   const handleCreatePanel = (lat, lng) => {
-  if (currentAccount) {
+  if (!currentAccount) {
     alert("Please connect your wallet first!");
     connectWallet();
     return;
@@ -265,6 +281,54 @@ const setShowNotification = (msg) => {
   const cancelCreatePanel = () => {
     setIsConfirmingPanel(false);
     setPendingPanelLocation(null);
+  };
+
+  const openContextMenu = (lat, lng, position) => {
+    setContextMenu({
+      lat,
+      lng,
+      x: position.x,
+      y: position.y
+    });
+  };
+
+  const closeContextMenu = () => {
+    setContextMenu(null);
+  };
+
+  const handleMenuSolarPanel = () => {
+    if (!contextMenu) return;
+    const { lat, lng } = contextMenu;
+    closeContextMenu();
+    handleCreatePanel(lat, lng);
+  };
+
+  const handleMenuFactory = () => {
+    if (!contextMenu) return;
+    const { lat, lng } = contextMenu;
+    closeContextMenu();
+    if (!currentAccount) {
+      alert("Please connect your wallet first!");
+      connectWallet();
+      return;
+    }
+    setPendingFactoryLocation({ lat, lng });
+    setShowFactoryModal(true);
+  };
+
+  const createFactoryOnClose = async (shouldRefresh = true) => {
+    if (shouldRefresh && pendingFactoryLocation) {
+      try {
+        await fetchFactories();
+        await fetchMyFactories();
+        showNotification("Factory created successfully!");
+      } catch (error) {
+        console.error("Failed to refresh factories:", error);
+        showNotification("Failed to refresh factories", "error");
+      }
+    }
+    setPendingFactoryLocation(null);
+    setShowFactoryModal(false);
   };
 
   const createPanelOnClose = async (shouldRefresh = true) => {
@@ -372,6 +436,69 @@ const setShowNotification = (msg) => {
     }
   };
 
+  const normalizeFactory = (factory) => {
+    let lat = factory.latitude;
+    let lng = factory.longitude;
+    let consumption = factory.powerConsumption;
+
+    if (lat > 90 || lng > 180 || lat < -90 || lng < -180) {
+      if (Math.abs(lat) > 90 || Math.abs(lng) > 180) {
+        lat = lat / 10000;
+        lng = lng / 10000;
+        consumption = consumption / 10000;
+      }
+    }
+
+    return {
+      ...factory,
+      latitude: lat,
+      longitude: lng,
+      powerConsumption: consumption
+    };
+  };
+
+  const fetchFactories = async (factoryInstance = factoryContract) => {
+    if (!factoryInstance) return;
+
+    try {
+      const rawFactories = await factoryInstance.getAllFactories();
+      const formatted = rawFactories.map((factory, index) =>
+        normalizeFactory({
+          id: factory.id?.toNumber ? factory.id.toNumber() : index + 1,
+          owner: factory.owner,
+          latitude: factory.latitude.toNumber(),
+          longitude: factory.longitude.toNumber(),
+          powerConsumption: factory.powerConsumption.toNumber(),
+          createdAt: factory.createdAt?.toNumber ? factory.createdAt.toNumber() : 0
+        })
+      );
+      setAllFactories(formatted);
+    } catch (error) {
+      console.error("Failed to fetch all factories:", error);
+    }
+  };
+
+  const fetchMyFactories = async (factoryInstance = factoryContract, account = currentAccount) => {
+    if (!factoryInstance || !account) return;
+
+    try {
+      const rawFactories = await factoryInstance.getFactoriesOf(account);
+      const formatted = rawFactories.map((factory, index) =>
+        normalizeFactory({
+          id: factory.id?.toNumber ? factory.id.toNumber() : index + 1,
+          owner: factory.owner,
+          latitude: factory.latitude.toNumber(),
+          longitude: factory.longitude.toNumber(),
+          powerConsumption: factory.powerConsumption.toNumber(),
+          createdAt: factory.createdAt?.toNumber ? factory.createdAt.toNumber() : 0
+        })
+      );
+      setMyFactories(formatted);
+    } catch (error) {
+      console.error("Failed to fetch user factories:", error);
+    }
+  };
+
   useEffect(() => {
     connectToBlockchain();
 
@@ -427,7 +554,7 @@ const setShowNotification = (msg) => {
     const infoControl = L.control({ position: 'bottomleft' });
     infoControl.onAdd = function(map) {
       const div = L.DomUtil.create('div', 'info-control');
-      div.innerHTML = 'Right-click the map to create a solar panel';
+      div.innerHTML = 'Right-click the map to open the creation menu';
       return div;
     };
     infoControl.addTo(map);
@@ -446,7 +573,14 @@ const setShowNotification = (msg) => {
 
 
   map.on("contextmenu", (e) => {
-      handleCreatePanel(e.latlng.lat, e.latlng.lng);
+      openContextMenu(e.latlng.lat, e.latlng.lng, {
+        x: e.originalEvent.clientX,
+        y: e.originalEvent.clientY
+      });
+    });
+
+  map.on("click", () => {
+      closeContextMenu();
     });
     return () => {
       map.remove();
@@ -464,6 +598,7 @@ const setShowNotification = (msg) => {
     });
 
     const panelsToShow = showMyPanels ? myPanels : allPanels;
+    const factoriesToShow = showMyPanels ? myFactories : allFactories;
     const customIcon = L.icon({
       iconUrl: kakilogo,
       iconSize: [50, 50],
@@ -526,7 +661,39 @@ const setShowNotification = (msg) => {
       });
     });
 
-  }, [mapInstance, allPanels, myPanels, showMyPanels]);
+    const factoryIcon = L.divIcon({
+      className: "factory-marker",
+      html: "<span>🏭</span>",
+      iconSize: [30, 30],
+      iconAnchor: [15, 30]
+    });
+
+    factoriesToShow.forEach((factory) => {
+      const marker = L.marker([factory.latitude, factory.longitude], { icon: factoryIcon })
+        .addTo(mapInstance)
+        .bindPopup(
+          `<div class="custom-popup">
+            <h3>Factory ID: ${factory.id}</h3>
+            <div class="popup-stats">
+              <div class="stat-item">
+                <span class="stat-label">Owner:</span>
+                <span class="stat-value owner-address">${factory.owner.substring(0, 6)}...${factory.owner.substring(factory.owner.length - 4)}</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Consumption:</span>
+                <span class="stat-value">${factory.powerConsumption}W</span>
+              </div>
+            </div>
+          </div>`,
+          { className: "custom-popup-container" }
+        );
+
+      marker.on("popupopen", () => {
+        setSelectedPanel(null);
+      });
+    });
+
+  }, [mapInstance, allPanels, myPanels, allFactories, myFactories, showMyPanels]);
 
 
     // Add panels fetched from blockchain
@@ -540,11 +707,14 @@ const setShowNotification = (msg) => {
         onVisibilityChange={setSidebarVisible}
       />
 
-      <div className={`map-container ${sidebarVisible ? "with-sidebar" : "no-sidebar"}`}>
+      <div
+        className={`map-container ${sidebarVisible ? "with-sidebar" : "no-sidebar"}`}
+        onClick={closeContextMenu}
+      >
         <div className="header-overlay">
           <div className="header-content">
             <h2 className="header-title">Solar Panel Network</h2>
-            <p className="header-subtitle">Right-click the map to create a solar panel and earn rewards</p>
+            <p className="header-subtitle">Right-click the map to open the creation menu</p>
           </div>
         </div>
 
@@ -629,6 +799,22 @@ const setShowNotification = (msg) => {
           />
         )}
 
+        {/* Context menu */}
+        {contextMenu && (
+          <div
+            className="map-context-menu"
+            style={{ top: contextMenu.y, left: contextMenu.x }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button className="map-context-item" onClick={handleMenuSolarPanel}>
+              Solar Panel
+            </button>
+            <button className="map-context-item" onClick={handleMenuFactory}>
+              Factory
+            </button>
+          </div>
+        )}
+
         {/* Map */}
         <div id="map" className="map"></div>
 
@@ -667,6 +853,13 @@ const setShowNotification = (msg) => {
           acPower={tradeScriptData.acPower}
           sandiaModuleName={tradeScriptData.sandia_module_name}
           cecInverterName={tradeScriptData.cec_inverter_name}
+        />
+      )}
+      {showFactoryModal && pendingFactoryLocation && (
+        <FactoryConfirm
+          close={createFactoryOnClose}
+          lat={pendingFactoryLocation.lat}
+          lng={pendingFactoryLocation.lng}
         />
       )}
       {isPredicting && (

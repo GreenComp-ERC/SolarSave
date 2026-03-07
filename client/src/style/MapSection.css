@@ -45,6 +45,35 @@
   z-index: 1;
 }
 
+/* Context Menu */
+.map-context-menu {
+  position: fixed;
+  z-index: 10050;
+  background: var(--popup-bg);
+  border: 1px solid var(--popup-border);
+  border-radius: 10px;
+  padding: 6px;
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: var(--glass-blur);
+  min-width: 160px;
+}
+
+.map-context-item {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--text-light);
+  text-align: left;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.map-context-item:hover {
+  background: rgba(52, 152, 219, 0.25);
+}
+
 /* Header Overlay */
 .header-overlay {
   position: absolute;
@@ -334,6 +363,20 @@
 /* Custom Marker Animation */
 .pulse-icon {
   animation: pulse 2s infinite;
+}
+
+.factory-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: rgba(255, 122, 0, 0.15);
+  border: 1px solid rgba(255, 122, 0, 0.6);
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(255, 122, 0, 0.35);
+  color: #ffb26b;
+  font-size: 16px;
 }
 
 @keyframes pulse {

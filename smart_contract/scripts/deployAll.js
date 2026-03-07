@@ -15,6 +15,10 @@ async function main() {
   const panels = await SolarPanels.deploy();
   await panels.waitForDeployment();
 
+  const FactoryRegistry = await ethers.getContractFactory("FactoryRegistry");
+  const factory = await FactoryRegistry.deploy();
+  await factory.waitForDeployment();
+
   const Shop = await ethers.getContractFactory("Shop");
   const shop = await Shop.deploy(token.target, panels.target);
   await shop.waitForDeployment();
@@ -26,6 +30,7 @@ async function main() {
   writeAddresses({
     token: token.target,
     solarPanels: panels.target,
+    factory: factory.target,
     shop: shop.target,
     powerReward: reward.target,
   });
@@ -33,6 +38,7 @@ async function main() {
   console.log("\nContracts deployed:");
   console.log("- SolarToken:", token.target);
   console.log("- SolarPanels:", panels.target);
+  console.log("- FactoryRegistry:", factory.target);
   console.log("- Shop:", shop.target);
   console.log("- PowerReward:", reward.target);
 

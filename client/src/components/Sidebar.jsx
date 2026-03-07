@@ -2,19 +2,22 @@ import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import {
   Sun, List, ChevronLeft, ChevronRight, Zap, Thermometer,
-  Globe, Lock, PlusCircle, Search, Filter, ChevronsLeft,
-    ChevronsRight, ArrowUpDown, Unlock
+  Globe, Lock, Search, ChevronsLeft, ChevronsRight, Unlock, Factory
 } from "lucide-react";
 import SolarPanels from "../utils/test/SolarPanels.json";
 import contractAddresses from "../utils/contractAddress.json";
 import "../style/Sidebar.css";
 
 const contractAddress = contractAddresses.solarPanels;
-const PANELS_PER_PAGE = 4; // Panels per page
-// Normalize panel location and power values
+const factoryAddress = contractAddresses.factory;
+const FACTORY_ABI = [
+  "function getAllFactories() view returns (tuple(uint256 id,address owner,uint256 latitude,uint256 longitude,uint256 powerConsumption,uint256 createdAt,bool exists)[])",
+  "function getFactoriesOf(address user) view returns (tuple(uint256 id,address owner,uint256 latitude,uint256 longitude,uint256 powerConsumption,uint256 createdAt,bool exists)[])"
+];
+const ITEMS_PER_PAGE = 4;
+
 const fixPanelData = (panel) => {
   let { lat, lng, batteryTemp, dcPower, acPower } = panel;
-
   if (lat > 90 || lng > 180 || lat < -90 || lng < -180) {
     if (Math.abs(lat) > 90 || Math.abs(lng) > 180) {
       lat = lat / 10000;
@@ -24,540 +27,377 @@ const fixPanelData = (panel) => {
       acPower = acPower / 10000;
     }
   }
+  return { ...panel, latitude: lat, longitude: lng, batteryTemperature: batteryTemp, dcPower, acPower };
+};
 
-  return {
-    ...panel,
-    latitude: lat,
-    longitude: lng,
-    batteryTemperature: batteryTemp,
-    dcPower,
-    acPower,
+const fixFactoryData = (factory) => {
+  let { latitude, longitude, powerConsumption } = factory;
+  if (latitude > 90 || longitude > 180 || latitude < -90 || longitude < -180) {
+    if (Math.abs(latitude) > 90 || Math.abs(longitude) > 180) {
+      latitude = latitude / 10000;
+      longitude = longitude / 10000;
+      powerConsumption = powerConsumption / 10000;
+    }
+  }
+  return { ...factory, latitude, longitude, powerConsumption };
+};
+
+// ---------------------------------------------------------
+// REUSABLE DATAVIEW COMPONENT
+// Handles rendering, searching, sorting, and pagination for any dataset
+// ---------------------------------------------------------
+const DataView = ({ viewType, title, allItems, myItems }) => {
+  const [showMy, setShowMy] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortOrder, setSortOrder] = useState({ field: "id", ascending: true });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [expandedItemId, setExpandedItemId] = useState(null);
+
+  // Reset pagination when toggling All/My or searching
+  useEffect(() => setCurrentPage(1), [showMy, searchTerm]);
+
+  const filterData = (data) => {
+    if (!searchTerm) return data;
+    const term = searchTerm.toLowerCase();
+    return data.filter(item => 
+      item.id.toString().includes(term) || 
+      item.owner.toLowerCase().includes(term) || 
+      item.latitude.toString().includes(term) || 
+      item.longitude.toString().includes(term)
+    );
   };
+
+  const sortData = (data) => {
+    return [...data].sort((a, b) => {
+      let compareA, compareB;
+      switch (sortOrder.field) {
+        case 'id': 
+          compareA = parseInt(a.id.toString()); 
+          compareB = parseInt(b.id.toString()); 
+          break;
+        case 'temperature': 
+          compareA = a.batteryTemperature ? parseInt(a.batteryTemperature.toString()) : 0; 
+          compareB = b.batteryTemperature ? parseInt(b.batteryTemperature.toString()) : 0; 
+          break;
+        case 'power': 
+          compareA = parseInt((viewType === 'panels' ? a.dcPower : a.powerConsumption).toString()); 
+          compareB = parseInt((viewType === 'panels' ? b.dcPower : b.powerConsumption).toString()); 
+          break;
+        default: 
+          compareA = parseInt(a.id.toString()); 
+          compareB = parseInt(b.id.toString());
+      }
+      return sortOrder.ascending ? compareA - compareB : compareB - compareA;
+    });
+  };
+
+  const currentData = showMy ? myItems : allItems;
+  const filteredData = filterData(currentData);
+  const sortedData = sortData(filteredData);
+  const totalPages = Math.ceil(sortedData.length / ITEMS_PER_PAGE);
+  const displayedData = sortedData.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
+  const handleSortClick = (field) => setSortOrder({ field, ascending: sortOrder.field === field ? !sortOrder.ascending : true });
+  const toggleItemExpand = (id) => setExpandedItemId(expandedItemId === id ? null : id);
+
+  return (
+    <div className={`${viewType}-section`}>
+      <div className="switch-controls">
+        <button className={`switch-button ${!showMy ? "active" : ""}`} onClick={() => setShowMy(false)}>
+          <Globe size={16} /><span>All {title}</span>
+        </button>
+        <button className={`switch-button ${showMy ? "active" : ""}`} onClick={() => setShowMy(true)}>
+          <Lock size={16} /><span>My {title}</span>
+        </button>
+      </div>
+
+      <div className="panels-header">
+        <h3>{showMy ? <><Lock size={16} /> My {title}</> : <><Globe size={16} /> All {title}</>}</h3>
+        <span className="panel-count">{filteredData.length} {viewType}</span>
+      </div>
+
+      <div className="panel-controls">
+        <div className="search-box">
+          <Search size={14} />
+          <input type="text" placeholder="Search ID, owner, location..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+          {searchTerm && <button className="clear-search" onClick={() => setSearchTerm("")}>×</button>}
+        </div>
+        <div className="sort-controls">
+          <button className={`sort-button ${sortOrder.field === 'id' ? 'active' : ''}`} onClick={() => handleSortClick('id')}>
+            ID {sortOrder.field === 'id' && (sortOrder.ascending ? '↑' : '↓')}
+          </button>
+          {viewType === 'panels' && (
+            <button className={`sort-button ${sortOrder.field === 'temperature' ? 'active' : ''}`} onClick={() => handleSortClick('temperature')}>
+              <Thermometer size={12} /> {sortOrder.field === 'temperature' && (sortOrder.ascending ? '↑' : '↓')}
+            </button>
+          )}
+          <button className={`sort-button ${sortOrder.field === 'power' ? 'active' : ''}`} onClick={() => handleSortClick('power')}>
+            <Zap size={12} /> {sortOrder.field === 'power' && (sortOrder.ascending ? '↑' : '↓')}
+          </button>
+        </div>
+      </div>
+
+      <div className="panel-list">
+        {displayedData.length === 0 ? (
+          <div className="empty-state"><List size={32} /><p>{searchTerm ? `No matching ${viewType}` : `No ${viewType} data`}</p></div>
+        ) : (
+          displayedData.map((item) => (
+            <div key={item.id.toString()} className={`panel-item ${expandedItemId === item.id.toString() ? 'expanded' : ''}`} onClick={() => toggleItemExpand(item.id.toString())}>
+              <div className="panel-summary">
+                <div className="panel-id"><span className="label">ID</span><span className="value">{item.id.toString()}</span></div>
+                <div className="panel-metrics">
+                  {viewType === 'panels' && <div className="metric"><Thermometer size={14} /><span>{item.batteryTemperature.toString()}°C</span></div>}
+                  <div className="metric"><Zap size={14} /><span>{(viewType === 'panels' ? item.dcPower : item.powerConsumption).toString()}W</span></div>
+                </div>
+              </div>
+              {expandedItemId === item.id.toString() && (
+                <div className="panel-details">
+                  <div className="panel-detail location"><span className="label">Location</span><span className="value">{item.latitude.toString()}°, {item.longitude.toString()}°</span></div>
+                  {viewType === 'panels' ? (
+                    <>
+                      <div className="panel-detail"><span className="label">DC Power</span><span className="value">{item.dcPower.toString()}W</span></div>
+                      <div className="panel-detail"><span className="label">AC Power</span><span className="value">{item.acPower.toString()}W</span></div>
+                    </>
+                  ) : (
+                    <div className="panel-detail"><span className="label">Consumption</span><span className="value">{item.powerConsumption.toString()}W</span></div>
+                  )}
+                  <div className="panel-owner" title={item.owner}><span className="label">Owner</span><span className="value">{`${item.owner.substring(0, 6)}...${item.owner.substring(item.owner.length - 4)}`}</span></div>
+                </div>
+              )}
+            </div>
+          ))
+        )}
+      </div>
+
+      {totalPages > 1 && (
+        <div className="pagination-controls">
+          <button onClick={() => setCurrentPage(1)} disabled={currentPage === 1} className="page-button"><ChevronsLeft size={16} /></button>
+          <button onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1} className="page-button"><ChevronLeft size={16} /></button>
+          <span className="page-info">{currentPage}/{totalPages}</span>
+          <button onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages} className="page-button"><ChevronRight size={16} /></button>
+          <button onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages} className="page-button"><ChevronsRight size={16} /></button>
+        </div>
+      )}
+    </div>
+  );
 };
 
-
+// ---------------------------------------------------------
+// MAIN SIDEBAR COMPONENT
+// ---------------------------------------------------------
 const Sidebar = ({ sidebarOpen, toggleSidebar, onVisibilityChange }) => {
-    const [contract, setContract] = useState(null);
-    const [account, setAccount] = useState("");
-    const [accountShort, setAccountShort] = useState("");
-    const [panels, setPanels] = useState([]);
-    const [myPanels, setMyPanels] = useState([]);
-    const [showMyPanels, setShowMyPanels] = useState(false);
-    const [newPanel, setNewPanel] = useState({ lat: "", lng: "" });
-    const [isLoading, setIsLoading] = useState(false);
-    const [notification, setNotification] = useState({ show: false, message: "", type: "" });
-    const [isLocked, setIsLocked] = useState(true);
-    const [isHovering, setIsHovering] = useState(false);
+  const [contract, setContract] = useState(null);
+  const [account, setAccount] = useState("");
+  const [accountShort, setAccountShort] = useState("");
+  
+  // Data State
+  const [panels, setPanels] = useState([]);
+  const [myPanels, setMyPanels] = useState([]);
+  const [factoryContract, setFactoryContract] = useState(null);
+  const [factories, setFactories] = useState([]);
+  const [myFactories, setMyFactories] = useState([]);
+  
+  // UI State
+  const [isLoading, setIsLoading] = useState(false);
+  const [notification, setNotification] = useState({ show: false, message: "", type: "" });
+  const [isLocked, setIsLocked] = useState(true);
+  const [isHovering, setIsHovering] = useState(false);
+  const [activeView, setActiveView] = useState("panels");
+  const [navbarHeight, setNavbarHeight] = useState(64);
 
-    // Pagination state
-    const [currentPage, setCurrentPage] = useState(1);
-    // Search and filter
-    const [searchTerm, setSearchTerm] = useState("");
-    const [sortOrder, setSortOrder] = useState({ field: "id", ascending: true });
-    const [expandedPanelId, setExpandedPanelId] = useState(null);
+  useEffect(() => {
+    connectWallet();
+    const navbar = document.querySelector('.navbar');
+    if (navbar) setNavbarHeight(navbar.offsetHeight);
+  }, []);
 
-    // Get navbar height to calculate sidebar offset
-    const [navbarHeight, setNavbarHeight] = useState(64); // Default value
+  useEffect(() => {
+    if (account) setAccountShort(`${account.substring(0, 6)}...${account.substring(account.length - 4)}`);
+  }, [account]);
 
-    useEffect(() => {
-        connectWallet();
+  const showNotification = (message, type = "success") => {
+    setNotification({ show: true, message, type });
+    setTimeout(() => setNotification({ show: false, message: "", type: "" }), 3000);
+  };
 
-        // Get actual navbar height
-        const navbar = document.querySelector('.navbar');
-        if (navbar) {
-            setNavbarHeight(navbar.offsetHeight);
-        }
-    }, []);
+  const connectWallet = async () => {
+    if (!window.ethereum) {
+      showNotification("Please install MetaMask!", "error");
+      return;
+    }
+    try {
+      setIsLoading(true);
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contractInstance = new ethers.Contract(contractAddress, SolarPanels.abi, signer);
+      const factoryInstance = new ethers.Contract(factoryAddress, FACTORY_ABI, signer);
+      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+      
+      setAccount(accounts[0]);
+      setContract(contractInstance);
+      setFactoryContract(factoryInstance);
 
-    useEffect(() => {
-        if (account) {
-            setAccountShort(`${account.substring(0, 6)}...${account.substring(account.length - 4)}`);
-        }
-    }, [account]);
+      await Promise.all([
+        fetchPanels(contractInstance),
+        fetchMyPanels(contractInstance),
+        fetchFactories(factoryInstance),
+        fetchMyFactories(factoryInstance, accounts[0])
+      ]);
+      showNotification("Wallet connected!");
+    } catch (error) {
+      console.error("Connection failed:", error);
+      showNotification("Wallet connection failed", "error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    // Reset page when view changes
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [showMyPanels, searchTerm]);
+  const fetchPanels = async (contractInstance = contract) => {
+    if (!contractInstance) return;
+    try {
+      const raw = await contractInstance.getAllPanels();
+      const fixed = raw.map((p, idx) => fixPanelData({ id: idx + 1, owner: p.owner, lat: p.latitude.toNumber(), lng: p.longitude.toNumber(), batteryTemp: p.batteryTemperature.toNumber(), dcPower: p.dcPower.toNumber(), acPower: p.acPower.toNumber() }));
+      setPanels(fixed);
+    } catch (error) {
+      showNotification("Failed to fetch solar panels", "error");
+    }
+  };
 
-    const showNotification = (message, type = "success") => {
-        setNotification({ show: true, message, type });
-        setTimeout(() => {
-            setNotification({ show: false, message: "", type: "" });
-        }, 3000);
-    };
+  const fetchMyPanels = async (contractInstance = contract) => {
+    if (!contractInstance) return;
+    try {
+      const raw = await contractInstance.getMyPanels();
+      const fixed = raw.map((p, idx) => fixPanelData({ id: idx + 1, owner: p.owner, lat: p.latitude.toNumber(), lng: p.longitude.toNumber(), batteryTemp: p.batteryTemperature.toNumber(), dcPower: p.dcPower.toNumber(), acPower: p.acPower.toNumber() }));
+      setMyPanels(fixed);
+    } catch (error) {
+      showNotification("Failed to fetch user solar panels", "error");
+    }
+  };
 
-    const connectWallet = async () => {
-        if (!window.ethereum) {
-            showNotification("Please install MetaMask!", "error");
-            return;
-        }
+  const fetchFactories = async (factoryInstance = factoryContract) => {
+    if (!factoryInstance) return;
+    try {
+      const raw = await factoryInstance.getAllFactories();
+      const fixed = raw.map((f, idx) => fixFactoryData({ id: f.id?.toNumber ? f.id.toNumber() : idx + 1, owner: f.owner, latitude: f.latitude.toNumber(), longitude: f.longitude.toNumber(), powerConsumption: f.powerConsumption.toNumber(), createdAt: f.createdAt?.toNumber ? f.createdAt.toNumber() : 0 }));
+      setFactories(fixed);
+    } catch (error) {
+      showNotification("Failed to fetch factories", "error");
+    }
+  };
 
-        try {
-            setIsLoading(true);
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
-            const signer = provider.getSigner();
-            const contractInstance = new ethers.Contract(contractAddress, SolarPanels.abi, signer);
+  const fetchMyFactories = async (factoryInstance = factoryContract, wallet = account) => {
+    if (!factoryInstance || !wallet) return;
+    try {
+      const raw = await factoryInstance.getFactoriesOf(wallet);
+      const fixed = raw.map((f, idx) => fixFactoryData({ id: f.id?.toNumber ? f.id.toNumber() : idx + 1, owner: f.owner, latitude: f.latitude.toNumber(), longitude: f.longitude.toNumber(), powerConsumption: f.powerConsumption.toNumber(), createdAt: f.createdAt?.toNumber ? f.createdAt.toNumber() : 0 }));
+      setMyFactories(fixed);
+    } catch (error) {
+      showNotification("Failed to fetch user factories", "error");
+    }
+  };
 
-            const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-            setAccount(accounts[0]);
-            setContract(contractInstance);
+  const isVisible = isLocked ? sidebarOpen : isHovering;
+  useEffect(() => { if (onVisibilityChange) onVisibilityChange(isVisible); }, [isVisible, onVisibilityChange]);
 
-            await Promise.all([
-                fetchPanels(contractInstance),
-                fetchMyPanels(contractInstance)
-            ]);
+  const tabStyle = {
+    display: "flex", gap: "10px", margin: "0 15px 15px", padding: "4px",
+    background: "rgba(0, 0, 0, 0.3)", borderRadius: "8px"
+  };
+  
+  const tabBtnStyle = (isActive) => ({
+    flex: 1, padding: "8px 0", border: "none", borderRadius: "6px",
+    background: isActive ? "rgba(0, 255, 136, 0.2)" : "transparent",
+    color: isActive ? "#00ff88" : "#888",
+    cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
+    fontWeight: isActive ? "bold" : "normal", transition: "all 0.2s"
+  });
 
-            showNotification("Wallet connected!");
-        } catch (error) {
-            console.error("Connection failed:", error);
-            showNotification("Wallet connection failed", "error");
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const createPanel = async () => {
-        if (!contract) return showNotification("Contract not connected", "error");
-        if (!newPanel.lat || !newPanel.lng) return showNotification("Please enter latitude and longitude", "error");
-
-        try {
-            setIsLoading(true);
-            const tx = await contract.createPanel(newPanel.lat, newPanel.lng, 30, 1000, 900);
-            await tx.wait();
-            showNotification("🌞 Solar panel created!");
-            setNewPanel({ lat: "", lng: "" });
-            await Promise.all([fetchPanels(contract), fetchMyPanels(contract)]);
-        } catch (error) {
-            console.error("Creation failed:", error);
-            showNotification("❌ Solar panel creation failed!", "error");
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const fetchPanels = async (contractInstance = contract) => {
-  if (!contractInstance) return;
-
-  try {
-        const raw = await contractInstance.getAllPanels();
-        const fixed = raw.map((p, idx) =>
-  fixPanelData({
-    id: idx + 1,
-    owner: p.owner,
-    lat: p.latitude.toNumber(),
-    lng: p.longitude.toNumber(),
-    batteryTemp: p.batteryTemperature.toNumber(),
-    dcPower: p.dcPower.toNumber(),
-    acPower: p.acPower.toNumber(),
-  })
-);
-
-    setPanels(fixed);
-  } catch (error) {
-    console.error("❌ Failed to fetch all solar panels:", error);
-    showNotification("Failed to fetch solar panels", "error");
-  }
-};
-
-
-    const fetchMyPanels = async (contractInstance = contract) => {
-  if (!contractInstance) return;
-
-  try {
-    const raw = await contractInstance.getMyPanels();
-    const fixed = raw.map((p, idx) =>
-  fixPanelData({
-    id: idx + 1,
-    owner: p.owner,
-    lat: p.latitude.toNumber(),
-    lng: p.longitude.toNumber(),
-    batteryTemp: p.batteryTemperature.toNumber(),
-    dcPower: p.dcPower.toNumber(),
-    acPower: p.acPower.toNumber(),
-  })
-);
-
-
-    setMyPanels(fixed);
-  } catch (error) {
-    console.error("❌ Failed to fetch user solar panels:", error);
-    showNotification("Failed to fetch user solar panels", "error");
-  }
-};
-
-
-    // Filter panels
-    const filterPanels = (panelsData) => {
-        if (!searchTerm) return panelsData;
-
-        return panelsData.filter(panel =>
-            panel.id.toString().includes(searchTerm) ||
-            panel.owner.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            panel.latitude.toString().includes(searchTerm) ||
-            panel.longitude.toString().includes(searchTerm)
-        );
-    };
-
-    // Sort panels
-    const sortPanels = (panelsData) => {
-        return [...panelsData].sort((a, b) => {
-            let compareA, compareB;
-
-            switch (sortOrder.field) {
-                case 'id':
-                    compareA = parseInt(a.id.toString());
-                    compareB = parseInt(b.id.toString());
-                    break;
-                case 'temperature':
-                    compareA = parseInt(a.batteryTemperature.toString());
-                    compareB = parseInt(b.batteryTemperature.toString());
-                    break;
-                case 'power':
-                    compareA = parseInt(a.dcPower.toString());
-                    compareB = parseInt(b.dcPower.toString());
-                    break;
-                default:
-                    compareA = a.id.toString();
-                    compareB = b.id.toString();
-            }
-
-            if (sortOrder.ascending) {
-                return compareA - compareB;
-            } else {
-                return compareB - compareA;
-            }
-        });
-    };
-
-    // Handle sort click
-    const handleSortClick = (field) => {
-        if (sortOrder.field === field) {
-            setSortOrder({ field, ascending: !sortOrder.ascending });
-        } else {
-            setSortOrder({ field, ascending: true });
-        }
-    };
-
-    // Pagination controls
-    const handlePageChange = (newPage) => {
-        setCurrentPage(newPage);
-    };
-
-    // Prepare panels to display
-    const currentData = showMyPanels ? myPanels : panels;
-    const filteredData = filterPanels(currentData);
-    const sortedData = sortPanels(filteredData);
-
-    const totalPages = Math.ceil(sortedData.length / PANELS_PER_PAGE);
-    const indexOfLastPanel = currentPage * PANELS_PER_PAGE;
-    const indexOfFirstPanel = indexOfLastPanel - PANELS_PER_PAGE;
-    const currentPanels = sortedData.slice(indexOfFirstPanel, indexOfLastPanel);
-
-    // Expand and collapse panel details
-    const togglePanelExpand = (id) => {
-        if (expandedPanelId === id) {
-            setExpandedPanelId(null);
-        } else {
-            setExpandedPanelId(id);
-        }
-    };
-
-    const isVisible = isLocked ? sidebarOpen : isHovering;
-
-    useEffect(() => {
-        if (onVisibilityChange) {
-            onVisibilityChange(isVisible);
-        }
-    }, [isVisible, onVisibilityChange]);
-
-    return (
-        <>
-            {!isLocked && (
-                <div
-                    className="sidebar-hover-zone"
-                    onMouseEnter={() => setIsHovering(true)}
-                    onMouseLeave={() => setIsHovering(false)}
-                />
-            )}
-            <div
-                className={`cyberpunk-sidebar ${isVisible ? "open" : "closed"} ${isLocked ? "locked" : "unlocked"}`}
-                style={{
-                    top: `${navbarHeight}px`,
-                    height: `calc(100vh - ${navbarHeight}px)`,
-                    zIndex: 1000
-                }}
-                onMouseEnter={() => !isLocked && setIsHovering(true)}
-                onMouseLeave={() => !isLocked && setIsHovering(false)}
-            >
-                {isVisible && (
-                    <div className="sidebar-content">
-                        <div className="sidebar-header">
-                            <div className="logo-container">
-                                <Sun className="sun-icon" size={24} />
-                                <h1>Solar<span>Chain</span></h1>
-                            </div>
-                            <button
-                                className={`lock-toggle ${isLocked ? "locked" : "unlocked"}`}
-                                onClick={() => setIsLocked(!isLocked)}
-                                aria-label={isLocked ? "Unlock sidebar" : "Lock sidebar"}
-                                title={isLocked ? "Unlock sidebar" : "Lock sidebar"}
-                            >
-                                {isLocked ? <Lock size={16} /> : <Unlock size={16} />}
-                            </button>
-                        </div>
-
-                        <div className="account-card">
-                            <div className="account-header">
-                                <div className="account-icon">
-                                    <Sun size={18} />
-                                </div>
-                                <h2>Account Info</h2>
-                            </div>
-                            {account ? (
-                                <div className="account-details">
-                                    <div className="address">
-                                        <span title={account}>{accountShort}</span>
-                                    </div>
-                                    <div className="status connected">Connected</div>
-                                </div>
-                            ) : (
-                                <button className="connect-button" onClick={connectWallet}>
-                                    Connect Wallet
-                                </button>
-                            )}
-                        </div>
-
-                        <div className="create-panel-card">
-                            <div className="card-header">
-                                <PlusCircle size={18} />
-                                <h3>Create Solar Panel</h3>
-                            </div>
-                            <div className="form-group">
-                                <div className="input-group">
-                                    <input
-                                        type="number"
-                                        placeholder="Latitude"
-                                        value={newPanel.lat}
-                                        onChange={(e) => setNewPanel({ ...newPanel, lat: e.target.value })}
-                                    />
-                                </div>
-                                <div className="input-group">
-                                    <input
-                                        type="number"
-                                        placeholder="Longitude"
-                                        value={newPanel.lng}
-                                        onChange={(e) => setNewPanel({ ...newPanel, lng: e.target.value })}
-                                    />
-                                </div>
-                            </div>
-                            <button
-                                className={`create-button ${isLoading ? "loading" : ""}`}
-                                onClick={createPanel}
-                                disabled={isLoading}
-                            >
-                                {isLoading ? "Processing..." : "Create Solar Panel"}
-                            </button>
-                        </div>
-
-                        <div className="switch-controls">
-                            <button
-                                className={`switch-button ${!showMyPanels ? "active" : ""}`}
-                                onClick={() => setShowMyPanels(false)}
-                            >
-                                <Globe size={16} />
-                                <span>All Panels</span>
-                            </button>
-                            <button
-                                className={`switch-button ${showMyPanels ? "active" : ""}`}
-                                onClick={() => setShowMyPanels(true)}
-                            >
-                                <Lock size={16} />
-                                <span>My Panels</span>
-                            </button>
-                        </div>
-
-                        <div className="panels-section">
-                            <div className="panels-header">
-                                <h3>
-                                    {showMyPanels ? (
-                                        <><Lock size={16} /> My Solar Panels</>
-                                    ) : (
-                                        <><Globe size={16} /> All Solar Panels</>
-                                    )}
-                                </h3>
-                                <span className="panel-count">
-                                    {filteredData.length} panels
-                                </span>
-                            </div>
-
-                            {/* Search and filter */}
-                            <div className="panel-controls">
-                                <div className="search-box">
-                                    <Search size={14} />
-                                    <input
-                                        type="text"
-                                        placeholder="Search panel ID, location..."
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                    />
-                                    {searchTerm && (
-                                        <button
-                                            className="clear-search"
-                                            onClick={() => setSearchTerm("")}
-                                        >
-                                            ×
-                                        </button>
-                                    )}
-                                </div>
-                                <div className="sort-controls">
-                                    <button
-                                        className={`sort-button ${sortOrder.field === 'id' ? 'active' : ''}`}
-                                        onClick={() => handleSortClick('id')}
-                                        title="Sort by ID"
-                                    >
-                                        ID {sortOrder.field === 'id' && (sortOrder.ascending ? '↑' : '↓')}
-                                    </button>
-                                    <button
-                                        className={`sort-button ${sortOrder.field === 'temperature' ? 'active' : ''}`}
-                                        onClick={() => handleSortClick('temperature')}
-                                        title="Sort by temperature"
-                                    >
-                                        <Thermometer size={12} /> {sortOrder.field === 'temperature' && (sortOrder.ascending ? '↑' : '↓')}
-                                    </button>
-                                    <button
-                                        className={`sort-button ${sortOrder.field === 'power' ? 'active' : ''}`}
-                                        onClick={() => handleSortClick('power')}
-                                        title="Sort by power"
-                                    >
-                                        <Zap size={12} /> {sortOrder.field === 'power' && (sortOrder.ascending ? '↑' : '↓')}
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="panel-list">
-                                {currentPanels.length === 0 ? (
-                                    <div className="empty-state">
-                                        <List size={32} />
-                                        <p>
-                                            {searchTerm ? 'No matching solar panels' : 'No solar panel data'}
-                                        </p>
-                                    </div>
-                                ) : (
-                                    currentPanels.map((panel) => (
-                                        <div
-                                            key={panel.id.toString()}
-                                            className={`panel-item ${expandedPanelId === panel.id.toString() ? 'expanded' : ''}`}
-                                            onClick={() => togglePanelExpand(panel.id.toString())}
-                                        >
-                                            <div className="panel-summary">
-                                                <div className="panel-id">
-                                                    <span className="label">ID</span>
-                                                    <span className="value">{panel.id.toString()}</span>
-                                                </div>
-                                                <div className="panel-metrics">
-                                                    <div className="metric">
-                                                        <Thermometer size={14} />
-                                                        <span>{panel.batteryTemperature.toString()}°C</span>
-                                                    </div>
-                                                    <div className="metric">
-                                                        <Zap size={14} />
-                                                        <span>{panel.dcPower.toString()}W</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {expandedPanelId === panel.id.toString() && (
-                                                <div className="panel-details">
-                                                    <div className="panel-detail location">
-                                                        <span className="label">Location</span>
-                                                        <span className="value">{panel.latitude.toString()}°, {panel.longitude.toString()}°</span>
-                                                    </div>
-                                                    <div className="panel-detail">
-                                                        <span className="label">DC Power</span>
-                                                        <span className="value">{panel.dcPower.toString()}W</span>
-                                                    </div>
-                                                    <div className="panel-detail">
-                                                        <span className="label">AC Power</span>
-                                                        <span className="value">{panel.acPower.toString()}W</span>
-                                                    </div>
-                                                    <div className="panel-owner" title={panel.owner}>
-                                                        <span className="label">Owner</span>
-                                                        <span className="value">{`${panel.owner.substring(0, 6)}...${panel.owner.substring(panel.owner.length - 4)}`}</span>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))
-                                )}
-                            </div>
-
-                            {/* Pagination controls */}
-                            {totalPages > 1 && (
-                                <div className="pagination-controls">
-                                    <button
-                                        onClick={() => handlePageChange(1)}
-                                        disabled={currentPage === 1}
-                                        className="page-button"
-                                        title="First page"
-                                    >
-                                        <ChevronsLeft size={16} />
-                                    </button>
-                                    <button
-                                        onClick={() => handlePageChange(currentPage - 1)}
-                                        disabled={currentPage === 1}
-                                        className="page-button"
-                                        title="Previous page"
-                                    >
-                                        <ChevronLeft size={16} />
-                                    </button>
-
-                                    <span className="page-info">{currentPage}/{totalPages}</span>
-
-                                    <button
-                                        onClick={() => handlePageChange(currentPage + 1)}
-                                        disabled={currentPage === totalPages}
-                                        className="page-button"
-                                        title="Next page"
-                                    >
-                                        <ChevronRight size={16} />
-                                    </button>
-                                    <button
-                                        onClick={() => handlePageChange(totalPages)}
-                                        disabled={currentPage === totalPages}
-                                        className="page-button"
-                                        title="Last page"
-                                    >
-                                        <ChevronsRight size={16} />
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                )}
+  return (
+    <>
+      {!isLocked && <div className="sidebar-hover-zone" onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)} />}
+      
+      <div
+        className={`cyberpunk-sidebar ${isVisible ? "open" : "closed"} ${isLocked ? "locked" : "unlocked"}`}
+        style={{ top: `${navbarHeight}px`, height: `calc(100vh - ${navbarHeight}px)`, zIndex: 1000, display: "flex", flexDirection: "column" }}
+        onMouseEnter={() => !isLocked && setIsHovering(true)}
+        onMouseLeave={() => !isLocked && setIsHovering(false)}
+      >
+        {isVisible && (
+          <div className="sidebar-content" style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
+            
+            <div className="account-card" style={{ marginTop: "15px" }}>
+              <div className="account-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <div className="account-icon"><Sun size={18} /></div>
+                  <h2 style={{ margin: 0 }}>Account Info</h2>
+                </div>
+                <button
+                  className="lock-toggle"
+                  onClick={() => setIsLocked(!isLocked)}
+                  style={{ background: "transparent", border: "none", color: isLocked ? "#00ff88" : "#888", cursor: "pointer" }}
+                  title={isLocked ? "Unlock sidebar" : "Lock sidebar"}
+                >
+                  {isLocked ? <Lock size={16} /> : <Unlock size={16} />}
+                </button>
+              </div>
+              
+              {account ? (
+                <div className="account-details">
+                  <div className="address"><span title={account}>{accountShort}</span></div>
+                  <div className="status connected">Connected</div>
+                </div>
+              ) : (
+                <button className="connect-button" onClick={connectWallet}>Connect Wallet</button>
+              )}
             </div>
 
-            {isLocked && (
-                <button
-                    className={`sidebar-toggle-btn ${sidebarOpen ? "open" : "closed"}`}
-                    onClick={toggleSidebar}
-                    aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
-                    style={{
-                        top: `${navbarHeight + 10}px`,
-                        zIndex: 1001
-                    }}
-                >
-                    {sidebarOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
-                </button>
-            )}
+            <div style={tabStyle}>
+              <button style={tabBtnStyle(activeView === "panels")} onClick={() => setActiveView("panels")}>
+                <Sun size={16} /> Panels
+              </button>
+              <button style={tabBtnStyle(activeView === "factories")} onClick={() => setActiveView("factories")}>
+                <Factory size={16} /> Factories
+              </button>
+            </div>
 
-            {notification.show && (
-                <div className={`notification ${notification.type}`}>
-                    {notification.message}
-                </div>
-            )}
-        </>
-    );
+            <div style={{ flex: 1, overflowY: "auto", paddingBottom: "20px" }}>
+              {activeView === "panels" ? (
+                <DataView 
+                  key="panels-view"
+                  viewType="panels" 
+                  title="Solar Panels" 
+                  allItems={panels} 
+                  myItems={myPanels} 
+                />
+              ) : (
+                <DataView 
+                  key="factories-view"
+                  viewType="factories" 
+                  title="Factories" 
+                  allItems={factories} 
+                  myItems={myFactories} 
+                />
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {isLocked && (
+        <button
+          className={`sidebar-toggle-btn ${sidebarOpen ? "open" : "closed"}`}
+          onClick={toggleSidebar}
+          style={{ top: `${navbarHeight + 10}px`, zIndex: 1001 }}
+        >
+          {sidebarOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
+        </button>
+      )}
+
+      {notification.show && (
+        <div className={`notification ${notification.type}`}>{notification.message}</div>
+      )}
+    </>
+  );
 };
 
 export default Sidebar;
