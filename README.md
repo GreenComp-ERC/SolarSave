@@ -109,8 +109,9 @@ python -m uvicorn main:app --reload
 ```
 
 ### **7. Start the Frontend**
+In another terminal:
 ```bash
-cd ../client
+cd /client
 npm run dev
 ```
 
