@@ -709,43 +709,43 @@ const setShowNotification = (msg) => {
         </div>
 
         {/* Status bar */}
-        <div className="stats-panel">
-          <div className="stat-item">
-            <div className="stat-value">{stats.totalPanels}</div>
-            <div className="stat-label">Total panels</div>
+        <div className="stats-panel stats-reward-panel">
+          <div className="stats-grid">
+            <div className="stat-item">
+              <div className="stat-value">{stats.totalPanels}</div>
+              <div className="stat-label">Total panels</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-value">{Number(stats.totalPower || 0).toFixed(2)}W</div>
+              <div className="stat-label">Total generation</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-value">{stats.myPanelsCount}</div>
+              <div className="stat-label">My panels</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-value">{Number(stats.myPanelsPower || 0).toFixed(2)}W</div>
+              <div className="stat-label">My generation</div>
+            </div>
           </div>
-          <div className="stat-item">
-            <div className="stat-value">{stats.totalPower}W</div>
-            <div className="stat-label">Total generation</div>
-          </div>
-          <div className="stat-item">
-            <div className="stat-value">{stats.myPanelsCount}</div>
-            <div className="stat-label">My panels</div>
-          </div>
-          <div className="stat-item">
-            <div className="stat-value">{stats.myPanelsPower}W</div>
-            <div className="stat-label">My generation</div>
+          <div className="reward-section">
+            <p className="reward-countdown">
+              Reward countdown:
+              {cooldownRemaining === null
+                ? "Loading..."
+                : cooldownRemaining > 0
+                  ? `${Math.floor(cooldownRemaining / 60)}m ${cooldownRemaining % 60}s`
+                  : "Ready to claim"}
+            </p>
+            <button
+              className="button"
+              onClick={claimReward}
+              disabled={cooldownRemaining > 0 || !isClaimable}
+            >
+              Claim reward ({rewardPreview ? ethers.utils.formatUnits(rewardPreview, 18) : "Loading..."} SOLR)
+            </button>
           </div>
         </div>
-        {/* Reward countdown & claim button */}
-<div className="reward-timer-panel">
-  <p style={{ marginBottom: "5px" }}>
-    Reward countdown:
-    {cooldownRemaining === null
-      ? "Loading..."
-      : cooldownRemaining > 0
-        ? `${Math.floor(cooldownRemaining / 60)}m ${cooldownRemaining % 60}s`
-        : "Ready to claim"}
-  </p>
-  <button
-    className="button"
-    onClick={claimReward}
-    disabled={cooldownRemaining > 0 || !isClaimable}
-  >
-    Claim reward ({rewardPreview ? ethers.utils.formatUnits(rewardPreview, 18) : "Loading..."} SOLR)
-  </button>
-
-</div>
 
 
         {/* Controls */}

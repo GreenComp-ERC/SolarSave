@@ -21,14 +21,35 @@ const normalizeEnergy = (value) => {
   return Math.abs(value) > 1000 ? value / 10000 : value;
 };
 
-const EnergyCard = ({ factory, balance }) => (
-  <>
-    <div className="trans-card-header">
-      <div className="trans-panel-name-section">
-        <h3 className="trans-panel-title">Factory #{factory.id}</h3>
-        <div className="trans-panel-id">Owner: {factory.owner.slice(0, 6)}...{factory.owner.slice(-4)}</div>
+const EnergyCard = ({ factory, balance }) => {
+  const normalizedBalance = normalizeEnergy(balance);
+  const normalizedConsumption = normalizeEnergy(factory.powerConsumption);
+  const needsEnergy = normalizedBalance < normalizedConsumption;
+
+  return (
+    <>
+      <div className="trans-card-header">
+        <div className="trans-panel-name-section">
+          <h3 className="trans-panel-title">Factory #{factory.id}</h3>
+          <div className="trans-panel-id">Owner: {factory.owner.slice(0, 6)}...{factory.owner.slice(-4)}</div>
+        </div>
+        {needsEnergy && (
+          <span
+            style={{
+              alignSelf: "flex-start",
+              padding: "2px 6px",
+              borderRadius: "6px",
+              background: "rgba(255, 107, 107, 0.2)",
+              color: "#ff6b6b",
+              fontSize: "12px",
+              fontWeight: "bold"
+            }}
+            title="Energy Balance below Consumption"
+          >
+            NEED ENERGY
+          </span>
+        )}
       </div>
-    </div>
     <div className="trans-performance-section">
       <div className="trans-metrics-grid">
         <div className="trans-metric-item">
@@ -44,7 +65,7 @@ const EnergyCard = ({ factory, balance }) => (
         <div className="trans-power-item">
           <div className="trans-power-header">
             <span className="trans-power-label">Energy Balance</span>
-            <span className="trans-power-value">{normalizeEnergy(balance)} W</span>
+            <span className="trans-power-value">{normalizedBalance} W</span>
           </div>
           <div className="trans-power-bar">
             <div className="trans-power-fill trans-ac-fill" style={{ width: `${Math.min(100, normalizeEnergy(balance) / 10)}%` }}></div>
@@ -54,6 +75,8 @@ const EnergyCard = ({ factory, balance }) => (
     </div>
   </>
 );
+
+};
 
 const Transactions = () => {
   const { currentAccount } = useContext(TransactionContext);

@@ -44,6 +44,11 @@ const fixFactoryData = (factory) => {
   return { ...factory, latitude, longitude, powerConsumption };
 };
 
+const normalizeEnergy = (value) => {
+  if (value === null || value === undefined) return 0;
+  return Math.abs(value) > 1000 ? value / 10000 : value;
+};
+
 // ---------------------------------------------------------
 // REUSABLE DATAVIEW COMPONENT
 // Handles rendering, searching, sorting, and pagination for any dataset
@@ -118,6 +123,14 @@ const DataView = ({ viewType, title, allItems, myItems }) => {
         <span className="panel-count">{filteredData.length} {viewType}</span>
       </div>
 
+      {viewType === "factories" && (
+        <div className="panel-controls" style={{ marginTop: "0" }}>
+          <div className="panel-detail" style={{ width: "100%" }}>
+            <span className="label">Energy Balance / Consumption</span>
+          </div>
+        </div>
+      )}
+
       <div className="panel-controls">
         <div className="search-box">
           <Search size={14} />
@@ -143,13 +156,41 @@ const DataView = ({ viewType, title, allItems, myItems }) => {
         {displayedData.length === 0 ? (
           <div className="empty-state"><List size={32} /><p>{searchTerm ? `No matching ${viewType}` : `No ${viewType} data`}</p></div>
         ) : (
-          displayedData.map((item) => (
+          displayedData.map((item) => {
+            const needsEnergy = viewType === "factories" && normalizeEnergy(item.energyBalance) < normalizeEnergy(item.powerConsumption);
+
+            return (
             <div key={item.id.toString()} className={`panel-item ${expandedItemId === item.id.toString() ? 'expanded' : ''}`} onClick={() => toggleItemExpand(item.id.toString())}>
               <div className="panel-summary">
                 <div className="panel-id"><span className="label">ID</span><span className="value">{item.id.toString()}</span></div>
                 <div className="panel-metrics">
                   {viewType === 'panels' && <div className="metric"><Thermometer size={14} /><span>{item.batteryTemperature.toString()}°C</span></div>}
-                  <div className="metric"><Zap size={14} /><span>{(viewType === 'panels' ? item.dcPower : item.powerConsumption).toString()}W</span></div>
+                  {viewType === 'panels' && (
+                    <div className="metric"><Zap size={14} /><span>{item.dcPower.toString()}W</span></div>
+                  )}
+                  {viewType === 'factories' && (
+                    <div className="metric">
+                      <Zap size={14} />
+                      <span>{normalizeEnergy(item.energyBalance)}W/{normalizeEnergy(item.powerConsumption)}W</span>
+                    </div>
+                  )}
+                  {needsEnergy && (
+                    <div className="metric">
+                      <span
+                        style={{
+                          padding: "2px 6px",
+                          borderRadius: "6px",
+                          background: "rgba(255, 107, 107, 0.2)",
+                          color: "#ff6b6b",
+                          fontSize: "11px",
+                          fontWeight: "bold"
+                        }}
+                        title="Energy Balance below Consumption"
+                      >
+                        NEED ENERGY
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
               {expandedItemId === item.id.toString() && (
@@ -161,13 +202,18 @@ const DataView = ({ viewType, title, allItems, myItems }) => {
                       <div className="panel-detail"><span className="label">AC Power</span><span className="value">{item.acPower.toString()}W</span></div>
                     </>
                   ) : (
-                    <div className="panel-detail"><span className="label">Consumption</span><span className="value">{item.powerConsumption.toString()}W</span></div>
+                    <>
+                      <div className="panel-detail"><span className="label">Energy Balance / Consumption</span><span className="value">{normalizeEnergy(item.energyBalance)}W/{normalizeEnergy(item.powerConsumption)}W</span></div>
+                      {needsEnergy && (
+                        <div className="panel-detail"><span className="label">Status</span><span className="value" style={{ color: "#ff6b6b", fontWeight: "bold" }}>Needs energy purchase</span></div>
+                      )}
+                    </>
                   )}
                   <div className="panel-owner" title={item.owner}><span className="label">Owner</span><span className="value">{`${item.owner.substring(0, 6)}...${item.owner.substring(item.owner.length - 4)}`}</span></div>
                 </div>
               )}
             </div>
-          ))
+          )})
         )}
       </div>
 
@@ -201,6 +247,7 @@ const Sidebar = ({ sidebarOpen, toggleSidebar, onVisibilityChange }) => {
   const [exchangeContract, setExchangeContract] = useState(null);
   const [globalSupplyEnergy, setGlobalSupplyEnergy] = useState(0);
   const [claimableReward, setClaimableReward] = useState(null);
+  const [factoryBalances, setFactoryBalances] = useState({});
   
   // UI State
   const [isLoading, setIsLoading] = useState(false);
@@ -288,6 +335,7 @@ const Sidebar = ({ sidebarOpen, toggleSidebar, onVisibilityChange }) => {
       const raw = await factoryInstance.getAllFactories();
       const fixed = raw.map((f, idx) => fixFactoryData({ id: f.id?.toNumber ? f.id.toNumber() : idx + 1, owner: f.owner, latitude: f.latitude.toNumber(), longitude: f.longitude.toNumber(), powerConsumption: f.powerConsumption.toNumber(), createdAt: f.createdAt?.toNumber ? f.createdAt.toNumber() : 0 }));
       setFactories(fixed);
+      refreshFactoryBalances(fixed);
     } catch (error) {
       showNotification("Failed to fetch factories", "error");
     }
@@ -304,6 +352,24 @@ const Sidebar = ({ sidebarOpen, toggleSidebar, onVisibilityChange }) => {
     }
   };
 
+  const refreshFactoryBalances = async (exchangeInstance = exchangeContract, factoryList = factories) => {
+    if (!exchangeInstance || !factoryList || factoryList.length === 0) {
+      setFactoryBalances({});
+      return;
+    }
+    try {
+      const entries = await Promise.all(
+        factoryList.map(async (factory) => {
+          const balance = await exchangeInstance.factoryEnergyBalance(factory.id);
+          return [factory.id, balance.toNumber()];
+        })
+      );
+      setFactoryBalances(Object.fromEntries(entries));
+    } catch (error) {
+      console.error("Failed to refresh factory balances:", error);
+    }
+  };
+
   const refreshExchange = async (exchangeInstance = exchangeContract, wallet = account) => {
     if (!exchangeInstance || !wallet) return;
     try {
@@ -313,6 +379,7 @@ const Sidebar = ({ sidebarOpen, toggleSidebar, onVisibilityChange }) => {
       ]);
       setGlobalSupplyEnergy(supply.toNumber());
       setClaimableReward(reward);
+      refreshFactoryBalances(exchangeInstance);
     } catch (error) {
       console.error("Failed to refresh exchange data:", error);
     }
@@ -328,6 +395,11 @@ const Sidebar = ({ sidebarOpen, toggleSidebar, onVisibilityChange }) => {
     }, 10000);
     return () => clearInterval(poller);
   }, [exchangeContract, account]);
+
+  useEffect(() => {
+    if (!exchangeContract) return;
+    refreshFactoryBalances(exchangeContract, factories);
+  }, [exchangeContract, factories]);
 
   useEffect(() => {
     const handleChainUpdate = () => {
@@ -416,8 +488,14 @@ const Sidebar = ({ sidebarOpen, toggleSidebar, onVisibilityChange }) => {
                   key="factories-view"
                   viewType="factories" 
                   title="Factories" 
-                  allItems={factories} 
-                  myItems={myFactories} 
+                  allItems={factories.map((factory) => ({
+                    ...factory,
+                    energyBalance: factoryBalances[factory.id] ?? 0
+                  }))} 
+                  myItems={myFactories.map((factory) => ({
+                    ...factory,
+                    energyBalance: factoryBalances[factory.id] ?? 0
+                  }))} 
                 />
               )}
             </div>
