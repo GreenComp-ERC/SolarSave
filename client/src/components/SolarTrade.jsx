@@ -1,18 +1,25 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ethers } from "ethers";
 import {
-  FiX, FiPlusCircle, FiBarChart2, FiPieChart,
+  FiX, FiBarChart2, FiPieChart,
   FiTrendingUp, FiLayers, FiSun, FiWifi
 } from "react-icons/fi";
-import TradeScript from "./TradeConfirm";
 import PanelWindows from "./PanelWindows";
 import SolarPanels from "../utils/test/SolarPanels.json";
-import EnergyExchange from "../utils/test/EnergyExchange.json";
 import contractAddresses from "../utils/contractAddress.json";
 import "../style/SolarTrade.css";
 
 const contractAddress = contractAddresses.solarPanels;
-const exchangeAddress = contractAddresses.energyExchange;
+const SCALE_FACTOR = 10000;
+
+const normalizeStoredPanelValue = (rawLat, rawLng, rawValue) => {
+  const looksScaledCoords = Math.abs(rawLat) > 90 || Math.abs(rawLng) > 180;
+  const looksScaledValue = Math.abs(rawValue) > SCALE_FACTOR;
+  if (looksScaledCoords || looksScaledValue) {
+    return rawValue / SCALE_FACTOR;
+  }
+  return rawValue;
+};
 
 // This component handles the chart display using a more reliable approach
 const PowerChart = ({ data, chartType }) => {
@@ -120,16 +127,11 @@ const PowerChart = ({ data, chartType }) => {
 const SolarTrade = () => {
   const [selectedPanel, setSelectedPanel] = useState(null);
   const [panels, setPanels] = useState([]);
-  const [showTradeScript, setShowTradeScript] = useState(false);
-  const [allPanels, setAllPanels] = useState([]);
   const [combinedData, setCombinedData] = useState([]);
   const [chartType, setChartType] = useState("BarChart");
   const [account, setAccount] = useState(null);
   const [totalDcPower, setTotalDcPower] = useState(0);
   const [totalAcPower, setTotalAcPower] = useState(0);
-  const [exchangeContract, setExchangeContract] = useState(null);
-  const [globalSupplyEnergy, setGlobalSupplyEnergy] = useState(0);
-  const [claimableReward, setClaimableReward] = useState(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [connectionError, setConnectionError] = useState("");
 
@@ -172,26 +174,35 @@ const SolarTrade = () => {
       const contract = new ethers.Contract(contractAddress, SolarPanels.abi, signer);
 
       const myPanelsData = await contract.getMyPanels();
-      const fix = (v) => {
-        const num = v.toNumber();
-        return Math.abs(num) > 1000 ? num / 10000 : num;
-      };
 
       const formattedPanels = myPanelsData.map((panel, index) => {
-        const dc = fix(panel.dcPower);
-        const ac = fix(panel.acPower);
+        const rawLat = panel.latitude.toNumber();
+        const rawLng = panel.longitude.toNumber();
+        const rawDc = panel.dcPower.toNumber();
+        const rawAc = panel.acPower.toNumber();
+
+        const dc = normalizeStoredPanelValue(rawLat, rawLng, rawDc);
+        const ac = normalizeStoredPanelValue(rawLat, rawLng, rawAc);
+
+        console.log("[SolarTrade] Inverter efficiency inputs", {
+          panelId: index + 1,
+          rawDcPower: rawDc,
+          rawAcPower: rawAc,
+          dcPower: dc,
+          acPower: ac,
+        });
+
         return {
           id: index + 1,
           name: `Solar Panel ${index + 1}`,
-          lat: fix(panel.latitude),
-          lng: fix(panel.longitude),
+          lat: normalizeStoredPanelValue(rawLat, rawLng, rawLat),
+          lng: normalizeStoredPanelValue(rawLat, rawLng, rawLng),
           dcPower: dc,
           acPower: ac,
           efficiency: dc > 0 ? Math.round((ac / dc) * 100) : 0
         };
       });
 
-      setAllPanels(formattedPanels);
       setPanels(formattedPanels);
     } catch (error) {
       console.error("Failed to fetch user solar panels:", error);
@@ -203,45 +214,13 @@ const SolarTrade = () => {
     refreshPanels();
   }, [account]);
 
-  const refreshExchange = async (exchangeInstance = exchangeContract) => {
-    if (!exchangeInstance || !account) return;
-    try {
-      const [supply, reward] = await Promise.all([
-        exchangeInstance.globalSupplyEnergy(),
-        exchangeInstance.previewPersonalReward(account)
-      ]);
-      setGlobalSupplyEnergy(supply.toNumber());
-      setClaimableReward(reward);
-    } catch (error) {
-      console.error("Failed to refresh exchange data:", error);
-    }
-  };
-
-  useEffect(() => {
-    if (!account) return;
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-    const exchangeInstance = new ethers.Contract(exchangeAddress, EnergyExchange.abi, signer);
-    setExchangeContract(exchangeInstance);
-    refreshExchange(exchangeInstance);
-  }, [account]);
-
-  useEffect(() => {
-    if (!exchangeContract || !account) return;
-    const poller = setInterval(() => {
-      refreshExchange();
-    }, 10000);
-    return () => clearInterval(poller);
-  }, [exchangeContract, account]);
-
   useEffect(() => {
     const handleChainUpdate = () => {
       refreshPanels();
-      refreshExchange();
     };
     window.addEventListener("chainStateUpdated", handleChainUpdate);
     return () => window.removeEventListener("chainStateUpdated", handleChainUpdate);
-  }, [exchangeContract, account]);
+  }, [account]);
 
   // Calculate combined power stats
   useEffect(() => {
@@ -271,14 +250,6 @@ const SolarTrade = () => {
     setPanels(panels.filter((panel) => panel.id !== panelId));
   };
 
-  // Add panel back
-  const addPanelBack = (panelId) => {
-    const panelToAdd = allPanels.find((panel) => panel.id === panelId);
-    if (panelToAdd && !panels.some((panel) => panel.id === panelId)) {
-      setPanels([...panels, panelToAdd]);
-    }
-  };
-
   // Get chart icon based on type
   const getChartIcon = (type) => {
     switch (type) {
@@ -302,7 +273,7 @@ const SolarTrade = () => {
       <div className="solar-trade-header">
         <div className="header-logo">
           <FiSun className="sun-icon" />
-          <h1>Solar Energy Trading Platform</h1>
+          <h1>Solar Panel Statistics</h1>
         </div>
         <div className="wallet-status">
           {account ? (
@@ -328,30 +299,6 @@ const SolarTrade = () => {
         <div className="left-panel">
           <div className="panel-header">
             <h2>Solar Panel Management</h2>
-            <button
-              className="trade-button"
-              onClick={() => setShowTradeScript(true)}
-            >
-              Trade Energy
-            </button>
-          </div>
-
-          <div className="panel-selection">
-            <select
-              value=""
-              onChange={(e) => addPanelBack(parseInt(e.target.value))}
-              className="panel-dropdown"
-            >
-              <option value="">Add solar panel</option>
-              {allPanels
-                .filter((panel) => !panels.some((p) => p.id === panel.id))
-                .map((panel) => (
-                  <option key={panel.id} value={panel.id}>
-                    {panel.name}
-                  </option>
-                ))}
-            </select>
-            <FiPlusCircle className="add-icon" />
           </div>
 
           <div className="panel-list">
@@ -396,7 +343,7 @@ const SolarTrade = () => {
                         <span>Location: {panel.lat.toFixed(2)}, {panel.lng.toFixed(2)}</span>
                       </div>
                       <div className="panel-efficiency">
-                        <span>Efficiency: {panel.efficiency}%</span>
+                        <span>Inverter Efficiency: {panel.efficiency}%</span>
                       </div>
                     </div>
                   </div>
@@ -405,7 +352,7 @@ const SolarTrade = () => {
             ) : (
               <div className="no-panels-message">
                 <p>No panels selected</p>
-                <p>Add from the dropdown</p>
+                <p>No panel data available in wallet</p>
               </div>
             )}
           </div>
@@ -437,7 +384,7 @@ const SolarTrade = () => {
                 <FiPieChart />
               </div>
               <div className="stats-content">
-                <h3>Average Efficiency</h3>
+                <h3>Average Inverter Efficiency</h3>
                 <div className="stats-value">
                   {totalDcPower > 0 ? Math.round((totalAcPower / totalDcPower) * 100) : 0}
                   <span>%</span>
@@ -472,7 +419,7 @@ const SolarTrade = () => {
               ) : (
                 <div className="no-data-message">
                   <p>No visualization data</p>
-                  <p>Add solar panels to view charts</p>
+                  <p>Connect a wallet with registered panels to view charts</p>
                 </div>
               )}
             </div>
@@ -481,7 +428,6 @@ const SolarTrade = () => {
       </div>
 
       {/* Modal windows */}
-      {showTradeScript && <TradeScript close={() => setShowTradeScript(false)} />}
       {selectedPanel && <PanelWindows panel={selectedPanel} closeWindow={() => setSelectedPanel(null)} />}
     </div>
   );

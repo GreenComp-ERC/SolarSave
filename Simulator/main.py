@@ -11,6 +11,7 @@ import json
 import string
 from web3 import Web3
 from eth_account import Account
+
 # Load environment variables
 load_dotenv()
 api_key = "0771554279f9204c977c7bf619352830"
@@ -325,7 +326,8 @@ async def run_model(request: SolarRequest):
             "data": {
                 "aoi": results["aoi"],
                 "cell_temperature": results["cell_temperature"],
-                "dc(v_mp)": results["dc"]["v_mp"],  # Voltage at maximum power point (MPP)
+                # FIXED: 提取 p_mp (功率) 而不是 v_mp (电压)
+                "dc_power": results["dc"]["p_mp"],  
                 "ac": results["ac"],
             },
         }
@@ -358,7 +360,9 @@ async def run_combined_model(request: MultiSolarRequest):
                 )
 
             ac_power = model_results["ac"].sum() if model_results["ac"] is not None else 0
-            dc_power = model_results["dc"]["v_mp"].sum() if "v_mp" in model_results["dc"] else 0
+            
+            # FIXED: 聚合 p_mp (功率) 而不是 v_mp (电压)
+            dc_power = model_results["dc"]["p_mp"].sum() if "p_mp" in model_results["dc"] else 0
 
             combined_ac += ac_power
             combined_dc += dc_power
@@ -366,7 +370,8 @@ async def run_combined_model(request: MultiSolarRequest):
             results.append({
                 "lat": lat,
                 "lon": lon,
-                "dc(v_mp)": model_results["dc"]["v_mp"],
+                # FIXED: 返回 p_mp
+                "dc_power": model_results["dc"]["p_mp"], 
                 "ac": model_results["ac"],
             })
 
@@ -383,6 +388,7 @@ async def run_combined_model(request: MultiSolarRequest):
 @app.get("/")
 async def root():
     return {"message": "SolarPVModel API is running!"}
+
 if __name__ == '__main__':
     # 运行fastapi程序
     uvicorn.run(app="main:app", host="0.0.0.0", port=8000, reload=True)

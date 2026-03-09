@@ -31,7 +31,7 @@ const PanelWindows = ({ panel, closeWindow }) => {
         fixedLng = fixedLng / 10000;
       }
 
-      const response = await axios.post("https://solarpay-8e3p.onrender.com/run_model/", {
+      const response = await axios.post("http://127.0.0.1:8000/run_model/", {
         lat: fixedLat,
         lon: fixedLng,
         start_date: "2022-06-21",
@@ -136,9 +136,19 @@ const PanelWindows = ({ panel, closeWindow }) => {
     );
   };
 
-  // Calculate efficiency
-  const efficiency = panel.acPower > 0 && panel.dcPower > 0
-    ? ((panel.acPower / panel.dcPower) * 100).toFixed(1)
+  const normalizedDcPower = fixValue(panel.dcPower);
+  const normalizedAcPower = fixValue(panel.acPower);
+
+  console.log("[PanelWindows] Inverter efficiency inputs", {
+    rawDcPower: panel.dcPower,
+    rawAcPower: panel.acPower,
+    dcPower: normalizedDcPower,
+    acPower: normalizedAcPower,
+  });
+
+  // Calculate inverter efficiency from normalized values only.
+  const efficiency = normalizedAcPower > 0 && normalizedDcPower > 0
+    ? ((normalizedAcPower / normalizedDcPower) * 100).toFixed(1)
     : 'N/A';
 
   return (
@@ -201,7 +211,7 @@ const PanelWindows = ({ panel, closeWindow }) => {
                     <p>DC: <span className="highlight">{fixValue(panel.dcPower).toFixed(2)} W</span></p>
                     <p>AC: <span className="highlight">{fixValue(panel.acPower).toFixed(2)} W</span></p>
 
-                    <p>Efficiency: <span className="highlight">{efficiency}%</span></p>
+                    <p>Inverter Efficiency: <span className="highlight">{efficiency}%</span></p>
                   </div>
                 </div>
 

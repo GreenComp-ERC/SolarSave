@@ -20,6 +20,24 @@ const FACTORY_ABI = [
   "function getAllFactories() view returns (tuple(uint256 id,address owner,uint256 latitude,uint256 longitude,uint256 powerConsumption,uint256 createdAt,bool exists)[])",
   "function getFactoriesOf(address user) view returns (tuple(uint256 id,address owner,uint256 latitude,uint256 longitude,uint256 powerConsumption,uint256 createdAt,bool exists)[])"
 ];
+const SCALE_FACTOR = 10000;
+
+const normalizePanelData = (panel) => {
+  let { lat, lng, batteryTemp, dcPower, acPower } = panel;
+
+  const looksScaledCoords = Math.abs(lat) > 90 || Math.abs(lng) > 180;
+  const looksScaledPower = Math.abs(dcPower) > SCALE_FACTOR || Math.abs(acPower) > SCALE_FACTOR;
+
+  if (looksScaledCoords || looksScaledPower) {
+    lat = lat / SCALE_FACTOR;
+    lng = lng / SCALE_FACTOR;
+    batteryTemp = batteryTemp / SCALE_FACTOR;
+    dcPower = dcPower / SCALE_FACTOR;
+    acPower = acPower / SCALE_FACTOR;
+  }
+
+  return { ...panel, lat, lng, batteryTemp, dcPower, acPower };
+};
 
 const MapSection = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -157,7 +175,7 @@ const MapSection = () => {
     try {
       const fixedLat = lat > 90 || lat < -90 ? lat / 10000 : lat;
       const fixedLng = lng > 180 || lng < -180 ? lng / 10000 : lng;
-      const response = await axios.post("https://solarpay-8e3p.onrender.com/run_model/", {
+      const response = await axios.post("http://127.0.0.1:8000/run_model/", {
         lat: fixedLat,
         lon: fixedLng,
         start_date: "2022-06-21",
@@ -173,17 +191,23 @@ const MapSection = () => {
       const keys = Object.keys(data.ac || {});
       const closestTime = getClosestTimestamp(keys, timestamp);
 
+      const rawDcPower = Number(data.dc_power?.[closestTime]);
+      const rawAcPower = Number(data.ac?.[closestTime]);
+      const dcPower = Number.isFinite(rawDcPower) && rawDcPower > 0 ? rawDcPower : 100;
+      const acFallback = Number.isFinite(rawAcPower) && rawAcPower >= 0 ? rawAcPower : 95;
+      const acPower = Math.min(acFallback, dcPower * 0.98);
+
       return {
         batteryTemp: data.cell_temperature?.[closestTime] ?? 25,
-        dcPower: data["dc(v_mp)"]?.[closestTime] ?? 100,
-        acPower: data.ac?.[closestTime] ?? 900,
+        dcPower,
+        acPower,
       };
     } catch (err) {
       console.error("Failed to fetch prediction data:", err);
       return {
         batteryTemp: 25,
         dcPower: 100,
-        acPower: 901,
+        acPower: 95,
       };
     }
   };
@@ -344,7 +368,7 @@ const setShowNotification = (msg) => {
 
     try {
       const allPanelsData = await contractInstance.getAllPanels();
-      const formattedPanels = allPanelsData.map((panel, index) => ({
+      const formattedPanels = allPanelsData.map((panel, index) => normalizePanelData({
         id: index + 1,
         owner: panel.owner,
         lat: panel.latitude.toNumber() ,
@@ -357,10 +381,7 @@ const setShowNotification = (msg) => {
       setAllPanels(formattedPanels);
 
       // Update stats
-      const totalPower = formattedPanels.reduce((sum, panel) => {
-      const correctedPower = panel.acPower > 100000 ? panel.acPower / 10000 : panel.acPower;
-      return sum + correctedPower;
-    }, 0);
+      const totalPower = formattedPanels.reduce((sum, panel) => sum + panel.acPower, 0);
 
     setStats(prev => ({
       ...prev,
@@ -378,7 +399,7 @@ const setShowNotification = (msg) => {
 
     try {
       const myPanelsData = await contractInstance.getMyPanels();
-      const formattedMyPanels = myPanelsData.map((panel, index) => ({
+      const formattedMyPanels = myPanelsData.map((panel, index) => normalizePanelData({
         id: index + 1,
         owner: panel.owner,
         lat: panel.latitude.toNumber(),
@@ -391,10 +412,7 @@ const setShowNotification = (msg) => {
       setMyPanels(formattedMyPanels);
 
       // Update stats
-          const myPanelsPower = formattedMyPanels.reduce((sum, panel) => {
-      const correctedPower = panel.acPower > 100000 ? panel.acPower / 10000 : panel.acPower;
-      return sum + correctedPower;
-    }, 0);
+          const myPanelsPower = formattedMyPanels.reduce((sum, panel) => sum + panel.acPower, 0);
 
     setStats(prev => ({
       ...prev,
@@ -627,15 +645,15 @@ const setShowNotification = (msg) => {
               </div>
               <div class="stat-item">
                 <span class="stat-label">Battery Temp:</span>
-                <span class="stat-value">${panel.batteryTemp/10000}°C</span>
+                <span class="stat-value">${batteryTemp.toFixed(2)}°C</span>
               </div>
               <div class="stat-item">
                 <span class="stat-label">DC Power:</span>
-                <span class="stat-value">${panel.dcPower/10000}W</span>
+                <span class="stat-value">${dcPower.toFixed(2)}W</span>
               </div>
               <div class="stat-item">
                 <span class="stat-label">AC Power:</span>
-                <span class="stat-value">${panel.acPower/10000}W</span>
+                <span class="stat-value">${acPower.toFixed(2)}W</span>
               </div>
             </div>
             <button class="details-button">More details</button>

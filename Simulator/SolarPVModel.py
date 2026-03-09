@@ -7,7 +7,6 @@ from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
 from dotenv import load_dotenv
 import os
 
-
 class SolarPVModel:
     def __init__(self, lat, lon, api_key, sandia_module_name='Canadian_Solar_CS5P_220M___2009_',
                  cec_inverter_name='ABB__MICRO_0_25_I_OUTD_US_208__208V_'):
@@ -15,8 +14,9 @@ class SolarPVModel:
         self.lon = lon
         self.api_key = api_key
 
-        # Initialize location and component parameters
-        self.site = location.Location(self.lat, self.lon, tz='Asia/Shanghai')
+        # 优化: 移除硬编码的上海时区。pvlib 的 Location 默认会使用 UTC，
+        # 在全球化(如加州或纽约)的地图打点中，使用 UTC 能避免时间对齐错误。
+        self.site = location.Location(self.lat, self.lon, tz='UTC')
         sandia_modules = pvsystem.retrieve_sam('SandiaMod')
         cec_inverters = pvsystem.retrieve_sam('cecinverter')
 
@@ -102,7 +102,9 @@ def calculate_combined_output(api_key, coordinates, start_date, end_date, freq='
         aggregated_output = solar_model.calculate_aggregated_output(start_date, end_date, interval)
 
         ac_power = aggregated_output['ac'].sum() if aggregated_output['ac'] is not None else 0
-        dc_power = aggregated_output['dc']['v_mp'].sum() if 'v_mp' in aggregated_output['dc'] else 0
+        
+        # 修复: 提取直流功率 'p_mp' 而不是电压 'v_mp'
+        dc_power = aggregated_output['dc']['p_mp'].sum() if 'p_mp' in aggregated_output['dc'] else 0
 
         combined_ac += ac_power
         combined_dc += dc_power
@@ -125,3 +127,8 @@ if __name__ == "__main__":
 
     print(f"Combined AC Power: {combined_ac:.2f} W")
     print(f"Combined DC Power: {combined_dc:.2f} W")
+    
+    # 学术严谨性检查：计算并打印物理真实的逆变器效率
+    if combined_dc > 0:
+        efficiency = (combined_ac / combined_dc) * 100
+        print(f"System Inverter Efficiency: {efficiency:.2f}% (Should be strictly < 100%)")
