@@ -235,6 +235,11 @@ const Transactions = () => {
 
       const tx = await exchangeContract.buyEnergyForFactory(selectedFactory.id, energyAmount);
       await tx.wait();
+      setSupplyEnergy((prev) => Math.max(0, (prev || 0) - energyAmount));
+      setBalances((prev) => ({
+        ...prev,
+        [selectedFactory.id]: (prev[selectedFactory.id] || 0) + energyAmount
+      }));
       await refreshExchange();
       window.dispatchEvent(new Event("chainStateUpdated"));
       alert("✅ Energy purchased and burned successfully!");
