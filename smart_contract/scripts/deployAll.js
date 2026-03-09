@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const { writeAddresses } = require("./addressStore");
 
-const writeSimulatorEnv = (privateKey) => {
+const writeSimulatorEnv = (privateKey, stepSeconds) => {
   if (!privateKey) {
     console.warn("\nSkipping simulator env sync: DEPLOYER_PRIVATE_KEY or SIMULATOR_PRIVATE_KEY not set.");
     return;
@@ -14,7 +14,7 @@ const writeSimulatorEnv = (privateKey) => {
     "ENABLE_ENERGY_SIM=true",
     `SIMULATOR_PRIVATE_KEY=${privateKey}`,
     "SIMULATOR_RPC_URL=http://127.0.0.1:8545",
-    "SIMULATOR_STEP_SECONDS=60"
+    `SIMULATOR_STEP_SECONDS=${stepSeconds}`
   ];
 
   fs.writeFileSync(envPath, envLines.join("\n") + "\n", { encoding: "utf-8" });
@@ -45,6 +45,10 @@ const resolveSimulatorKey = (ownerAddress, ethers) => {
 async function main() {
   const { ethers } = hre;
   const [owner, ...signers] = await ethers.getSigners();
+  const rawStepSeconds = Number(process.env.SIMULATOR_STEP_SECONDS || "60");
+  const simulatorStepSeconds = Number.isFinite(rawStepSeconds) && rawStepSeconds > 0
+    ? Math.floor(rawStepSeconds)
+    : 60;
   const simulatorKey = resolveSimulatorKey(owner.address, ethers);
 
   console.log("\nDeploying contracts...");
@@ -90,6 +94,12 @@ async function main() {
   console.log("- Shop:", shop.target);
   console.log("- PowerReward:", reward.target);
 
+  console.log(`\nSyncing simulator step seconds: ${simulatorStepSeconds}`);
+  const exchangeStepTx = await energyExchange.setSimulatorStepSeconds(simulatorStepSeconds);
+  await exchangeStepTx.wait();
+  const rewardStepTx = await reward.setSimulatorStepSeconds(simulatorStepSeconds);
+  await rewardStepTx.wait();
+
   try {
     const authorizeTx = await panels.setShopContract(shop.target);
     await authorizeTx.wait();
@@ -128,7 +138,7 @@ async function main() {
   await exchangeFundTx.wait();
   console.log("Exchange pool funded:", fundAmount.toString());
 
-  writeSimulatorEnv(simulatorKey);
+  writeSimulatorEnv(simulatorKey, simulatorStepSeconds);
 }
 
 main().catch((error) => {

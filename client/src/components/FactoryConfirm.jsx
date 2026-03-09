@@ -90,6 +90,7 @@ const FactoryConfirm = ({ close, lat, lng }) => {
       await tx.wait();
 
       setTransactionStatus("Transaction completed successfully!");
+      window.dispatchEvent(new Event("chainStateUpdated"));
       setTimeout(() => {
         close();
       }, 1500);

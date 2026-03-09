@@ -7,10 +7,12 @@ import {
 import TradeScript from "./TradeConfirm";
 import PanelWindows from "./PanelWindows";
 import SolarPanels from "../utils/test/SolarPanels.json";
+import EnergyExchange from "../utils/test/EnergyExchange.json";
 import contractAddresses from "../utils/contractAddress.json";
 import "../style/SolarTrade.css";
 
 const contractAddress = contractAddresses.solarPanels;
+const exchangeAddress = contractAddresses.energyExchange;
 
 // This component handles the chart display using a more reliable approach
 const PowerChart = ({ data, chartType }) => {
@@ -125,6 +127,9 @@ const SolarTrade = () => {
   const [account, setAccount] = useState(null);
   const [totalDcPower, setTotalDcPower] = useState(0);
   const [totalAcPower, setTotalAcPower] = useState(0);
+  const [exchangeContract, setExchangeContract] = useState(null);
+  const [globalSupplyEnergy, setGlobalSupplyEnergy] = useState(0);
+  const [claimableReward, setClaimableReward] = useState(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [connectionError, setConnectionError] = useState("");
 
@@ -158,18 +163,16 @@ const SolarTrade = () => {
     }
   }, []);
 
-  // Fetch user's solar panels
-  useEffect(() => {
-    const fetchMyPanels = async () => {
-      if (!account) return;
+  const refreshPanels = async () => {
+    if (!account) return;
 
-      try {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const signer = provider.getSigner();
-        const contract = new ethers.Contract(contractAddress, SolarPanels.abi, signer);
+    try {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(contractAddress, SolarPanels.abi, signer);
 
-        const myPanelsData = await contract.getMyPanels();
-        const fix = (v) => {
+      const myPanelsData = await contract.getMyPanels();
+      const fix = (v) => {
         const num = v.toNumber();
         return Math.abs(num) > 1000 ? num / 10000 : num;
       };
@@ -186,18 +189,59 @@ const SolarTrade = () => {
           acPower: ac,
           efficiency: dc > 0 ? Math.round((ac / dc) * 100) : 0
         };
-});
+      });
 
+      setAllPanels(formattedPanels);
+      setPanels(formattedPanels);
+    } catch (error) {
+      console.error("Failed to fetch user solar panels:", error);
+    }
+  };
 
-        setAllPanels(formattedPanels);
-        setPanels(formattedPanels);
-      } catch (error) {
-        console.error("Failed to fetch user solar panels:", error);
-      }
-    };
-
-    fetchMyPanels();
+  // Fetch user's solar panels
+  useEffect(() => {
+    refreshPanels();
   }, [account]);
+
+  const refreshExchange = async (exchangeInstance = exchangeContract) => {
+    if (!exchangeInstance || !account) return;
+    try {
+      const [supply, reward] = await Promise.all([
+        exchangeInstance.globalSupplyEnergy(),
+        exchangeInstance.previewPersonalReward(account)
+      ]);
+      setGlobalSupplyEnergy(supply.toNumber());
+      setClaimableReward(reward);
+    } catch (error) {
+      console.error("Failed to refresh exchange data:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (!account) return;
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+    const exchangeInstance = new ethers.Contract(exchangeAddress, EnergyExchange.abi, signer);
+    setExchangeContract(exchangeInstance);
+    refreshExchange(exchangeInstance);
+  }, [account]);
+
+  useEffect(() => {
+    if (!exchangeContract || !account) return;
+    const poller = setInterval(() => {
+      refreshExchange();
+    }, 10000);
+    return () => clearInterval(poller);
+  }, [exchangeContract, account]);
+
+  useEffect(() => {
+    const handleChainUpdate = () => {
+      refreshPanels();
+      refreshExchange();
+    };
+    window.addEventListener("chainStateUpdated", handleChainUpdate);
+    return () => window.removeEventListener("chainStateUpdated", handleChainUpdate);
+  }, [exchangeContract, account]);
 
   // Calculate combined power stats
   useEffect(() => {

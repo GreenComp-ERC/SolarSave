@@ -90,6 +90,7 @@ const TradeConfirm = ({ close, lat, lng, batterTemp, dcPower, acPower, sandiaMod
       await tx.wait();
 
       setTransactionStatus("Transaction completed successfully!");
+      window.dispatchEvent(new Event("chainStateUpdated"));
 
       setTimeout(() => {
         close(); // Close modal

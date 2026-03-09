@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { FiSun } from "react-icons/fi";
 import { ethers } from "ethers";
 import { TransactionContext } from "../context/TransactionContext";
@@ -69,37 +69,60 @@ const Transactions = () => {
   const [purchaseAmount, setPurchaseAmount] = useState("100");
   const [estimatedCost, setEstimatedCost] = useState("0");
   const [loading, setLoading] = useState(true);
+  const [marketStepSeconds, setMarketStepSeconds] = useState(null);
+  const [lastMarketStepAt, setLastMarketStepAt] = useState(null);
+  const [marketCountdownRemaining, setMarketCountdownRemaining] = useState(null);
+  const refreshInFlight = useRef(false);
+
+  const formatCountdown = (seconds) => {
+    const clamped = Math.max(0, seconds);
+    const mins = Math.floor(clamped / 60);
+    const secs = clamped % 60;
+    return `${mins}m ${secs}s`;
+  };
 
   const refreshExchange = async (exchangeCtr = exchangeContract, factoryCtr = factoryContract) => {
     if (!exchangeCtr || !factoryCtr) return;
+    if (refreshInFlight.current) return;
+    refreshInFlight.current = true;
 
-    const [supply, demand] = await Promise.all([
-      exchangeCtr.globalSupplyEnergy(),
-      exchangeCtr.totalDemandEnergy()
-    ]);
+    try {
+      const [supply, demand, stepSeconds, lastStepAt] = await Promise.all([
+        exchangeCtr.globalSupplyEnergy(),
+        exchangeCtr.totalDemandEnergy(),
+        exchangeCtr.simulatorStepSeconds(),
+        exchangeCtr.lastMarketStepAt()
+      ]);
 
-    const supplyRaw = supply.toNumber();
-    const demandRaw = demand.toNumber();
-    setSupplyEnergy(supplyRaw);
-    setDemandEnergy(demandRaw);
-    setDeficitEnergy(Math.max(0, demandRaw - supplyRaw));
+      const supplyRaw = supply.toNumber();
+      const demandRaw = demand.toNumber();
+      setSupplyEnergy(supplyRaw);
+      setDemandEnergy(demandRaw);
+      setDeficitEnergy(Math.max(0, demandRaw - supplyRaw));
+      setMarketStepSeconds(stepSeconds.toNumber());
+      setLastMarketStepAt(lastStepAt.toNumber());
 
-    const factoryList = await factoryCtr.getAllFactories();
-    const formatted = factoryList.map((factory) => ({
-      id: factory.id.toNumber(),
-      owner: factory.owner,
-      latitude: normalizeEnergy(factory.latitude.toNumber()),
-      longitude: normalizeEnergy(factory.longitude.toNumber()),
-      powerConsumption: factory.powerConsumption.toNumber()
-    }));
-    setFactories(formatted);
+      const factoryList = await factoryCtr.getAllFactories();
+      const formatted = factoryList.map((factory) => ({
+        id: factory.id.toNumber(),
+        owner: factory.owner,
+        latitude: normalizeEnergy(factory.latitude.toNumber()),
+        longitude: normalizeEnergy(factory.longitude.toNumber()),
+        powerConsumption: factory.powerConsumption.toNumber()
+      }));
+      setFactories(formatted);
 
-    const balanceMap = {};
-    for (const factory of formatted) {
-      const bal = await exchangeCtr.factoryEnergyBalance(factory.id);
-      balanceMap[factory.id] = bal.toNumber();
+      const balanceMap = {};
+      for (const factory of formatted) {
+        const bal = await exchangeCtr.factoryEnergyBalance(factory.id);
+        balanceMap[factory.id] = bal.toNumber();
+      }
+      setBalances(balanceMap);
+    } catch (error) {
+      console.error("Failed to refresh exchange:", error);
+    } finally {
+      refreshInFlight.current = false;
     }
-    setBalances(balanceMap);
   };
 
   useEffect(() => {
@@ -123,6 +146,51 @@ const Transactions = () => {
 
     connect();
   }, [currentAccount]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (!lastMarketStepAt || !marketStepSeconds) {
+        setMarketCountdownRemaining(null);
+        return;
+      }
+      const now = Math.floor(Date.now() / 1000);
+      const nextUpdate = lastMarketStepAt + marketStepSeconds;
+      const diff = nextUpdate - now;
+      if (diff <= 0) {
+        setMarketCountdownRemaining(0);
+        refreshExchange();
+        return;
+      }
+      setMarketCountdownRemaining(diff);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [lastMarketStepAt, marketStepSeconds]);
+
+  useEffect(() => {
+    if (!marketStepSeconds || !exchangeContract || !factoryContract) return;
+    const refreshTimer = setInterval(() => {
+      refreshExchange();
+    }, marketStepSeconds * 1000);
+
+    return () => clearInterval(refreshTimer);
+  }, [marketStepSeconds, exchangeContract, factoryContract]);
+
+  useEffect(() => {
+    if (!exchangeContract || !factoryContract) return;
+    const poller = setInterval(() => {
+      refreshExchange();
+    }, 10000);
+    return () => clearInterval(poller);
+  }, [exchangeContract, factoryContract]);
+
+  useEffect(() => {
+    const handleChainUpdate = () => {
+      refreshExchange();
+    };
+    window.addEventListener("chainStateUpdated", handleChainUpdate);
+    return () => window.removeEventListener("chainStateUpdated", handleChainUpdate);
+  }, [exchangeContract, factoryContract]);
 
   useEffect(() => {
     const updateEstimate = async () => {
@@ -168,6 +236,7 @@ const Transactions = () => {
       const tx = await exchangeContract.buyEnergyForFactory(selectedFactory.id, energyAmount);
       await tx.wait();
       await refreshExchange();
+      window.dispatchEvent(new Event("chainStateUpdated"));
       alert("✅ Energy purchased and burned successfully!");
     } catch (error) {
       console.error("Purchase failed", error);
@@ -228,6 +297,11 @@ const Transactions = () => {
                   <span className="trans-section-icon">⚡</span>
                   Energy Market
                 </h2>
+                <div className="trans-market-timer">
+                  Next update: {marketCountdownRemaining === null
+                    ? "Loading..."
+                    : formatCountdown(marketCountdownRemaining)}
+                </div>
               </div>
               <div className="trans-shop-grid">
                 <div className="trans-panel-card">

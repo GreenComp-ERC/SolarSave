@@ -13,6 +13,8 @@ contract EnergyExchange is Ownable {
 
     uint256 public globalSupplyEnergy;
     uint256 public totalDemandEnergy;
+    uint256 public simulatorStepSeconds;
+    uint256 public lastMarketStepAt;
 
     mapping(address => uint256) public personalRewardWei;
     mapping(address => uint256) public lastClaimedAt;
@@ -26,6 +28,7 @@ contract EnergyExchange is Ownable {
 
     constructor(address _rewardToken) Ownable(msg.sender) {
         rewardToken = ISolarToken(_rewardToken);
+        simulatorStepSeconds = 3600;
     }
 
     function updateMarketStep(
@@ -51,13 +54,19 @@ contract EnergyExchange is Ownable {
         }
 
         totalDemandEnergy = demandEnergy;
+        lastMarketStepAt = block.timestamp;
         emit MarketStepUpdated(supplyEnergy, demandEnergy, block.timestamp);
+    }
+
+    function setSimulatorStepSeconds(uint256 stepSeconds) external onlyOwner {
+        require(stepSeconds > 0, "Step must be > 0");
+        simulatorStepSeconds = stepSeconds;
     }
 
     function claimPersonalReward() external {
         require(
-            block.timestamp - lastClaimedAt[msg.sender] >= 1 hours,
-            "Can only claim once per hour"
+            block.timestamp - lastClaimedAt[msg.sender] >= simulatorStepSeconds,
+            "Claim cooldown active"
         );
         uint256 amount = personalRewardWei[msg.sender];
         require(amount > 0, "No reward to claim");
@@ -70,7 +79,7 @@ contract EnergyExchange is Ownable {
     }
 
     function previewPersonalReward(address user) external view returns (uint256) {
-        if (block.timestamp - lastClaimedAt[user] < 1 hours) return 0;
+        if (block.timestamp - lastClaimedAt[user] < simulatorStepSeconds) return 0;
         return personalRewardWei[user];
     }
 

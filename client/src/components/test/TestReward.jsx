@@ -20,21 +20,22 @@ const TestReward = () => {
     const [lastClaimedAt, setLastClaimedAt] = useState(null);
     const [cooldownRemaining, setCooldownRemaining] = useState(null);
     const [poolBalance, setPoolBalance] = useState(null);
+    const [simulatorStepSeconds, setSimulatorStepSeconds] = useState(null);
     useEffect(() => {
         connect();
     }, []);
     useEffect(() => {
     const interval = setInterval(() => {
-        if (lastClaimedAt !== null) {
+        if (lastClaimedAt !== null && simulatorStepSeconds) {
             const now = Math.floor(Date.now() / 1000);
-            const nextClaim = lastClaimedAt + 3600;
+            const nextClaim = lastClaimedAt + simulatorStepSeconds;
             const remaining = nextClaim - now;
             setCooldownRemaining(remaining > 0 ? remaining : 0);
         }
     }, 1000);
 
     return () => clearInterval(interval);
-}, [lastClaimedAt]);
+}, [lastClaimedAt, simulatorStepSeconds]);
 
 
     const connect = async () => {
@@ -70,6 +71,9 @@ const TestReward = () => {
 
     const preview = await rewardCtr.previewReward(userAddress);
     setRewardPreview(preview);
+
+    const stepSeconds = await rewardCtr.simulatorStepSeconds();
+    setSimulatorStepSeconds(stepSeconds.toNumber());
 
     const last = await rewardCtr.lastClaimedAt(userAddress);
     setLastClaimedAt(last.toNumber());
@@ -151,7 +155,9 @@ const TestReward = () => {
 
 
                 {/* ✅ Countdown */}
-                {cooldownRemaining !== null && cooldownRemaining > 0 ? (
+                {cooldownRemaining === null ? (
+                    <p>⏳ Loading cooldown...</p>
+                ) : cooldownRemaining > 0 ? (
                     <p>⏳ Time until next claim: {Math.floor(cooldownRemaining / 60)}m {cooldownRemaining % 60}s</p>
                 ) : (
                     <p>✅ You can claim rewards now!</p>

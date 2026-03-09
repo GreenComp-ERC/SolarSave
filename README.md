@@ -50,7 +50,7 @@ SolarSave is designed for individuals, communities, and organizations aiming to 
 
 ### **1. Prerequisites**
 - **Node.js**: 18+ (LTS recommended)
-- **Python**: 3.9+ (3.10+ recommended)
+- **Python**: 3.9+ (3.10 recommended)
 - **Git**: latest
 - **MetaMask**: for local wallet interactions
 
@@ -111,7 +111,7 @@ python -m uvicorn main:app --reload
 ### **7. Start the Frontend**
 In another terminal:
 ```bash
-cd /client
+cd client
 npm run dev
 ```
 

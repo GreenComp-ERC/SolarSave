@@ -98,6 +98,15 @@
   align-items: center;
 }
 
+.trans-market-timer {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  background: rgba(41, 82, 227, 0.1);
+  border: 1px solid rgba(41, 82, 227, 0.3);
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+}
+
 .trans-section-title {
   font-size: 1.25rem;
   font-weight: 600;

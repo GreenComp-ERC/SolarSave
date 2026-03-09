@@ -5,11 +5,13 @@ import {
   Globe, Lock, Search, ChevronsLeft, ChevronsRight, Unlock, Factory
 } from "lucide-react";
 import SolarPanels from "../utils/test/SolarPanels.json";
+import EnergyExchange from "../utils/test/EnergyExchange.json";
 import contractAddresses from "../utils/contractAddress.json";
 import "../style/Sidebar.css";
 
 const contractAddress = contractAddresses.solarPanels;
 const factoryAddress = contractAddresses.factory;
+const exchangeAddress = contractAddresses.energyExchange;
 const FACTORY_ABI = [
   "function getAllFactories() view returns (tuple(uint256 id,address owner,uint256 latitude,uint256 longitude,uint256 powerConsumption,uint256 createdAt,bool exists)[])",
   "function getFactoriesOf(address user) view returns (tuple(uint256 id,address owner,uint256 latitude,uint256 longitude,uint256 powerConsumption,uint256 createdAt,bool exists)[])"
@@ -196,6 +198,9 @@ const Sidebar = ({ sidebarOpen, toggleSidebar, onVisibilityChange }) => {
   const [factoryContract, setFactoryContract] = useState(null);
   const [factories, setFactories] = useState([]);
   const [myFactories, setMyFactories] = useState([]);
+  const [exchangeContract, setExchangeContract] = useState(null);
+  const [globalSupplyEnergy, setGlobalSupplyEnergy] = useState(0);
+  const [claimableReward, setClaimableReward] = useState(null);
   
   // UI State
   const [isLoading, setIsLoading] = useState(false);
@@ -231,11 +236,13 @@ const Sidebar = ({ sidebarOpen, toggleSidebar, onVisibilityChange }) => {
       const signer = provider.getSigner();
       const contractInstance = new ethers.Contract(contractAddress, SolarPanels.abi, signer);
       const factoryInstance = new ethers.Contract(factoryAddress, FACTORY_ABI, signer);
+      const exchangeInstance = new ethers.Contract(exchangeAddress, EnergyExchange.abi, signer);
       const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
       
       setAccount(accounts[0]);
       setContract(contractInstance);
       setFactoryContract(factoryInstance);
+      setExchangeContract(exchangeInstance);
 
       await Promise.all([
         fetchPanels(contractInstance),
@@ -243,6 +250,7 @@ const Sidebar = ({ sidebarOpen, toggleSidebar, onVisibilityChange }) => {
         fetchFactories(factoryInstance),
         fetchMyFactories(factoryInstance, accounts[0])
       ]);
+      await refreshExchange(exchangeInstance, accounts[0]);
       showNotification("Wallet connected!");
     } catch (error) {
       console.error("Connection failed:", error);
@@ -296,8 +304,42 @@ const Sidebar = ({ sidebarOpen, toggleSidebar, onVisibilityChange }) => {
     }
   };
 
+  const refreshExchange = async (exchangeInstance = exchangeContract, wallet = account) => {
+    if (!exchangeInstance || !wallet) return;
+    try {
+      const [supply, reward] = await Promise.all([
+        exchangeInstance.globalSupplyEnergy(),
+        exchangeInstance.previewPersonalReward(wallet)
+      ]);
+      setGlobalSupplyEnergy(supply.toNumber());
+      setClaimableReward(reward);
+    } catch (error) {
+      console.error("Failed to refresh exchange data:", error);
+    }
+  };
+
   const isVisible = isLocked ? sidebarOpen : isHovering;
   useEffect(() => { if (onVisibilityChange) onVisibilityChange(isVisible); }, [isVisible, onVisibilityChange]);
+
+  useEffect(() => {
+    if (!exchangeContract || !account) return;
+    const poller = setInterval(() => {
+      refreshExchange();
+    }, 10000);
+    return () => clearInterval(poller);
+  }, [exchangeContract, account]);
+
+  useEffect(() => {
+    const handleChainUpdate = () => {
+      fetchPanels();
+      fetchMyPanels();
+      fetchFactories();
+      fetchMyFactories();
+      refreshExchange();
+    };
+    window.addEventListener("chainStateUpdated", handleChainUpdate);
+    return () => window.removeEventListener("chainStateUpdated", handleChainUpdate);
+  }, [exchangeContract, account]);
 
   const tabStyle = {
     display: "flex", gap: "10px", margin: "0 15px 15px", padding: "4px",

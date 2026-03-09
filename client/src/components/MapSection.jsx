@@ -51,6 +51,7 @@ const MapSection = () => {
   const [cooldownRemaining, setCooldownRemaining] = useState(null);
   const [lastClaimedAt, setLastClaimedAt] = useState(null);
   const [rewardPreview, setRewardPreview] = useState(null);
+  const [simulatorStepSeconds, setSimulatorStepSeconds] = useState(null);
 
 
   const [stats, setStats] = useState({
@@ -93,6 +94,9 @@ const MapSection = () => {
     const preview = await exchangeCtr.previewPersonalReward(accounts[0]);
     setRewardPreview(preview);
 
+    const stepSeconds = await exchangeCtr.simulatorStepSeconds();
+    setSimulatorStepSeconds(stepSeconds.toNumber());
+
     // ✅ Fetch panels
     await fetchPanels(contractInstance);
     await fetchMyPanels(contractInstance);
@@ -123,6 +127,7 @@ const MapSection = () => {
     await tx.wait();
     alert("✅ Reward claimed successfully!");
     await connectToBlockchain(); // Refresh rewardPreview and cooldown
+    window.dispatchEvent(new Event("chainStateUpdated"));
   } catch (e) {
     console.error("❌ Claim failed:", e);
     alert("❌ Reward claim failed!");
@@ -482,15 +487,35 @@ const setShowNotification = (msg) => {
   }, []);
   useEffect(() => {
   const timer = setInterval(() => {
-    if (lastClaimedAt !== null) {
+      if (lastClaimedAt !== null && simulatorStepSeconds) {
       const now = Math.floor(Date.now() / 1000);
-      const nextClaim = lastClaimedAt + 3600;
+        const nextClaim = lastClaimedAt + simulatorStepSeconds;
       const diff = nextClaim - now;
       setCooldownRemaining(diff > 0 ? diff : 0);
     }
   }, 1000);
   return () => clearInterval(timer);
-}, [lastClaimedAt]);
+  }, [lastClaimedAt, simulatorStepSeconds]);
+
+    useEffect(() => {
+      if (!exchangeContract || !simulatorStepSeconds || !currentAccount) return;
+
+      const refreshRewards = async () => {
+        try {
+          const last = await exchangeContract.lastClaimedAt(currentAccount);
+          setLastClaimedAt(last.toNumber());
+
+          const preview = await exchangeContract.previewPersonalReward(currentAccount);
+          setRewardPreview(preview);
+        } catch (error) {
+          console.error("Failed to refresh reward data:", error);
+        }
+      };
+
+      refreshRewards();
+      const refreshTimer = setInterval(refreshRewards, simulatorStepSeconds * 1000);
+      return () => clearInterval(refreshTimer);
+    }, [exchangeContract, simulatorStepSeconds, currentAccount]);
 
 
   // Initialize map and default panels
@@ -706,9 +731,11 @@ const setShowNotification = (msg) => {
 <div className="reward-timer-panel">
   <p style={{ marginBottom: "5px" }}>
     Reward countdown:
-    {cooldownRemaining !== null && cooldownRemaining > 0
-      ? `${Math.floor(cooldownRemaining / 60)}m ${cooldownRemaining % 60}s`
-      : "Ready to claim"}
+    {cooldownRemaining === null
+      ? "Loading..."
+      : cooldownRemaining > 0
+        ? `${Math.floor(cooldownRemaining / 60)}m ${cooldownRemaining % 60}s`
+        : "Ready to claim"}
   </p>
   <button
     className="button"
