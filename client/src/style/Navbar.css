@@ -41,10 +41,16 @@
   max-width: 1440px;
   margin: 0 auto;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   height: 100%;
   padding: 0 2rem;
+}
+
+.right-actions {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
 }
 
 /* Logo Section */
@@ -108,6 +114,11 @@
   list-style: none;
   margin: 0;
   padding: 0;
+}
+
+.nav-links .nav-item {
+  margin: 0 0.35rem;
+  padding: 0.45rem 0.6rem;
 }
 
 .nav-item {
@@ -217,6 +228,7 @@
 .wallet-section {
   display: flex;
   align-items: center;
+  margin-left: 0.5rem;
 }
 
 .connect-wallet-btn, .wallet-address-btn {
@@ -432,6 +444,10 @@
 
 /* Media Queries */
 @media screen and (max-width: 1024px) {
+  .right-actions {
+    margin-left: 0;
+  }
+
   .nav-links {
     display: none;
   }

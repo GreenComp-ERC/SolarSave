@@ -68,77 +68,28 @@ const Navbar = ({ logoSize = "w-16" }) => {
           </div>
         </div>
 
-        <ul className="nav-links">
-          <NavBarItem title="About" icon={<Info size={18} />} onClick={() => setIsAboutOpen(true)} />
-          <NavBarItem title="Blog" icon={<BookOpen size={18} />} />
-          <NavBarItem title="Updates" icon={<Activity size={18} />} />
-          <NavBarItem title="Docs" icon={<BookOpen size={18} />} />
-          <NavBarItem title="Block Explorer" icon={<Globe size={18} />} />
+        <div className="right-actions">
+          <ul className="nav-links">
+            <NavBarItem title="Help" icon={<BookOpen size={18} />} />
+            <NavBarItem title="About" icon={<Info size={18} />} onClick={() => setIsAboutOpen(true)} />
+          </ul>
 
-          <li className="nav-item dropdown">
-            <div
-              className="dropdown-trigger"
-              onClick={() => setToolsDropdown(!toolsDropdown)}
-            >
-              <Settings size={18} />
-              <span>Test Tools</span>
-              <ChevronDown
-                size={14}
-                className={`dropdown-arrow ${toolsDropdown ? "active" : ""}`}
-              />
-            </div>
-
-            {toolsDropdown && (
-                <ul className="dropdown-menu">
-                  <li onClick={() => {
-                    setIsTokenModalOpen(true);
-                    setToolsDropdown(false);
-                  }}>
-                    <Wallet size={16}/>
-                    <span>Token Test</span>
-                  </li>
-                  <li onClick={() => {
-                    setIsStoreModalOpen(true);
-                    setToolsDropdown(false);
-                  }}>
-                    <ShoppingCart size={16}/>
-                    <span>Shop Test</span>
-                  </li>
-                  <li onClick={() => {
-                    setIsTestPanelsModalOpen(true);
-                    setToolsDropdown(false);
-                  }}>
-                    <Activity size={16}/>
-                    <span>Solar Panel Test</span>
-                  </li>
-                  <li onClick={() => {
-                    setIsTestRewardModalOpen(true);
-                    setToolsDropdown(false);
-                  }}>
-                    <HandCoins size={16}/>
-                    <span>Rewards Test</span>
-                  </li>
-
-                </ul>
+          <div className="wallet-section">
+            {!currentAccount ? (
+                <button className="connect-wallet-btn" onClick={connectWallet}>
+                <Wallet size={18} />
+                <span>Connect Wallet</span>
+              </button>
+            ) : (
+              <button
+                className="wallet-address-btn"
+                onClick={() => setIsWalletModalOpen(true)}
+              >
+                <User size={18} />
+                <span>{shortenAddress(currentAccount)}</span>
+              </button>
             )}
-          </li>
-        </ul>
-
-        <div className="wallet-section">
-          {!currentAccount ? (
-              <button className="connect-wallet-btn" onClick={connectWallet}>
-              <Wallet size={18} />
-              <span>Connect Wallet</span>
-            </button>
-          ) : (
-            <button
-              className="wallet-address-btn"
-              onClick={() => setIsWalletModalOpen(true)}
-            >
-              <User size={18} />
-              <span>{shortenAddress(currentAccount)}</span>
-            </button>
-          )}
+          </div>
         </div>
 
         <div className="mobile-menu-btn" onClick={() => setToggleMenu(!toggleMenu)}>
@@ -149,27 +100,8 @@ const Navbar = ({ logoSize = "w-16" }) => {
       {toggleMenu && (
         <div className="mobile-nav">
           <ul className="mobile-nav-list">
+            <NavBarItem title="Help" icon={<BookOpen size={18} />} />
             <NavBarItem title="About" icon={<Info size={18} />} onClick={() => setIsAboutOpen(true)} />
-            <NavBarItem title="Blog" icon={<BookOpen size={18} />} />
-            <NavBarItem title="Updates" icon={<Activity size={18} />} />
-            <NavBarItem title="Docs" icon={<BookOpen size={18} />} />
-            <NavBarItem title="Block Explorer" icon={<Globe size={18} />} />
-
-            <li onClick={() => {
-              setIsTokenModalOpen(true);
-              setToolsDropdown(false);
-            }}>
-              <Wallet size={18}/>
-              <span>Token Test</span>
-            </li>
-            <li className="mobile-nav-item" onClick={() => setIsStoreModalOpen(true)}>
-            <ShoppingCart size={18} />
-              <span>Shop Test</span>
-            </li>
-            <li className="mobile-nav-item" onClick={() => setIsTestPanelsModalOpen(true)}>
-              <Activity size={18} />
-              <span>Trade Test</span>
-            </li>
 
             {!currentAccount && (
               <li className="mobile-connect-wallet">
