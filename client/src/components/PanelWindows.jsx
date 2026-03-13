@@ -5,6 +5,24 @@ import Draggable from "react-draggable";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import "../style/PanelWindows.css";
 
+const formatLocalDate = (date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
+
+const getDefaultDateRange = () => {
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+
+  return {
+    startDate: formatLocalDate(yesterday),
+    endDate: formatLocalDate(today),
+  };
+};
+
 const PanelWindows = ({ panel, closeWindow }) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -31,11 +49,13 @@ const PanelWindows = ({ panel, closeWindow }) => {
         fixedLng = fixedLng / 10000;
       }
 
+      const { startDate, endDate } = getDefaultDateRange();
+
       const response = await axios.post("http://127.0.0.1:8000/run_model/", {
         lat: fixedLat,
         lon: fixedLng,
-        start_date: "2022-06-21",
-        end_date: "2022-06-22",
+        start_date: startDate,
+        end_date: endDate,
       });
 
       if (response.data.status === "success") {

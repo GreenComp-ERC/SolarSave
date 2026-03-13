@@ -22,6 +22,24 @@ const FACTORY_ABI = [
 ];
 const SCALE_FACTOR = 10000;
 
+const formatLocalDate = (date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
+
+const getPredictionDateRange = () => {
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+
+  return {
+    startDate: formatLocalDate(yesterday),
+    endDate: formatLocalDate(today),
+  };
+};
+
 const normalizePanelData = (panel) => {
   let { lat, lng, batteryTemp, dcPower, acPower } = panel;
 
@@ -175,11 +193,12 @@ const MapSection = () => {
     try {
       const fixedLat = lat > 90 || lat < -90 ? lat / 10000 : lat;
       const fixedLng = lng > 180 || lng < -180 ? lng / 10000 : lng;
+      const { startDate, endDate } = getPredictionDateRange();
       const response = await axios.post("http://127.0.0.1:8000/run_model/", {
         lat: fixedLat,
         lon: fixedLng,
-        start_date: "2022-06-21",
-        end_date: "2022-06-22",
+        start_date: startDate,
+        end_date: endDate,
         freq: "60min"
       });
 
@@ -247,7 +266,7 @@ const setShowNotification = (msg) => {
   setIsPredicting(true);  // Start loading
 
   const { lat, lng } = pendingPanelLocation;
-  const isoTimestamp = "2022-06-21T15:00:00";
+  const isoTimestamp = new Date().toISOString();
 
   try {
     const prediction = await fetchPredictedPanelData(lat, lng, isoTimestamp);

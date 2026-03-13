@@ -2,7 +2,26 @@ import React, { useState, useEffect, useRef } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
 import "../style/Test.css";
 
+const formatLocalDate = (date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
+
+const getDefaultDateRange = () => {
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+
+  return {
+    startDate: formatLocalDate(yesterday),
+    endDate: formatLocalDate(today),
+  };
+};
+
 const SolarPredict = () => {
+  const defaultDateRange = getDefaultDateRange();
   const [lat, setLat] = useState(31.2992);
   const [lng, setLng] = useState(120.7467);
   const [data, setData] = useState(null);
@@ -10,8 +29,8 @@ const SolarPredict = () => {
   const [error, setError] = useState(null);
   const [interval, setInterval] = useState("hour");
   const [timeRange, setTimeRange] = useState(24);
-  const [startDate, setStartDate] = useState("2022-06-21");
-  const [endDate, setEndDate] = useState("2022-06-22");
+  const [startDate, setStartDate] = useState(defaultDateRange.startDate);
+  const [endDate, setEndDate] = useState(defaultDateRange.endDate);
   const [modalOpen, setModalOpen] = useState(false);
   const [activeChart, setActiveChart] = useState(null);
   const [viewMode, setViewMode] = useState("compact");
