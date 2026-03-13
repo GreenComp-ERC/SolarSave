@@ -12,7 +12,7 @@ import {
   Cone
 } from '@react-three/drei';
 
-// --- 太阳能板模型优化 ---
+// --- Solar Panel Model Beautification ---
 const SolarPanelModel = ({ intensity }) => {
   const panelRef = useRef();
 
@@ -20,46 +20,65 @@ const SolarPanelModel = ({ intensity }) => {
     const t = state.clock.getElapsedTime();
     if (panelRef.current) {
       panelRef.current.position.y = Math.sin(t * 1.5) * 0.03;
+      // Smooth tracking simulation
       panelRef.current.rotation.x = Math.PI / 6 + (intensity - 0.5) * 0.15;
     }
   });
 
   return (
     <group ref={panelRef} position={[0, 0, 0]}>
-      {/* 支架底座 */}
-      <Cylinder args={[0.08, 0.12, 1.2, 32]} position={[0, -0.6, 0]}>
-        <meshStandardMaterial color="#8892b0" metalness={0.9} roughness={0.2} />
+      {/* Ground Pedestal / Base Plate */}
+      <Cylinder args={[0.3, 0.4, 0.05, 32]} position={[0, -1.15, 0]}>
+        <meshStandardMaterial color="#475569" metalness={0.6} roughness={0.7} />
       </Cylinder>
-      {/* 连接件 */}
-      <RoundedBox args={[0.25, 0.25, 0.25]} radius={0.05} position={[0, 0, -0.1]}>
-        <meshStandardMaterial color="#333" metalness={0.8} roughness={0.4} />
-      </RoundedBox>
       
-      {/* 太阳能板主体 */}
+      {/* Main Support Pole */}
+      <Cylinder args={[0.06, 0.1, 1.2, 32]} position={[0, -0.6, 0]}>
+        <meshStandardMaterial color="#94a3b8" metalness={0.9} roughness={0.2} />
+      </Cylinder>
+
+      {/* Hydraulic / Rotation Joint */}
+      <RoundedBox args={[0.3, 0.2, 0.2]} radius={0.05} position={[0, -0.05, -0.05]}>
+        <meshStandardMaterial color="#1e293b" metalness={0.8} roughness={0.4} />
+      </RoundedBox>
+      <Cylinder args={[0.04, 0.04, 0.4]} rotation={[0, 0, Math.PI / 2]} position={[0, -0.05, -0.05]}>
+        <meshStandardMaterial color="#cbd5e1" metalness={1} roughness={0.1} />
+      </Cylinder>
+      
+      {/* Solar Panel Array */}
       <group rotation={[Math.PI / 6, 0, 0]}>
-        {/* 背板 */}
-        <RoundedBox args={[2.1, 0.1, 3.1]} radius={0.02}>
-          <meshStandardMaterial color="#ccd6f6" metalness={0.5} roughness={0.8} />
+        {/* Aluminum Outer Frame */}
+        <RoundedBox args={[2.2, 0.08, 3.2]} radius={0.02}>
+          <meshStandardMaterial color="#e2e8f0" metalness={0.8} roughness={0.2} />
         </RoundedBox>
-        {/* 光伏玻璃面板 */}
-        <RoundedBox args={[2, 0.05, 3]} position={[0, 0.04, 0]} radius={0.01}>
-          <meshStandardMaterial 
-            color="#0a192f" 
-            emissive="#1d4ed8"
-            emissiveIntensity={intensity * 0.3}
-            metalness={1} 
-            roughness={0.05} // 极低粗糙度带来玻璃质感
-            envMapIntensity={2} // 增强环境反射
+
+        {/* Backplate */}
+        <RoundedBox args={[2.1, 0.09, 3.1]} radius={0.01} position={[0, -0.01, 0]}>
+          <meshStandardMaterial color="#0f172a" metalness={0.4} roughness={0.8} />
+        </RoundedBox>
+
+        {/* Photovoltaic Glass Panel */}
+        <RoundedBox args={[2.05, 0.05, 3.05]} position={[0, 0.03, 0]} radius={0.005}>
+          <meshPhysicalMaterial 
+            color="#082f49" 
+            emissive="#0284c7"
+            emissiveIntensity={intensity * 0.15}
+            metalness={0.9} 
+            roughness={0.05}
+            clearcoat={1}
+            clearcoatRoughness={0.1}
+            envMapIntensity={2.5}
           />
         </RoundedBox>
-        {/* 栅线网络 (简化为半透明发光条) */}
-        <mesh position={[0, 0.07, 0]}>
-          <planeGeometry args={[1.9, 2.9]} />
+
+        {/* Photovoltaic Grid Network (Using dense segments for cell illusion) */}
+        <mesh position={[0, 0.056, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[2.0, 3.0, 12, 18]} />
           <meshBasicMaterial 
-            color="#64ffda" 
+            color="#38bdf8" 
             wireframe 
             transparent 
-            opacity={0.15 + intensity * 0.2} 
+            opacity={0.1 + intensity * 0.3} 
           />
         </mesh>
       </group>
@@ -67,63 +86,117 @@ const SolarPanelModel = ({ intensity }) => {
   );
 };
 
-// --- 工厂模型优化 ---
+// --- Factory Model Beautification ---
 const FactoryModel = ({ intensity }) => {
   const factoryRef = useRef();
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
     if (factoryRef.current) {
-      factoryRef.current.position.y = Math.sin(t * 1) * 0.02;
+      factoryRef.current.position.y = Math.sin(t * 1) * 0.015;
     }
   });
 
   return (
     <group ref={factoryRef} position={[0, -0.5, 0]}>
-      {/* 厂房主体 */}
-      <RoundedBox args={[3.2, 1.2, 2.2]} position={[0, 0.6, 0]} radius={0.1}>
-        <meshStandardMaterial color="#e2e8f0" metalness={0.1} roughness={0.9} />
+      {/* Foundation Base */}
+      <RoundedBox args={[3.8, 0.1, 2.8]} position={[0, 0.05, 0]} radius={0.02}>
+        <meshStandardMaterial color="#334155" metalness={0.2} roughness={0.8} />
       </RoundedBox>
-      {/* 屋顶 */}
-      <group position={[0, 1.45, 0]}>
-        <Cone args={[1.1, 0.6, 4]} rotation={[0, Math.PI / 4, 0]} position={[-0.9, 0, 0]}>
-          <meshStandardMaterial color="#3b82f6" metalness={0.3} roughness={0.6} />
-        </Cone>
-        <Cone args={[1.1, 0.6, 4]} rotation={[0, Math.PI / 4, 0]} position={[0.9, 0, 0]}>
-          <meshStandardMaterial color="#3b82f6" metalness={0.3} roughness={0.6} />
-        </Cone>
+
+      {/* Main Building Structure */}
+      <RoundedBox args={[3.4, 1.2, 2.4]} position={[0, 0.7, 0]} radius={0.05}>
+        <meshStandardMaterial color="#cbd5e1" metalness={0.1} roughness={0.9} />
+      </RoundedBox>
+
+      {/* Decorative Accent Stripe */}
+      <mesh position={[0, 0.7, 1.21]}>
+        <planeGeometry args={[3.4, 0.1]} />
+        <meshStandardMaterial color="#3b82f6" metalness={0.5} roughness={0.4} />
+      </mesh>
+
+      {/* Industrial Windows (Glowing based on activity) */}
+      {[-1, 0, 1].map((x, i) => (
+        <mesh key={i} position={[x, 0.6, 1.21]}>
+          <planeGeometry args={[0.5, 0.4]} />
+          <meshPhysicalMaterial 
+            color="#e0f2fe" 
+            emissive="#bae6fd"
+            emissiveIntensity={intensity > 0.1 ? 0.8 : 0.2}
+            metalness={0.9}
+            roughness={0.1}
+            clearcoat={1}
+          />
+        </mesh>
+      ))}
+
+      {/* Industrial Sawtooth Roof (Classic Factory Look) */}
+      <group position={[0, 1.3, 0]}>
+        {[-1, 0, 1].map((x, i) => (
+          <mesh key={`roof-${i}`} position={[x, 0.25, 0]} rotation={[0, 0, 0]}>
+            {/* Triangular prism using cylinder geometry */}
+            <cylinderGeometry args={[0.6, 0.6, 2.4, 3]} />
+            <meshStandardMaterial color="#94a3b8" metalness={0.4} roughness={0.6} />
+          </mesh>
+        ))}
+        {/* Glass panes on sawtooth roof */}
+        {[-1.15, -0.15, 0.85].map((x, i) => (
+          <mesh key={`glass-${i}`} position={[x, 0.38, 0]} rotation={[0, 0, -Math.PI / 6]}>
+            <planeGeometry args={[0.65, 2.3]} />
+            <meshPhysicalMaterial 
+              color="#0f172a" 
+              metalness={0.9} 
+              roughness={0.1} 
+              envMapIntensity={2} 
+            />
+          </mesh>
+        ))}
       </group>
-      {/* 烟囱 */}
-      <Cylinder args={[0.2, 0.25, 1.8, 32]} position={[-1.2, 1.4, -0.6]}>
-        <meshStandardMaterial color="#94a3b8" metalness={0.6} roughness={0.4} />
-      </Cylinder>
-      {/* 动态能量球 (替代烟雾) */}
-      <Sphere args={[0.35, 32, 32]} position={[-1.2, 2.6, -0.6]}>
-        <meshStandardMaterial 
-          color="#64ffda" 
-          emissive="#64ffda"
-          emissiveIntensity={intensity * 2}
-          transparent 
-          opacity={0.6} 
-          wireframe={intensity > 0.5}
-        />
-      </Sphere>
+
+      {/* Chimney Stack */}
+      <group position={[-1.2, 1.3, -0.7]}>
+        <Cylinder args={[0.15, 0.2, 1.4, 32]} position={[0, 0.7, 0]}>
+          <meshStandardMaterial color="#64748b" metalness={0.5} roughness={0.5} />
+        </Cylinder>
+        <Cylinder args={[0.2, 0.2, 0.1, 32]} position={[0, 1.35, 0]}>
+          <meshStandardMaterial color="#334155" metalness={0.7} roughness={0.3} />
+        </Cylinder>
+        
+        {/* Dynamic Energy Orbs (Replaces generic sphere with layered tech look) */}
+        <Sphere args={[0.25, 32, 32]} position={[0, 1.8, 0]}>
+          <meshStandardMaterial 
+            color="#34d399" 
+            emissive="#10b981"
+            emissiveIntensity={1.5 + intensity}
+            transparent 
+            opacity={0.8} 
+          />
+        </Sphere>
+        <Sphere args={[0.4, 16, 16]} position={[0, 1.8, 0]}>
+          <meshBasicMaterial 
+            color="#6ee7b7" 
+            wireframe 
+            transparent 
+            opacity={0.3} 
+          />
+        </Sphere>
+      </group>
     </group>
   );
 };
 
-// --- 场景与环境光影优化 ---
+// --- Scene & Lighting Optimization ---
 const Scene = ({ isFactory, currentHour, onIntensityChange }) => {
-  // 声明式地计算太阳位置，避免在 useFrame 中手动操作 ref 属性
   const isDay = currentHour >= 6 && currentHour <= 18;
   const hourCycle = (currentHour - 6) / 12;
   const angle = Math.PI * hourCycle;
   
   const sunPosition = useMemo(() => {
     if (isDay) {
-      return [ -Math.cos(angle) * 15, Math.sin(angle) * 15, 8 ];
+      // Adjusted path to avoid dead-center glaring white-outs
+      return [ -Math.cos(angle) * 20, Math.sin(angle) * 15, 10 ];
     }
-    return [ 0, -10, 0 ]; // 夜晚太阳在地平线以下
+    return [ 0, -10, 0 ];
   }, [currentHour, isDay, angle]);
 
   const intensity = isDay ? Math.sin(angle) : 0;
@@ -134,41 +207,57 @@ const Scene = ({ isFactory, currentHour, onIntensityChange }) => {
 
   return (
     <>
-      {/* 物理级天空盒：自动根据 sunPosition 渲染日出、正午、日落 */}
-      <Sky sunPosition={sunPosition} turbidity={0.3} rayleigh={0.5} />
+      {/* Refined Skybox: Adjusted turbidity and rayleigh to ensure a rich blue sky, preventing pure white backgrounds */}
+      <Sky 
+        sunPosition={sunPosition} 
+        turbidity={0.65} 
+        rayleigh={1.2} 
+        mieCoefficient={0.01} 
+        mieDirectionalG={0.8} 
+      />
       
-      {/* 夜晚星空 */}
-      {!isDay && <Stars radius={50} depth={50} count={1000} factor={4} saturation={0} fade speed={1} />}
+      {!isDay && <Stars radius={50} depth={50} count={1500} factor={4} saturation={1} fade speed={1.5} />}
       
-      {/* 环境光反射 (为金属和玻璃提供真实的反射源) */}
-      <Environment preset="city" />
-      <ambientLight intensity={isDay ? 0.4 : 0.1} />
+      {/* Environment lighting tuned for better material reflections */}
+      <Environment preset="city" background={false} />
+      <ambientLight intensity={isDay ? 0.3 : 0.05} />
       
       <directionalLight 
         position={sunPosition} 
-        intensity={isDay ? intensity * 2 : 0.2} 
-        color={isDay ? "#ffffff" : "#4a5568"}
+        intensity={isDay ? intensity * 2.5 : 0.1} 
+        color={isDay ? "#fffbeb" : "#1e293b"} // Warm sunlight vs Cool moonlight
         castShadow 
       />
+
+      {/* Global Stage/Ground to anchor the floating objects */}
+      <mesh position={[0, -1.2, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <circleGeometry args={[4, 64]} />
+        <meshStandardMaterial 
+          color={isDay ? "#e2e8f0" : "#0f172a"} 
+          roughness={0.8} 
+          metalness={0.1} 
+        />
+      </mesh>
 
       <OrbitControls 
         enableZoom={false} 
         autoRotate 
-        autoRotateSpeed={0.5} 
-        maxPolarAngle={Math.PI / 2 + 0.1} // 允许稍微看到一点地平线以下
+        autoRotateSpeed={0.4} 
+        maxPolarAngle={Math.PI / 2 - 0.05} // Prevent camera from going completely under the floor
         minPolarAngle={Math.PI / 4} 
         enablePan={false}
       />
       
       {isFactory ? <FactoryModel intensity={intensity} /> : <SolarPanelModel intensity={intensity} />}
       
-      {/* 高级接触阴影：比生硬的 Plane + castShadow 效果好得多 */}
+      {/* Refined Contact Shadows */}
       <ContactShadows 
-        position={[0, -0.5, 0]} 
-        opacity={0.7} 
-        scale={10} 
-        blur={2} 
+        position={[0, -1.19, 0]} 
+        opacity={0.8} 
+        scale={12} 
+        blur={2.5} 
         far={4} 
+        color="#000000"
       />
     </>
   );
@@ -182,7 +271,6 @@ const ThreeDPopup = ({ isOpen, onClose, data, type, mapView }) => {
   useEffect(() => {
     if (!isOpen) return;
     
-    // 减缓时间流逝速度，让视觉变化更平滑
     const interval = setInterval(() => {
       setSimulatedTime(prev => {
         const next = (prev + 2) % (24 * 60);
@@ -219,7 +307,7 @@ const ThreeDPopup = ({ isOpen, onClose, data, type, mapView }) => {
   let baseValue = isFactory ? data.powerConsumption : (data.dcPower || 15000);
   
   if (!isFactory) {
-    const noise = (Math.random() - 0.5) * 100; // 减弱噪点幅度，避免数值闪烁感过强
+    const noise = (Math.random() - 0.5) * 80; 
     baseValue = Math.max(0, (baseValue * lightIntensity) + (lightIntensity > 0 ? noise : 0));
   } else {
     const noise = (Math.random() - 0.5) * (data.powerConsumption * 0.02);
@@ -320,7 +408,7 @@ const ThreeDPopup = ({ isOpen, onClose, data, type, mapView }) => {
         </div>
 
         <div className="threed-canvas-container">
-          <Canvas camera={{ position: [0, 2, 7], fov: 40 }}>
+          <Canvas camera={{ position: [0, 2, 8.5], fov: 42 }}>
             <Scene 
               isFactory={isFactory} 
               currentHour={currentHour} 
