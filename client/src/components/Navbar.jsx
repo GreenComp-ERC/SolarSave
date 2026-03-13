@@ -8,6 +8,7 @@ import TestPanels from "./test/TestPanels";
 import "../style/Navbar.css"; // Import CSS
 import TestReward from "./test/TestReward"; // ✅ Import TestReward component
 import About from "./About"
+import Help from "./Help"
 // Replace icon imports with more modern icons
 import {
   Menu, X, Sun, ChevronDown, Wallet,
@@ -32,6 +33,7 @@ const Navbar = ({ logoSize = "w-16" }) => {
   const [isTestPanelsModalOpen, setIsTestPanelsModalOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [toolsDropdown, setToolsDropdown] = useState(false);
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false); // ✅ Connect wallet modal
   const [isTestRewardModalOpen, setIsTestRewardModalOpen] = useState(false); // ✅ Reward test modal
@@ -70,7 +72,7 @@ const Navbar = ({ logoSize = "w-16" }) => {
 
         <div className="right-actions">
           <ul className="nav-links">
-            <NavBarItem title="Help" icon={<BookOpen size={18} />} />
+            <NavBarItem title="Help" icon={<BookOpen size={18} />} onClick={() => setIsHelpOpen(true)} />
             <NavBarItem title="About" icon={<Info size={18} />} onClick={() => setIsAboutOpen(true)} />
           </ul>
 
@@ -100,7 +102,7 @@ const Navbar = ({ logoSize = "w-16" }) => {
       {toggleMenu && (
         <div className="mobile-nav">
           <ul className="mobile-nav-list">
-            <NavBarItem title="Help" icon={<BookOpen size={18} />} />
+            <NavBarItem title="Help" icon={<BookOpen size={18} />} onClick={() => setIsHelpOpen(true)} />
             <NavBarItem title="About" icon={<Info size={18} />} onClick={() => setIsAboutOpen(true)} />
 
             {!currentAccount && (
@@ -146,15 +148,17 @@ const Navbar = ({ logoSize = "w-16" }) => {
         </div>
       )}
       {isWalletModalOpen && (
-        <div className="modal-overlay">
-          <div className="modal-container">
-            <button
-              className="modal-close-btn"
-              onClick={() => setIsWalletModalOpen(false)}
-            >
-              <X size={20} />
-            </button>
-            <WalletModel /> {/* ✅ Wallet.jsx */}
+        <div className="modal-overlay wallet-modal-overlay">
+          <div className="modal-container wallet-modal-container">
+            <div className="wallet-modal-body">
+              <button
+                className="modal-close-btn"
+                onClick={() => setIsWalletModalOpen(false)}
+              >
+                <X size={20} />
+              </button>
+              <WalletModel /> {/* ✅ Wallet.jsx */}
+            </div>
           </div>
         </div>
       )}
@@ -174,6 +178,9 @@ const Navbar = ({ logoSize = "w-16" }) => {
       )}
       {isAboutOpen && (
         <About onClose={() => setIsAboutOpen(false)} />
+      )}
+      {isHelpOpen && (
+        <Help onClose={() => setIsHelpOpen(false)} />
       )}
       {isTestRewardModalOpen && (
         <div className="modal-overlay">

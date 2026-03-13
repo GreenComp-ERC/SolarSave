@@ -5,7 +5,7 @@ import contractAddresses from "../utils/contractAddress.json";
 
 import '../style/Wallet.css';
 
-// Mock ethers for demo display
+// Mock ethers for demo display (Keep exactly as original)
 const mockEthers = {
   providers: {
     Web3Provider: class {
@@ -18,18 +18,14 @@ const mockEthers = {
       this.transfer = async () => ({ wait: async () => {} });
     }
   },
-
 };
-
-// Use ethers in production instead of mockEthers
-
 
 const SOLAR_TOKEN_ADDRESS = contractAddresses.token;
 const ERC20_ABI = [
   "function balanceOf(address owner) view returns (uint256)",
   "function transfer(address to, uint256 amount) public returns (bool)",
-    "function mint(address to, uint256 amount) public",
-    "function owner() view returns (address)"
+  "function mint(address to, uint256 amount) public",
+  "function owner() view returns (address)"
 ];
 
 const Wallet = () => {
@@ -98,51 +94,25 @@ const Wallet = () => {
   };
 
   const sendToken = async () => {
-  if (!recipient || !amount) {
-    alert("Please enter a recipient address and amount");
-    return;
-  }
-  if (!ethers.utils.isAddress(recipient)) {
-    alert("Invalid wallet address");
-    return;
-  }
-
-  setIsLoading(true);
-  try {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-    const contract = new ethers.Contract(SOLAR_TOKEN_ADDRESS, ERC20_ABI, signer);
-
-    const tx = await contract.transfer(recipient, ethers.utils.parseEther(amount));
-    const receipt = await tx.wait();
-
-    if (receipt.status === 1) {
-      // Update transaction history
-      setTxHistory([
-        {
-          recipient,
-          amount,
-          timestamp: new Date().toLocaleString()
-        },
-        ...txHistory
-      ]);
-
-      // Clear input fields
-      setRecipient("");
-      setAmount("");
-
-      // Update balance
-      fetchBalance(account, provider);
-    } else {
-      alert("Transaction failed, please try again");
+    if (!recipient || !amount) {
+      alert("Please enter a recipient address and amount");
+      return;
+    }
+    if (!ethers.utils.isAddress(recipient)) {
+      alert("Invalid wallet address");
+      return;
     }
 
-  } catch (error) {
-    if (error.code === "TRANSACTION_REPLACED") {
-      // ⚠ Replaced transaction that still succeeded
-      if (error.replacement?.status === 1) {
-        console.warn("Transaction replaced, replacement succeeded");
+    setIsLoading(true);
+    try {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(SOLAR_TOKEN_ADDRESS, ERC20_ABI, signer);
 
+      const tx = await contract.transfer(recipient, ethers.utils.parseEther(amount));
+      const receipt = await tx.wait();
+
+      if (receipt.status === 1) {
         setTxHistory([
           {
             recipient,
@@ -153,21 +123,37 @@ const Wallet = () => {
         ]);
         setRecipient("");
         setAmount("");
-        fetchBalance(account, new ethers.providers.Web3Provider(window.ethereum));
+        fetchBalance(account, provider);
       } else {
-        alert("Replacement transaction failed ❌");
+        alert("Transaction failed, please try again");
       }
-    } else {
-      console.error("Transfer failed:", error);
-      alert("Send failed, please try again later");
+    } catch (error) {
+      if (error.code === "TRANSACTION_REPLACED") {
+        if (error.replacement?.status === 1) {
+          console.warn("Transaction replaced, replacement succeeded");
+          setTxHistory([
+            {
+              recipient,
+              amount,
+              timestamp: new Date().toLocaleString()
+            },
+            ...txHistory
+          ]);
+          setRecipient("");
+          setAmount("");
+          fetchBalance(account, new ethers.providers.Web3Provider(window.ethereum));
+        } else {
+          alert("Replacement transaction failed ❌");
+        }
+      } else {
+        console.error("Transfer failed:", error);
+        alert("Send failed, please try again later");
+      }
+    } finally {
+      setIsLoading(false);
     }
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
-
-  // Address formatting
   const formatAddress = (addr) => {
     if (!addr) return "";
     return `${addr.substring(0, 6)}...${addr.substring(addr.length - 4)}`;
@@ -203,13 +189,12 @@ const Wallet = () => {
     <div className="wallet-container">
       {/* Header */}
       <div className="wallet-header">
-        <Sun className="wallet-sun-icon" />
-        <h1 className="wallet-title">
-          SolarToken Wallet
-        </h1>
+        <div className="wallet-icon-wrapper">
+          <Sun className="wallet-sun-icon" />
+        </div>
+        <h1 className="wallet-title">SolarToken</h1>
       </div>
 
-      {/* Account info */}
       <div className="wallet-content">
         {account ? (
           <div className="wallet-account-info">
@@ -218,46 +203,43 @@ const Wallet = () => {
                 <div className="wallet-status-dot"></div>
                 <span className="wallet-status-text">Connected</span>
               </div>
-              <button
-                onClick={copyToClipboard}
-                className="wallet-copy-btn"
-              >
-                {isCopied ? <Check size={14} className="wallet-copy-icon" /> : <Copy size={14} className="wallet-copy-icon" />}
-                {isCopied ? "Copied" : "Copy address"}
+            </div>
+
+            {/* UI Fix: Better address display with copy button inline */}
+            <div className="wallet-address-container">
+              <div className="wallet-address">{formatAddress(account)}</div>
+              <button onClick={copyToClipboard} className="wallet-copy-btn" title="Copy Address">
+                {isCopied ? <Check size={16} /> : <Copy size={16} />}
               </button>
             </div>
 
-            <div className="wallet-address">
-              {account}
-            </div>
-
-            <div className="wallet-balance">
-              <span className="wallet-balance-label">SOLR Balance:</span>
+            <div className="wallet-balance-card">
+              <span className="wallet-balance-label">Total Balance</span>
               <div className="wallet-balance-value">
-                <Sun className="wallet-balance-icon" />
                 <span className="wallet-balance-amount">{balance}</span>
+                <span className="wallet-balance-currency">SOLR</span>
               </div>
             </div>
 
             {isOwner && (
-              <div className="wallet-section">
-                <h3 className="wallet-section-title">Owner Tools</h3>
-                <div className="wallet-input-row">
+              <div className="wallet-owner-section">
+                <h3 className="wallet-section-subtitle">Admin Minting</h3>
+                <div className="wallet-owner-input-row">
                   <input
                     type="number"
                     min="1"
                     step="1"
                     value={mintAmount}
                     onChange={(e) => setMintAmount(e.target.value)}
-                    placeholder="Mint amount"
-                    className="wallet-input"
+                    placeholder="Amount"
+                    className="wallet-input wallet-input-small"
                   />
                   <button
                     onClick={mintToSelf}
-                    className="wallet-btn"
+                    className="wallet-owner-btn"
                     disabled={isMinting}
                   >
-                    {isMinting ? "Minting..." : "Mint SOLR to my wallet"}
+                    {isMinting ? "Minting..." : "Mint"}
                   </button>
                 </div>
               </div>
@@ -279,14 +261,13 @@ const Wallet = () => {
         )}
       </div>
 
-      {/* Transfer */}
+      {/* Transfer Section */}
       {account && (
-        <div className="wallet-transfer-section">
-          <h2 className="wallet-section-title">Send SOLR</h2>
-
+        <div className="wallet-card">
+          <h2 className="wallet-section-title">Send Token</h2>
           <div className="wallet-form">
             <div className="wallet-input-group">
-              <label className="wallet-label">Recipient address</label>
+              <label className="wallet-label">Recipient</label>
               <input
                 type="text"
                 value={recipient}
@@ -298,47 +279,47 @@ const Wallet = () => {
 
             <div className="wallet-input-group">
               <label className="wallet-label">Amount</label>
-              <div className="wallet-amount-input">
+              <div className="wallet-amount-input-wrapper">
                 <input
                   type="number"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder="0.0"
-                  className="wallet-input"
+                  className="wallet-input wallet-amount-input"
                 />
-                <span className="wallet-currency">SOLR</span>
+                <span className="wallet-currency-badge">SOLR</span>
               </div>
             </div>
 
             <button
               onClick={sendToken}
               disabled={isLoading || !recipient || !amount}
-              className={`wallet-send-btn ${isLoading || !recipient || !amount ? 'wallet-btn-disabled' : ''}`}
+              className="wallet-send-btn"
             >
               {isLoading ? (
                 <Loader className="wallet-btn-icon wallet-spin" />
               ) : (
                 <Send className="wallet-btn-icon" />
               )}
-              {isLoading ? "Processing..." : "Send SOLR"}
+              {isLoading ? "Processing..." : "Send"}
             </button>
           </div>
         </div>
       )}
 
-      {/* Transaction history */}
+      {/* Transaction History */}
       {account && txHistory.length > 0 && (
-        <div className="wallet-history-section">
+        <div className="wallet-card wallet-history">
           <h2 className="wallet-section-title">Recent Transactions</h2>
           <div className="wallet-history-list">
             {txHistory.map((tx, index) => (
               <div key={index} className="wallet-history-item">
-                <div className="wallet-history-header">
-                  <span className="wallet-history-time">{tx.timestamp}</span>
-                  <span className="wallet-history-amount">{tx.amount} SOLR</span>
+                <div className="wallet-history-left">
+                  <div className="wallet-history-address">{formatAddress(tx.recipient)}</div>
+                  <div className="wallet-history-time">{tx.timestamp}</div>
                 </div>
-                <div className="wallet-history-address">
-                  Sent to: {formatAddress(tx.recipient)}
+                <div className="wallet-history-right">
+                  <span className="wallet-history-amount">-{tx.amount} SOLR</span>
                 </div>
               </div>
             ))}

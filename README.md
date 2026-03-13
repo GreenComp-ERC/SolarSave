@@ -1,35 +1,38 @@
-# **SolarSave: Blockchain for Sustainable Energy Optimization**
+# **SolarChain: Blockchain for Sustainable Energy Optimization**
 
 ## **Overview**
 
-**SolarSave** is an open-source platform dedicated to optimizing solar energy usage through blockchain, IoT, and artificial intelligence (AI) technologies. This project allows users to track solar energy production in real-time, predict efficiency, and incentivize energy-saving behaviors through a reward mechanism (SolarToken, abbreviated as SOLR).
+**SolarChain** is an open-source platform for optimizing distributed solar energy with blockchain, geospatial interaction, and AI-powered forecasting. It combines on-chain asset management, factory-side energy demand, and a simulator-driven market update flow.
 
-SolarSave is designed for individuals, communities, and organizations aiming to reduce energy costs, lower carbon footprints, and participate in the renewable energy revolution.
+SolarChain is designed for individuals, communities, and organizations that want transparent energy data, tokenized incentives, and a practical local testbed for renewable energy coordination.
 
 ---
 
 ## **Key Features**
 
-### **Interactive Solar Map**
-- **View and Create Solar Panels**: Users can view existing solar panels on the map or create new ones by selecting coordinates.
-- **Real-Time Status Display**: Displays the real-time status of solar panels (e.g., coordinates, battery temperature, DC power, AC power, and owner information).
+### **Interactive Map and Asset Creation**
+- **Solar Panel Registration**: Create and manage solar panels directly from map coordinates.
+- **Factory Registration**: Register factories with location and power consumption to model energy demand on-chain.
+- **Map-Based Discovery**: Browse global and personal assets (panels/factories) with interactive detail views.
 
-### **Efficiency Prediction**
-- **Location-Based Power Generation Prediction**: Predicts solar power generation efficiency at a specific location based on historical data and weather conditions.
-- **AI Optimization Suggestions**: Provides specific recommendations, such as cleaning solar panels or adjusting installation angles, to improve power generation efficiency.
+### **AI-Assisted Generation Forecast**
+- **Prediction API Integration**: Uses the simulator API to predict panel values such as battery temperature, DC power, and AC power for selected locations.
+- **Pre-Submission Validation**: Prediction data is shown before panel confirmation to improve data quality.
 
-### **Blockchain Integration**
-- **Device Registration**: Registers solar panels on the blockchain for transparent data management.
-- **Data Submission**: Submits solar energy production data and earns SolarToken based on contributions.
-- **Ownership Transactions**: Supports secure transactions of solar panel ownership between users.
+### **On-Chain Energy Market**
+- **Supply and Demand Tracking**: Maintains global supply energy and total market demand on-chain.
+- **Factory Energy Purchase**: Buy energy for a selected factory using SOLR, with on-chain cost preview.
+- **Factory Energy Balances**: Track per-factory energy balance and deficits in the UI.
 
-### **Real-Time Monitoring**
-- **Performance Dashboard**: Users can view real-time solar panel power generation, historical data, and predicted efficiency.
-- **Historical Data Visualization**: Analyzes historical trends to make better decisions.
+### **Rewards and Cooldown Logic**
+- **Personal Reward Accrual**: Rewards accumulate from simulator market steps.
+- **Claim with Cooldown**: Reward claiming respects `simulatorStepSeconds` cooldown logic from the contract.
+- **Live Reward Preview**: Frontend previews claimable rewards before submission.
 
-### **Reward Mechanism**
-- **SolarToken Incentives**: Rewards users for submitting energy data or optimizing energy usage.
-- **Wallet Support**: Supports reward withdrawals to Ethereum-compatible wallets like MetaMask.
+### **Wallet and Token Operations**
+- **MetaMask Integration**: Connect wallet and interact with contracts through ethers.js.
+- **SOLR Transfers**: Transfer SOLR between addresses from the wallet UI.
+- **Owner Mint Tools (Local/Test)**: Token owner can mint SOLR for local testing workflows.
 
 ---
 
@@ -37,12 +40,13 @@ SolarSave is designed for individuals, communities, and organizations aiming to 
 
 | Technology    | Purpose                           |
 |---------------|-----------------------------------|
-| **Python**    | Backend simulator and data processing |
-| **React.js**  | Frontend interface and interactive dashboard |
+| **Python (FastAPI + Uvicorn)** | Simulator and prediction API |
+| **React.js**  | Frontend interface and dashboards |
+| **Leaflet**   | Interactive map rendering         |
 | **Solidity**  | Smart contract development        |
-| **Hardhat**   | Blockchain development and testing |
-| **ethers.js** | Frontend-blockchain interaction   |
-| **Docker**    | Deployment and containerization   |
+| **Hardhat**   | Local blockchain development and deployment |
+| **ethers.js** | Frontend and script blockchain integration |
+| **Docker**    | Containerized development/deployment |
 
 ---
 
@@ -136,7 +140,7 @@ npm run dev
 ## **Project Structure**
 
 ```
-SolarSave/
+SolarChain/
 ├── client/                         # Frontend code
 │   ├── src/                        # Frontend source
 │   │   ├── components/             # Shared React components
@@ -144,7 +148,6 @@ SolarSave/
 │   │   ├── utils/                  # Utility functions
 │   │   ├── App.jsx                 # Main application file
 │   │   ├── index.jsx               # Entry file
-│   ├── package.json
 │   └── package.json
 ├── Simulator/                      # Simulator
 │   ├── SolarPVModel.py             # Solar panel logic simulation
@@ -153,6 +156,8 @@ SolarSave/
 ├── smart_contract/                 # Smart contracts
 │   ├── contracts/                  # Smart contract files
 │   │   ├── SolarPanels.sol         # Solar panel registry
+│   │   ├── Factory.sol             # Factory registry
+│   │   ├── EnergyExchange.sol      # Supply/demand and reward market
 │   │   ├── Shop.sol                # Panel marketplace
 │   │   ├── PowerReward.sol         # Reward distribution
 │   │   ├── SolarToken.sol          # ERC-20 token (SOLR)
@@ -165,22 +170,27 @@ SolarSave/
 
 ---
 
-## **How to Use SolarSave**
+## **How to Use SolarChain**
 
-1. **Create Solar Panels**:
+1. **Connect Wallet and Load Contracts**:
    - Open the frontend application.
-   - Select coordinates on the map and click the create button.
+   - Connect MetaMask to the local Hardhat network.
 
-2. **Submit Energy Data**:
-   - Use the simulator to generate solar panel data.
-   - Submit data to the blockchain and earn SolarToken.
+2. **Create Solar Panels and Factories**:
+   - Open the frontend application.
+   - Select coordinates on the map and register a solar panel or a factory.
 
-3. **View Efficiency**:
-   - View real-time and historical data on the dashboard.
-   - Use AI suggestions to optimize solar panel performance.
+3. **Run Market Updates with Simulator**:
+   - Start the simulator to generate/update panel output.
+   - Let the simulator update market supply, demand, and personal rewards.
 
-4. **Withdraw Rewards**:
-   - Withdraw SolarToken to compatible wallets (e.g., MetaMask).
+4. **Trade and Allocate Energy**:
+   - Use the market dashboard to inspect global supply/demand.
+   - Purchase energy for factories and monitor factory balances.
+
+5. **Claim Rewards and Manage SOLR**:
+   - Claim personal rewards when cooldown allows.
+   - Manage SOLR balances and transfers through wallet UI.
 
 ---
 
@@ -188,6 +198,8 @@ SolarSave/
 
 ### **Core Contracts**
 - **SolarPanels.sol**: create/update panels, query all panels, query panels by owner.
+- **Factory.sol**: register factories and query personal/global factory lists.
+- **EnergyExchange.sol**: tracks market supply/demand, accrues personal rewards, handles reward claiming, and supports factory energy purchases.
 - **Shop.sol**: list panels for sale, buy panels, approve sales.
 - **PowerReward.sol**: claim rewards based on panel DC power; owner can deposit reward tokens.
 - **SolarToken.sol**: ERC-20 token (SOLR) used for payments and rewards.
@@ -216,16 +228,15 @@ This project is licensed under the [MIT License](LICENSE).
 
 - **Machine Learning Integration**: Improve the accuracy of efficiency predictions.
 - **Cross-chain Support**: Extend to other blockchain platforms.
-- **Solar Panel Market**: Allow users to trade solar panel ownership and rewards.
+- **Advanced Market Strategy**: Improve matching between distributed generation and factory demand.
 
 ---
 
 ## **Contact**
 
 For questions or suggestions, please contact:
-- **Email**: support@solarsave.com
 - **GitHub Issue**: [Submit an issue](https://github.com/GreenComp-ERC/SolarSave.git)
 
 ---
 
-Through **SolarSave**, let's contribute to a sustainable future!
+Through **SolarChain**, let's contribute to a sustainable future!

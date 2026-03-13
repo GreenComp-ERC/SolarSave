@@ -408,6 +408,54 @@
   height: 80vh;
 }
 
+.wallet-modal-overlay {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(6px) saturate(120%);
+  -webkit-backdrop-filter: blur(6px) saturate(120%);
+}
+
+.wallet-modal-container {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  width: fit-content;
+  max-width: 96vw;
+  max-height: calc(100vh - var(--navbar-height) - 32px);
+  overflow: visible;
+  animation: modalSlideUp 0.24s ease forwards;
+  margin: 0 auto;
+}
+
+.wallet-modal-body {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: min(96vw, 42rem);
+}
+
+.wallet-modal-body .modal-close-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  z-index: 2;
+  background: none;
+  border: none;
+  color: white;
+  width: auto;
+  height: auto;
+  padding: 5px;
+  box-shadow: none;
+  transition: background-color 0.2s;
+  transform: none;
+}
+
+.wallet-modal-body .modal-close-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  transform: none;
+}
+
 @keyframes modalSlideUp {
   from {
     opacity: 0;

@@ -12,6 +12,8 @@
   padding: calc(var(--navbar-height) + 16px) 16px 24px;
   box-sizing: border-box;
   overflow-y: auto;
+  backdrop-filter: blur(6px) saturate(120%);
+  -webkit-backdrop-filter: blur(6px) saturate(120%);
 }
 
 .about-modal {
@@ -25,7 +27,7 @@
   box-shadow:
     0 22px 50px rgba(0, 0, 0, 0.45),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(148, 163, 184, 0.24);
+  border: 1px solid rgba(0, 240, 255, 0.3);
   color: #e2e8f0;
   font-family: var(--font-sans);
   backdrop-filter: blur(18px) saturate(140%);
@@ -34,7 +36,7 @@
 }
 
 .about-header {
-  background: linear-gradient(135deg, #1e293b, #0f172a);
+  background: rgba(15, 23, 42, 0.5);
   color: white;
   padding: 20px;
   position: relative;
@@ -83,6 +85,11 @@
   overflow: hidden;
   flex: 1;
   min-height: 0;
+}
+
+.about-empty {
+  min-height: 320px;
+  background: transparent;
 }
 
 .about-nav {
@@ -268,7 +275,7 @@ section {
 }
 
 .about-footer {
-  background-color: #0b1222;
+  background: rgba(15, 23, 42, 0.5);
   padding: 12px 20px;
   text-align: center;
   border-top: 1px solid rgba(148, 163, 184, 0.2);

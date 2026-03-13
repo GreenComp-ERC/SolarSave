@@ -25,8 +25,12 @@
 @media (min-width: 640px) {
   .footer-content {
     flex-direction: row;
-    justify-content: space-between;
+    justify-content: center;
   }
+}
+
+.footer-content .footer-text {
+  text-align: center;
 }
 
 .logo-container {
