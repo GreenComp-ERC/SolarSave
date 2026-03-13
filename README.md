@@ -126,6 +126,10 @@ npm run dev
 ## **Troubleshooting**
 - **Global Supply / Global Demand is 0**: make sure the simulator is running and that at least one solar panel and factory are created on-chain.
 - **Rewards are 0**: the energy simulator must run at least one step to update the market and reward balances.
+- **Next update stuck at 0m 0s or countdown jumps**:
+   - Ensure `Simulator/.env` has a valid `SIMULATOR_PRIVATE_KEY` and `ENABLE_ENERGY_SIM=true`.
+   - The simulator now syncs contract `simulatorStepSeconds` from `SIMULATOR_STEP_SECONDS` at startup.
+   - Restart simulator after changing `SIMULATOR_STEP_SECONDS`.
 
 ---
 

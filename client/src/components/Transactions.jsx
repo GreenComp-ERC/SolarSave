@@ -96,6 +96,8 @@ const Transactions = () => {
   const [lastMarketStepAt, setLastMarketStepAt] = useState(null);
   const [marketCountdownRemaining, setMarketCountdownRemaining] = useState(null);
   const refreshInFlight = useRef(false);
+  const lastForcedRefreshAtRef = useRef(0);
+  const lastRefreshedCycleRef = useRef(null);
 
   const formatCountdown = (seconds) => {
     const clamped = Math.max(0, seconds);
@@ -174,38 +176,32 @@ const Transactions = () => {
     const timer = setInterval(() => {
       if (!lastMarketStepAt || !marketStepSeconds) {
         setMarketCountdownRemaining(null);
+        lastRefreshedCycleRef.current = null;
         return;
       }
+
       const now = Math.floor(Date.now() / 1000);
-      const nextUpdate = lastMarketStepAt + marketStepSeconds;
-      const diff = nextUpdate - now;
-      if (diff <= 0) {
-        setMarketCountdownRemaining(0);
-        refreshExchange();
-        return;
-      }
+      const elapsed = now - lastMarketStepAt;
+
+      // Roll over countdown by cycle to avoid freezing at 0 when chain update arrives late.
+      const cyclesPassed = elapsed > 0 ? Math.floor(elapsed / marketStepSeconds) : 0;
+      const nextUpdate = lastMarketStepAt + ((cyclesPassed + 1) * marketStepSeconds);
+      const diff = Math.max(0, nextUpdate - now);
       setMarketCountdownRemaining(diff);
+
+      // Refresh exactly once per computed cycle to keep market cards and countdown aligned.
+      if (lastRefreshedCycleRef.current !== cyclesPassed) {
+        const nowMs = Date.now();
+        if (nowMs - lastForcedRefreshAtRef.current >= 900) {
+          lastForcedRefreshAtRef.current = nowMs;
+          lastRefreshedCycleRef.current = cyclesPassed;
+          refreshExchange();
+        }
+      }
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [lastMarketStepAt, marketStepSeconds]);
-
-  useEffect(() => {
-    if (!marketStepSeconds || !exchangeContract || !factoryContract) return;
-    const refreshTimer = setInterval(() => {
-      refreshExchange();
-    }, marketStepSeconds * 1000);
-
-    return () => clearInterval(refreshTimer);
-  }, [marketStepSeconds, exchangeContract, factoryContract]);
-
-  useEffect(() => {
-    if (!exchangeContract || !factoryContract) return;
-    const poller = setInterval(() => {
-      refreshExchange();
-    }, 10000);
-    return () => clearInterval(poller);
-  }, [exchangeContract, factoryContract]);
+  }, [lastMarketStepAt, marketStepSeconds, exchangeContract, factoryContract]);
 
   useEffect(() => {
     const handleChainUpdate = () => {

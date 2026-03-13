@@ -15,10 +15,30 @@ from eth_account import Account
 # Load environment variables
 load_dotenv()
 api_key = "0771554279f9204c977c7bf619352830"
-ENABLE_ENERGY_SIM = os.getenv("ENABLE_ENERGY_SIM", "false").lower() == "true"
 SIMULATOR_RPC_URL = os.getenv("SIMULATOR_RPC_URL", "http://127.0.0.1:8545")
 SIMULATOR_PRIVATE_KEY = os.getenv("SIMULATOR_PRIVATE_KEY", "")
 SIMULATOR_STEP_SECONDS = int(os.getenv("SIMULATOR_STEP_SECONDS", "3600"))
+
+
+def resolve_energy_sim_enabled(raw_value, private_key):
+    lowered = (raw_value or "auto").strip().lower()
+    if lowered in {"1", "true", "yes", "on"}:
+        return True
+    if lowered in {"0", "false", "no", "off"}:
+        return False
+    # AUTO mode: enable when a plausible private key exists.
+    cleaned = (private_key or "").strip()
+    if cleaned.startswith("0x"):
+        cleaned = cleaned[2:]
+    if len(cleaned) != 64:
+        return False
+    return all(ch in string.hexdigits for ch in cleaned)
+
+
+ENABLE_ENERGY_SIM = resolve_energy_sim_enabled(
+    os.getenv("ENABLE_ENERGY_SIM", "auto"),
+    SIMULATOR_PRIVATE_KEY
+)
 
 CONTRACT_ADDRESS_PATH = os.path.join(
     os.path.dirname(__file__),
@@ -112,6 +132,24 @@ ENERGY_EXCHANGE_ABI = [
             {"internalType": "uint256", "name": "", "type": "uint256"}
         ],
         "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "simulatorStepSeconds",
+        "outputs": [
+            {"internalType": "uint256", "name": "", "type": "uint256"}
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {"internalType": "uint256", "name": "stepSeconds", "type": "uint256"}
+        ],
+        "name": "setSimulatorStepSeconds",
+        "outputs": [],
+        "stateMutability": "nonpayable",
         "type": "function"
     }
 ]
@@ -241,6 +279,37 @@ async def market_loop():
     factory_contract = w3.eth.contract(address=factory_address, abi=FACTORY_ABI)
     exchange_contract = w3.eth.contract(address=exchange_address, abi=ENERGY_EXCHANGE_ABI)
 
+    configured_step_seconds = max(1, SIMULATOR_STEP_SECONDS)
+
+    def sync_step_seconds_if_needed(nonce=None):
+        try:
+            chain_step = exchange_contract.functions.simulatorStepSeconds().call()
+            if chain_step == configured_step_seconds:
+                return nonce
+
+            local_nonce = nonce
+            if local_nonce is None:
+                local_nonce = w3.eth.get_transaction_count(account.address, "pending")
+
+            set_step_tx = exchange_contract.functions.setSimulatorStepSeconds(
+                configured_step_seconds
+            ).build_transaction({
+                "from": account.address
+            })
+            next_nonce = send_transaction(w3, account, set_step_tx, local_nonce)
+            print(
+                f"Energy simulator step synced: chain {chain_step}s -> local {configured_step_seconds}s"
+            )
+            return next_nonce
+        except Exception as exc:
+            print(f"Energy simulator step sync skipped: {exc}")
+            return nonce
+
+    sync_step_seconds_if_needed()
+
+    loop = asyncio.get_running_loop()
+    next_tick_at = loop.time()
+
     while True:
         try:
             panels = panels_contract.functions.getAllPanels().call()
@@ -248,7 +317,8 @@ async def market_loop():
 
             users, user_energy, total_energy, total_demand = calculate_market_step(panels, factories)
 
-            nonce = w3.eth.get_transaction_count(account.address)
+            nonce = w3.eth.get_transaction_count(account.address, "pending")
+            nonce = sync_step_seconds_if_needed(nonce)
             update_tx = exchange_contract.functions.updateMarketStep(
                 users,
                 user_energy,
@@ -275,16 +345,22 @@ async def market_loop():
                     "from": account.address
                 })
                 nonce = send_transaction(w3, account, consume_tx, nonce)
+            next_tick_at += configured_step_seconds
         except Exception as exc:
             print(f"Energy simulator step failed: {exc}")
+            # Retry quickly after failures instead of waiting a full cycle.
+            next_tick_at = loop.time() + min(5, configured_step_seconds)
 
-        await asyncio.sleep(SIMULATOR_STEP_SECONDS)
+        await asyncio.sleep(max(0, next_tick_at - loop.time()))
 
 
 @app.on_event("startup")
 async def startup_event():
     if ENABLE_ENERGY_SIM:
+        print("Energy simulator loop started")
         asyncio.create_task(market_loop())
+    else:
+        print("Energy simulator loop disabled (set ENABLE_ENERGY_SIM=true to force enable)")
 
 # Define input models
 class SolarRequest(BaseModel):
