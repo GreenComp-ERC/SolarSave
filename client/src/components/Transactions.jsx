@@ -97,7 +97,6 @@ const Transactions = () => {
   const [marketCountdownRemaining, setMarketCountdownRemaining] = useState(null);
   const refreshInFlight = useRef(false);
   const lastForcedRefreshAtRef = useRef(0);
-  const lastRefreshedCycleRef = useRef(null);
 
   const formatCountdown = (seconds) => {
     const clamped = Math.max(0, seconds);
@@ -176,25 +175,19 @@ const Transactions = () => {
     const timer = setInterval(() => {
       if (!lastMarketStepAt || !marketStepSeconds) {
         setMarketCountdownRemaining(null);
-        lastRefreshedCycleRef.current = null;
         return;
       }
 
       const now = Math.floor(Date.now() / 1000);
-      const elapsed = now - lastMarketStepAt;
-
-      // Roll over countdown by cycle to avoid freezing at 0 when chain update arrives late.
-      const cyclesPassed = elapsed > 0 ? Math.floor(elapsed / marketStepSeconds) : 0;
-      const nextUpdate = lastMarketStepAt + ((cyclesPassed + 1) * marketStepSeconds);
+      const nextUpdate = lastMarketStepAt + marketStepSeconds;
       const diff = Math.max(0, nextUpdate - now);
       setMarketCountdownRemaining(diff);
 
-      // Refresh exactly once per computed cycle to keep market cards and countdown aligned.
-      if (lastRefreshedCycleRef.current !== cyclesPassed) {
+      // Keep refreshing after cycle boundary until chain timestamp advances.
+      if (now >= nextUpdate) {
         const nowMs = Date.now();
-        if (nowMs - lastForcedRefreshAtRef.current >= 900) {
+        if (nowMs - lastForcedRefreshAtRef.current >= 1200) {
           lastForcedRefreshAtRef.current = nowMs;
-          lastRefreshedCycleRef.current = cyclesPassed;
           refreshExchange();
         }
       }
@@ -209,6 +202,29 @@ const Transactions = () => {
     };
     window.addEventListener("chainStateUpdated", handleChainUpdate);
     return () => window.removeEventListener("chainStateUpdated", handleChainUpdate);
+  }, [exchangeContract, factoryContract]);
+
+  useEffect(() => {
+    if (!exchangeContract) return;
+
+    const handleMarketStepUpdated = () => {
+      refreshExchange();
+    };
+
+    try {
+      exchangeContract.on("MarketStepUpdated", handleMarketStepUpdated);
+    } catch (error) {
+      // Some providers may not support event subscriptions; timer-based refresh remains active.
+      console.warn("MarketStepUpdated subscription unavailable:", error);
+    }
+
+    return () => {
+      try {
+        exchangeContract.off("MarketStepUpdated", handleMarketStepUpdated);
+      } catch {
+        // no-op
+      }
+    };
   }, [exchangeContract, factoryContract]);
 
   useEffect(() => {
