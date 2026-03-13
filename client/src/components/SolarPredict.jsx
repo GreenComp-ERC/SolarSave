@@ -611,9 +611,20 @@ const SolarPredict = () => {
           }
         }
 
+        @keyframes pred-modalFadeIn {
+          0% {
+            opacity: 0;
+            backdrop-filter: blur(0px);
+          }
+          100% {
+            opacity: 1;
+            backdrop-filter: blur(15px);
+          }
+        }
+
         @keyframes pred-modalSlideIn {
           0% {
-            transform: scale(0.7) translateY(50px);
+            transform: scale(0.9) translateY(30px);
             opacity: 0;
           }
           100% {
@@ -628,9 +639,165 @@ const SolarPredict = () => {
             opacity: 1;
           }
           100% {
-            transform: scale(0.7) translateY(50px);
+            transform: scale(0.9) translateY(30px);
             opacity: 0;
           }
+        }
+
+        .pred-chart-modal {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 9999;
+          animation: pred-modalFadeIn 0.3s ease-out forwards;
+        }
+
+        .pred-modal-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(10, 10, 15, 0.7);
+        }
+
+        .pred-modal-content {
+          position: relative;
+          background: rgba(20, 20, 30, 0.85);
+          backdrop-filter: blur(25px);
+          -webkit-backdrop-filter: blur(25px);
+          border: 1px solid rgba(0, 162, 255, 0.3);
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 30px rgba(0, 162, 255, 0.15);
+          border-radius: 24px;
+          padding: 30px;
+          width: 90%;
+          max-width: 1000px;
+          max-height: 90vh;
+          overflow-y: auto;
+          overflow-x: hidden;
+          z-index: 10000;
+        }
+
+        .pred-modal-close-btn {
+          position: absolute;
+          top: 20px;
+          right: 20px;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          color: #fff;
+          font-size: 1.2rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          z-index: 10;
+        }
+
+        .pred-modal-close-btn:hover {
+          background: rgba(255, 107, 107, 0.2);
+          border-color: #ff6b6b;
+          color: #ff6b6b;
+          transform: rotate(90deg);
+        }
+
+        .pred-chart-cards-container {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 24px;
+          margin-top: 30px;
+        }
+
+        .pred-chart-preview-card {
+          background: rgba(15, 15, 25, 0.6);
+          border: 1px solid rgba(0, 162, 255, 0.15);
+          border-radius: 20px;
+          padding: 24px;
+          cursor: pointer;
+          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          position: relative;
+          overflow: hidden;
+          backdrop-filter: blur(10px);
+        }
+
+        .pred-chart-preview-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(135deg, rgba(0, 162, 255, 0.1), transparent);
+          opacity: 0;
+          transition: opacity 0.4s ease;
+        }
+
+        .pred-chart-preview-card:hover {
+          transform: translateY(-8px) scale(1.02);
+          border-color: rgba(0, 162, 255, 0.6);
+          box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 162, 255, 0.2);
+        }
+
+        .pred-chart-preview-card:hover::before {
+          opacity: 1;
+        }
+
+        .pred-view-chart-btn {
+          width: 100%;
+          padding: 12px;
+          margin-top: 15px;
+          background: rgba(0, 162, 255, 0.1);
+          border: 1px solid rgba(0, 162, 255, 0.3);
+          border-radius: 12px;
+          color: #00a2ff;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 8px;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .pred-chart-preview-card:hover .pred-view-chart-btn {
+          background: #00a2ff;
+          color: #fff;
+          box-shadow: 0 0 15px rgba(0, 162, 255, 0.4);
+        }
+
+        .pred-view-mode-btn {
+          padding: 10px 20px;
+          border-radius: 12px;
+          border: 1px solid rgba(255,255,255,0.2);
+          background: rgba(0,0,0,0.3);
+          color: #fff;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          font-weight: 600;
+        }
+
+        .pred-view-mode-btn.active {
+          background: rgba(0, 162, 255, 0.2);
+          border-color: #00a2ff;
+          color: #00a2ff;
+          box-shadow: 0 0 15px rgba(0, 162, 255, 0.2);
+        }
+
+        .pred-view-controls {
+          display: flex;
+          gap: 15px;
+          justify-content: center;
+          margin-bottom: 20px;
         }
 
         .pred-card-header {
@@ -638,6 +805,20 @@ const SolarPredict = () => {
           justify-content: space-between;
           align-items: center;
           margin-bottom: 15px;
+          position: relative;
+          z-index: 1;
+        }
+
+        .pred-chart-subtitle {
+          margin: 0;
+          font-size: 1.2rem;
+          font-weight: 700;
+          color: #fff;
+          font-family: 'Orbitron', monospace;
+          text-transform: capitalize;
+          background: linear-gradient(90deg, #fff, #a0d8ef);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
         }
 
         .pred-stats-badges {
@@ -646,21 +827,25 @@ const SolarPredict = () => {
         }
 
         .pred-stat-badge {
-          background: rgba(255, 255, 255, 0.1);
-          padding: 4px 8px;
+          background: rgba(0, 0, 0, 0.4);
+          padding: 6px 10px;
           border-radius: 12px;
           font-size: 0.8rem;
           font-weight: 600;
           backdrop-filter: blur(10px);
+          border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .pred-stats-row {
           display: flex;
           justify-content: space-between;
-          margin-bottom: 15px;
-          background: rgba(0, 0, 0, 0.2);
-          border-radius: 10px;
-          padding: 10px;
+          margin-bottom: 20px;
+          background: rgba(0, 0, 0, 0.3);
+          border-radius: 12px;
+          padding: 12px 15px;
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          position: relative;
+          z-index: 1;
         }
 
         .pred-stat-item {
@@ -671,23 +856,36 @@ const SolarPredict = () => {
         }
 
         .pred-stat-label {
-          font-size: 0.7rem;
-          color: rgba(255, 255, 255, 0.7);
+          font-size: 0.75rem;
+          color: rgba(255, 255, 255, 0.6);
           text-transform: uppercase;
-          letter-spacing: 0.5px;
+          letter-spacing: 1px;
         }
 
         .pred-stat-value {
-          font-size: 0.9rem;
+          font-size: 1.05rem;
           font-weight: 700;
           font-family: 'Orbitron', monospace;
+          text-shadow: 0 0 10px currentColor;
         }
 
         .pred-modal-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 20px;
+          margin-bottom: 30px;
+          padding-bottom: 15px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .pred-modal-chart-title {
+          font-family: 'Orbitron', monospace;
+          font-size: 1.8rem;
+          margin: 0;
+          background: linear-gradient(135deg, #00a2ff, #2ed573);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          text-transform: capitalize;
         }
 
         .pred-modal-stats {
@@ -698,32 +896,41 @@ const SolarPredict = () => {
         .pred-modal-stat {
           display: flex;
           flex-direction: column;
-          align-items: center;
+          align-items: flex-end;
           gap: 4px;
+          background: rgba(0, 0, 0, 0.3);
+          padding: 8px 16px;
+          border-radius: 12px;
+          border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .pred-modal-stat-label {
           font-size: 0.8rem;
-          color: rgba(255, 255, 255, 0.7);
+          color: rgba(255, 255, 255, 0.5);
           text-transform: uppercase;
           letter-spacing: 0.5px;
         }
 
         .pred-modal-stat-value {
-          font-size: 1.1rem;
+          font-size: 1.2rem;
           font-weight: 700;
-          color: #00a2ff;
+          color: #fff;
           font-family: 'Orbitron', monospace;
         }
 
         .pred-loading-spinner {
-          width: 16px;
-          height: 16px;
-          border: 2px solid rgba(255, 255, 255, 0.3);
-          border-top: 2px solid #ffffff;
+          width: 20px;
+          height: 20px;
+          border: 3px solid rgba(255, 255, 255, 0.2);
+          border-top: 3px solid #ffffff;
           border-radius: 50%;
           animation: pred-spin 1s linear infinite;
-          margin-right: 8px;
+          margin-right: 10px;
+        }
+
+        @keyframes pred-spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
       `}</style>
     </div>

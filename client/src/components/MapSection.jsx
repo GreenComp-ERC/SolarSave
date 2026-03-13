@@ -3,6 +3,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import Sidebar from "./Sidebar";
 import PanelWindows from "./PanelWindows";
+import ThreeDPopup from "./ThreeDPopup";
 import TradeConfirm from "./TradeConfirm";
 import FactoryConfirm from "./FactoryConfirm";
 import kakilogo from "../../images/kali.png";
@@ -61,6 +62,9 @@ const MapSection = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [selectedPanel, setSelectedPanel] = useState(null);
+  const [selectedFactory, setSelectedFactory] = useState(null);
+  const [showThreeDPopup, setShowThreeDPopup] = useState(false);
+  const [threeDPopupType, setThreeDPopupType] = useState('panel'); // 'panel' or 'factory'
   const [showPanelDetails, setShowPanelDetails] = useState(false);
   const [showTradeScript, setShowTradeScript] = useState(false);
   const [showFactoryModal, setShowFactoryModal] = useState(false);
@@ -68,6 +72,7 @@ const MapSection = () => {
   const [pendingPanelLocation, setPendingPanelLocation] = useState(null);
   const [pendingFactoryLocation, setPendingFactoryLocation] = useState(null);
   const [mapInstance, setMapInstance] = useState(null);
+  const [mapViewState, setMapViewState] = useState(null);
   const [contextMenu, setContextMenu] = useState(null);
   const { currentAccount, connectWallet } = useContext(TransactionContext);
   const [tradeScriptData, setTradeScriptData] = useState(null);
@@ -576,6 +581,24 @@ const setShowNotification = (msg) => {
 
     setMapInstance(map);
 
+    const syncMapViewState = () => {
+      const center = map.getCenter();
+      const bounds = map.getBounds();
+      setMapViewState({
+        center: { lat: center.lat, lng: center.lng },
+        zoom: map.getZoom(),
+        bounds: {
+          north: bounds.getNorth(),
+          south: bounds.getSouth(),
+          east: bounds.getEast(),
+          west: bounds.getWest(),
+        },
+      });
+    };
+
+    syncMapViewState();
+    map.on('moveend zoomend', syncMapViewState);
+
 
     // Add hint text
     const infoControl = L.control({ position: 'bottomleft' });
@@ -588,12 +611,12 @@ const setShowNotification = (msg) => {
 
     // Add default solar panels (keep original defaults)
     const panelsToShow = showMyPanels ? myPanels : allPanels;
-    const customIcon = L.icon({
-      iconUrl: kakilogo,
-      iconSize: [50, 50],
-      iconAnchor: [20, 40],
-      popupAnchor: [0, -40],
-      className: 'pulse-icon'
+    const defaultSolarIcon = L.divIcon({
+      className: "solar-marker pulse-icon",
+      html: "<span>☀️</span>",
+      iconSize: [34, 34],
+      iconAnchor: [17, 17],
+      popupAnchor: [0, -17],
     });
 
 
@@ -610,6 +633,7 @@ const setShowNotification = (msg) => {
       closeContextMenu();
     });
     return () => {
+      map.off('moveend zoomend', syncMapViewState);
       map.remove();
     };
   }, []);
@@ -626,13 +650,14 @@ const setShowNotification = (msg) => {
 
     const panelsToShow = showMyPanels ? myPanels : allPanels;
     const factoriesToShow = showMyPanels ? myFactories : allFactories;
-    const customIcon = L.icon({
-      iconUrl: kakilogo,
-      iconSize: [50, 50],
-      iconAnchor: [25, 50],
-      popupAnchor: [0, -50],
-    });
 
+    const solarIcon = L.divIcon({
+      className: "solar-marker",
+      html: "<span>☀️</span>",
+      iconSize: [36, 36],
+      iconAnchor: [18, 18],
+      popupAnchor: [0, -18],
+    });
 
     panelsToShow.forEach((panel) => {
       let lat = panel.lat;
@@ -652,71 +677,32 @@ const setShowNotification = (msg) => {
       }
       }
 
-      const marker = L.marker([lat, lng], { icon: customIcon })
-        .addTo(mapInstance)
-        .bindPopup(
-          `<div class="custom-popup">
-            <h3>Panel ID: ${panel.id}</h3>
-            <div class="popup-stats">
-              <div class="stat-item">
-                <span class="stat-label">Owner:</span>
-                <span class="stat-value owner-address">${panel.owner.substring(0, 6)}...${panel.owner.substring(panel.owner.length - 4)}</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-label">Battery Temp:</span>
-                <span class="stat-value">${batteryTemp.toFixed(2)}°C</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-label">DC Power:</span>
-                <span class="stat-value">${dcPower.toFixed(2)}W</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-label">AC Power:</span>
-                <span class="stat-value">${acPower.toFixed(2)}W</span>
-              </div>
-            </div>
-            <button class="details-button">More details</button>
-          </div>`,
-          { className: "custom-popup-container" }
-        );
+      const marker = L.marker([lat, lng], { icon: solarIcon })
+        .addTo(mapInstance);
 
-      marker.on("popupopen", () => {
+      marker.on("click", () => {
         setSelectedPanel(panel);
-        document.querySelector(".details-button").addEventListener("click", () => {
-          setShowPanelDetails(true);
-        });
+        setThreeDPopupType('panel');
+        setShowThreeDPopup(true);
       });
     });
 
     const factoryIcon = L.divIcon({
       className: "factory-marker",
       html: "<span>🏭</span>",
-      iconSize: [30, 30],
-      iconAnchor: [15, 30]
+      iconSize: [36, 36],
+      iconAnchor: [18, 18],
+      popupAnchor: [0, -18],
     });
 
     factoriesToShow.forEach((factory) => {
       const marker = L.marker([factory.latitude, factory.longitude], { icon: factoryIcon })
-        .addTo(mapInstance)
-        .bindPopup(
-          `<div class="custom-popup">
-            <h3>Factory ID: ${factory.id}</h3>
-            <div class="popup-stats">
-              <div class="stat-item">
-                <span class="stat-label">Owner:</span>
-                <span class="stat-value owner-address">${factory.owner.substring(0, 6)}...${factory.owner.substring(factory.owner.length - 4)}</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-label">Consumption:</span>
-                <span class="stat-value">${factory.powerConsumption}W</span>
-              </div>
-            </div>
-          </div>`,
-          { className: "custom-popup-container" }
-        );
+        .addTo(mapInstance);
 
-      marker.on("popupopen", () => {
-        setSelectedPanel(null);
+      marker.on("click", () => {
+        setSelectedFactory(factory);
+        setThreeDPopupType('factory');
+        setShowThreeDPopup(true);
       });
     });
 
@@ -806,6 +792,16 @@ const setShowNotification = (msg) => {
           <PanelWindows
             panel={selectedPanel}
             closeWindow={() => setShowPanelDetails(false)}
+          />
+        )}
+
+        {showThreeDPopup && (
+          <ThreeDPopup
+            isOpen={showThreeDPopup}
+            onClose={() => setShowThreeDPopup(false)}
+            data={threeDPopupType === 'panel' ? selectedPanel : selectedFactory}
+            type={threeDPopupType}
+            mapView={mapViewState}
           />
         )}
 
