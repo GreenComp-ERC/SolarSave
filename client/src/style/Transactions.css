@@ -17,23 +17,28 @@
 
 /* Header Styles */
 .trans-header {
-  text-align: left;
-  margin-bottom: 0; /* 移除底部外边距，交由下方 layout 的 padding 处理，保证衔接自然 */
-  padding: 1rem 2rem; 
-  border-bottom: 1px solid var(--border-color); /* 统一使用 border-color 变量 */
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: var(--navbar-height);
+  z-index: 10;
+}
+
+.trans-main-title {
   display: flex;
   align-items: center;
   gap: 1rem;
   justify-content: center;
-  position: sticky;
-  top: var(--navbar-height);
-  z-index: 10;
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
+  grid-column: 2;
 }
 
-.trans-main-title {
+.trans-main-title h1 {
   font-size: 1.5rem;
   font-weight: 600;
   background: var(--accent-gradient);
@@ -41,18 +46,28 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
   margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  justify-content: center;
-  text-align: center;
-  width: 100%;
 }
 
 .trans-title-icon {
-  font-size: 1.5rem;
+  font-size: 2rem;
   color: #FFD700;
   filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+  animation: pulse 3s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
 }
 
 .trans-title-accent {
@@ -73,7 +88,8 @@
 
 @media (min-width: 1024px) {
   .trans-layout {
-    grid-template-columns: 350px 1fr;
+    /* 增加工厂列表的宽度比例，降低右侧市场占位 */
+    grid-template-columns: 1.3fr 1fr;
     gap: 1.5rem;
   }
 }
@@ -105,6 +121,36 @@
   border: 1px solid rgba(41, 82, 227, 0.3);
   padding: 0.3rem 0.75rem;
   border-radius: 999px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.trans-refresh-btn {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+}
+
+.trans-refresh-btn:hover {
+  transform: rotate(180deg);
+}
+
+.trans-refresh-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.trans-market-timer-text {
+  font-variant-numeric: tabular-nums;
 }
 
 .trans-section-title {
@@ -131,6 +177,25 @@
   border-radius: 20px;
   font-size: 0.85rem;
   font-weight: 600;
+}
+
+.trans-panels-list {
+  max-height: 70vh;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+/* Custom Scrollbar for list */
+.trans-panels-list::-webkit-scrollbar {
+  width: 6px;
+}
+.trans-panels-list::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+.trans-panels-list::-webkit-scrollbar-thumb {
+  background: rgba(41, 82, 227, 0.5);
+  border-radius: 4px;
 }
 
 /* Panel Cards */
@@ -362,18 +427,49 @@
   transition: all var(--transition-speed) ease;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
+  width: 100%;
 }
 
-.trans-action-button:hover {
+.trans-action-button:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(41, 82, 227, 0.3);
 }
 
+.trans-action-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  filter: grayscale(0.5);
+}
+
+.trans-quick-btn-group {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.trans-quick-btn {
+  background: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  flex: 1;
+}
+
+.trans-quick-btn:hover {
+  background: rgba(41, 82, 227, 0.1);
+  color: var(--primary-color);
+  border-color: rgba(41, 82, 227, 0.3);
+}
+
 /* Shop Grid */
 .trans-shop-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 1.5rem;
   padding: 1.5rem;
 }
@@ -489,4 +585,9 @@
     grid-template-columns: 1fr;
     padding: 1rem;
   }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }

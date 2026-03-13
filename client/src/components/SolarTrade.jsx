@@ -267,6 +267,10 @@ const SolarTrade = () => {
     return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
   };
 
+  const formatNumber = (num) => {
+    return num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  };
+
   return (
     <div className="solar-trade-container">
       {/* Header section with wallet status */}
@@ -325,14 +329,14 @@ const SolarTrade = () => {
                     <div className="power-meters">
                       <div className="power-meter dc">
                         <div className="meter-label">DC Power</div>
-                        <div className="meter-value">{panel.dcPower} W</div>
+                        <div className="meter-value">{formatNumber(panel.dcPower)} W</div>
                         <div className="meter-bar">
                           <div className="meter-fill" style={{ width: `${Math.min(100, panel.dcPower / 30)}%` }}></div>
                         </div>
                       </div>
                       <div className="power-meter ac">
                         <div className="meter-label">AC Power</div>
-                        <div className="meter-value">{panel.acPower} W</div>
+                        <div className="meter-value">{formatNumber(panel.acPower)} W</div>
                         <div className="meter-bar">
                           <div className="meter-fill" style={{ width: `${Math.min(100, panel.acPower / 25)}%` }}></div>
                         </div>
@@ -367,7 +371,7 @@ const SolarTrade = () => {
               </div>
               <div className="stats-content">
                 <h3>Total DC Power</h3>
-                <div className="stats-value">{totalDcPower} <span>W</span></div>
+                <div className="stats-value">{formatNumber(totalDcPower)} <span>W</span></div>
               </div>
             </div>
             <div className="stats-card ac-power">
@@ -376,7 +380,7 @@ const SolarTrade = () => {
               </div>
               <div className="stats-content">
                 <h3>Total AC Power</h3>
-                <div className="stats-value">{totalAcPower} <span>W</span></div>
+                <div className="stats-value">{formatNumber(totalAcPower)} <span>W</span></div>
               </div>
             </div>
             <div className="stats-card efficiency">
@@ -384,7 +388,7 @@ const SolarTrade = () => {
                 <FiPieChart />
               </div>
               <div className="stats-content">
-                <h3>Average Inverter Efficiency</h3>
+                <h3>Average Efficiency</h3>
                 <div className="stats-value">
                   {totalDcPower > 0 ? Math.round((totalAcPower / totalDcPower) * 100) : 0}
                   <span>%</span>

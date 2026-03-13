@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { FiSun } from "react-icons/fi";
+import { FiSun, FiRefreshCw, FiAlertCircle } from "react-icons/fi";
 import { ethers } from "ethers";
 import { TransactionContext } from "../context/TransactionContext";
 import EnergyExchange from "../utils/test/EnergyExchange.json";
@@ -19,6 +19,10 @@ const FACTORY_ABI = [
 const normalizeEnergy = (value) => {
   if (!value) return 0;
   return Math.abs(value) > 1000 ? value / 10000 : value;
+};
+
+const formatNumber = (num) => {
+  return num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 };
 
 const EnergyCard = ({ factory, balance }) => {
@@ -58,17 +62,17 @@ const EnergyCard = ({ factory, balance }) => {
         </div>
         <div className="trans-metric-item">
           <div className="trans-metric-label">Consumption</div>
-          <div className="trans-metric-value">{normalizeEnergy(factory.powerConsumption)} W</div>
+          <div className="trans-metric-value">{formatNumber(normalizedConsumption)} W</div>
         </div>
       </div>
       <div className="trans-power-section">
         <div className="trans-power-item">
           <div className="trans-power-header">
             <span className="trans-power-label">Energy Balance</span>
-            <span className="trans-power-value">{normalizedBalance} W</span>
+            <span className="trans-power-value">{formatNumber(normalizedBalance)} W</span>
           </div>
           <div className="trans-power-bar">
-            <div className="trans-power-fill trans-ac-fill" style={{ width: `${Math.min(100, normalizeEnergy(balance) / 10)}%` }}></div>
+            <div className="trans-power-fill trans-ac-fill" style={{ width: `${Math.min(100, (normalizedBalance / normalizedConsumption) * 100 || 0)}%` }}></div>
           </div>
         </div>
       </div>
@@ -92,17 +96,44 @@ const Transactions = () => {
   const [purchaseAmount, setPurchaseAmount] = useState("100");
   const [estimatedCost, setEstimatedCost] = useState("0");
   const [loading, setLoading] = useState(true);
+  const [isPurchasing, setIsPurchasing] = useState(false);
   const [marketStepSeconds, setMarketStepSeconds] = useState(null);
   const [lastMarketStepAt, setLastMarketStepAt] = useState(null);
   const [marketCountdownRemaining, setMarketCountdownRemaining] = useState(null);
+  const [message, setMessage] = useState({ type: "", text: "" });
   const refreshInFlight = useRef(false);
   const lastForcedRefreshAtRef = useRef(0);
+
+  const showMessage = (type, text) => {
+    setMessage({ type, text });
+    setTimeout(() => setMessage({ type: "", text: "" }), 5000);
+  };
 
   const formatCountdown = (seconds) => {
     const clamped = Math.max(0, seconds);
     const mins = Math.floor(clamped / 60);
     const secs = clamped % 60;
     return `${mins}m ${secs}s`;
+  };
+
+  const handleManualRefresh = () => {
+    refreshExchange();
+    showMessage("success", "Market data refreshed.");
+  };
+
+  const handleQuickFill = (type) => {
+    if (!selectedFactory) return;
+    const consumption = normalizeEnergy(selectedFactory.powerConsumption);
+    const balance = normalizeEnergy(balances[selectedFactory.id] || 0);
+    const deficit = Math.max(0, consumption - balance);
+
+    if (type === "deficit") {
+      setPurchaseAmount(Math.ceil(deficit).toString());
+    } else if (type === "100W") {
+      setPurchaseAmount("100");
+    } else if (type === "500W") {
+      setPurchaseAmount("500");
+    }
   };
 
   const refreshExchange = async (exchangeCtr = exchangeContract, factoryCtr = factoryContract) => {
@@ -247,19 +278,20 @@ const Transactions = () => {
 
   const handleBuyEnergy = async () => {
     if (!selectedFactory) {
-      alert("Select a factory first");
+      showMessage("error", "Select a factory first");
       return;
     }
     if (!exchangeContract || !tokenContract) {
-      alert("Contract not connected");
+      showMessage("error", "Contract not connected");
       return;
     }
     const energyAmount = Math.max(0, Math.floor(Number(purchaseAmount) * 10000));
     if (energyAmount <= 0) {
-      alert("Enter a valid energy amount");
+      showMessage("error", "Enter a valid energy amount");
       return;
     }
 
+    setIsPurchasing(true);
     try {
       const costWei = await exchangeContract.previewCost(energyAmount);
       const allowance = await tokenContract.allowance(currentAccount, exchangeAddress);
@@ -277,21 +309,44 @@ const Transactions = () => {
       }));
       await refreshExchange();
       window.dispatchEvent(new Event("chainStateUpdated"));
-      alert("✅ Energy purchased and burned successfully!");
+      showMessage("success", "Energy purchased and burned successfully!");
     } catch (error) {
       console.error("Purchase failed", error);
-      alert("❌ Purchase failed");
+      showMessage("error", "Purchase failed: " + (error.reason || error.message || "Unknown error"));
+    } finally {
+      setIsPurchasing(false);
     }
   };
 
   return (
     <div className="trans-marketplace">
+      {message.text && (
+        <div style={{
+          position: "fixed",
+          top: "80px",
+          right: "20px",
+          padding: "1rem 1.5rem",
+          borderRadius: "8px",
+          backgroundColor: message.type === "error" ? "rgba(244, 67, 54, 0.9)" : "rgba(76, 175, 80, 0.9)",
+          color: "white",
+          zIndex: 1000,
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+          backdropFilter: "blur(8px)",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.5rem",
+          fontWeight: "500"
+        }}>
+          {message.type === "error" ? <FiAlertCircle /> : <FiSun />}
+          {message.text}
+        </div>
+      )}
       <div className="trans-container">
         <div className="trans-header">
-          <h1 className="trans-main-title">
+          <div className="trans-main-title">
             <FiSun className="trans-title-icon" />
-            Solar Energy Exchange
-          </h1>
+            <h1>Solar Energy Exchange</h1>
+          </div>
         </div>
 
         <div className="trans-layout">
@@ -338,36 +393,57 @@ const Transactions = () => {
                   Energy Market
                 </h2>
                 <div className="trans-market-timer">
-                  Next update: {marketCountdownRemaining === null
-                    ? "Loading..."
-                    : formatCountdown(marketCountdownRemaining)}
+                  <span className="trans-market-timer-text">
+                    Next update: {marketCountdownRemaining === null
+                      ? "Loading..."
+                      : formatCountdown(marketCountdownRemaining)}
+                  </span>
+                  <button 
+                    className="trans-refresh-btn" 
+                    onClick={handleManualRefresh}
+                    disabled={refreshInFlight.current}
+                    title="Refresh Market Data"
+                  >
+                    <FiRefreshCw />
+                  </button>
                 </div>
               </div>
               <div className="trans-shop-grid">
                 <div className="trans-panel-card">
                   <div className="trans-card-header">
-                    <h3 className="trans-panel-title">Global Supply</h3>
+                    <h3 className="trans-panel-title">Market Overview</h3>
                   </div>
                   <div className="trans-performance-section">
-                    <div className="trans-metric-item">
-                      <div className="trans-metric-label">Available Energy</div>
-                      <div className="trans-metric-value">{normalizeEnergy(supplyEnergy)} W</div>
+                    <div className="trans-metrics-grid" style={{ marginBottom: 0 }}>
+                      <div className="trans-metric-item">
+                        <div className="trans-metric-label">Available Supply</div>
+                        <div className="trans-metric-value" style={{ color: "var(--success-color)", fontSize: "1.2rem" }}>
+                          {formatNumber(normalizeEnergy(supplyEnergy))} W
+                        </div>
+                      </div>
+                      <div className="trans-metric-item">
+                        <div className="trans-metric-label">Total Demand</div>
+                        <div className="trans-metric-value">{formatNumber(normalizeEnergy(demandEnergy))} W</div>
+                      </div>
+                      <div className="trans-metric-item" style={{ marginTop: "1rem" }}>
+                        <div className="trans-metric-label">Current Deficit</div>
+                        <div className="trans-metric-value" style={{ color: deficitEnergy > 0 ? "var(--error-color)" : "inherit" }}>
+                          {formatNumber(normalizeEnergy(deficitEnergy))} W
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-
-                <div className="trans-panel-card">
-                  <div className="trans-card-header">
-                    <h3 className="trans-panel-title">Global Demand</h3>
-                  </div>
-                  <div className="trans-performance-section">
-                    <div className="trans-metric-item">
-                      <div className="trans-metric-label">Demand Energy</div>
-                      <div className="trans-metric-value">{normalizeEnergy(demandEnergy)} W</div>
+                  {/* Visual Indicator of Supply relative to Demand */}
+                  <div className="trans-power-section" style={{ marginTop: "1rem", padding: "0 1rem" }}>
+                    <div className="trans-power-header">
+                      <span className="trans-power-label">Supply vs Total Demand</span>
+                      <span className="trans-power-value">{demandEnergy > 0 ? Math.min(100, (supplyEnergy / demandEnergy) * 100).toFixed(1) : 100}%</span>
                     </div>
-                    <div className="trans-metric-item">
-                      <div className="trans-metric-label">Current Deficit</div>
-                      <div className="trans-metric-value">{normalizeEnergy(deficitEnergy)} W</div>
+                    <div className="trans-power-bar" style={{ backgroundColor: "rgba(244, 67, 54, 0.2)" }}>
+                      <div className="trans-power-fill trans-ac-fill" style={{ 
+                        width: `${demandEnergy > 0 ? Math.min(100, (supplyEnergy / demandEnergy) * 100) : 100}%`,
+                        backgroundColor: supplyEnergy >= demandEnergy ? "var(--success-color)" : "var(--warning-color)"
+                      }}></div>
                     </div>
                   </div>
                 </div>
@@ -383,7 +459,7 @@ const Transactions = () => {
                         {selectedFactory ? `Factory #${selectedFactory.id}` : "Select a factory"}
                       </div>
                     </div>
-                    <div className="trans-metric-item">
+                    <div className="trans-metric-item" style={{ marginTop: "1rem" }}>
                       <div className="trans-metric-label">Energy Amount (W)</div>
                       <input
                         className="trans-price-input"
@@ -392,19 +468,34 @@ const Transactions = () => {
                         step="1"
                         value={purchaseAmount}
                         onChange={(e) => setPurchaseAmount(e.target.value)}
+                        disabled={isPurchasing}
+                        style={{ width: "100%", padding: "0.5rem", borderRadius: "6px", border: "1px solid var(--border-color)", background: "rgba(0,0,0,0.3)", color: "white" }}
                       />
+                      <div className="trans-quick-btn-group">
+                        <button className="trans-quick-btn" onClick={() => handleQuickFill("deficit")} disabled={!selectedFactory || isPurchasing}>Fill Deficit</button>
+                        <button className="trans-quick-btn" onClick={() => handleQuickFill("100W")} disabled={isPurchasing}>100 W</button>
+                        <button className="trans-quick-btn" onClick={() => handleQuickFill("500W")} disabled={isPurchasing}>500 W</button>
+                      </div>
                     </div>
-                    <div className="trans-metric-item">
+                    <div className="trans-metric-item" style={{ marginTop: "1rem" }}>
                       <div className="trans-metric-label">Estimated Cost</div>
-                      <div className="trans-metric-value">{estimatedCost} SOLR</div>
+                      <div className="trans-metric-value" style={{ color: "var(--primary-color)" }}>{formatNumber(Number(estimatedCost))} SOLR</div>
                     </div>
-                    <button
-                      className="trans-action-button trans-list-button"
-                      onClick={handleBuyEnergy}
-                    >
-                      Purchase & Burn
-                    </button>
                   </div>
+                  <button
+                    className="trans-action-button"
+                    onClick={handleBuyEnergy}
+                    disabled={isPurchasing || !selectedFactory}
+                  >
+                    {isPurchasing ? (
+                      <>
+                        <FiRefreshCw className="trans-title-icon" style={{ animation: "spin 1s linear infinite", fontSize: "1rem" }} />
+                        Processing...
+                      </>
+                    ) : (
+                      "Purchase & Burn"
+                    )}
+                  </button>
                 </div>
               </div>
             </div>

@@ -79,6 +79,9 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .wallet-status {
@@ -152,8 +155,8 @@
 
 /* Content layout */
 .solar-trade-content {
-  display: flex;
-  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
   gap: 1.5rem;
   padding: 1.5rem;
   min-height: calc(100vh - var(--navbar-height) - 4.5rem);
@@ -161,7 +164,6 @@
 
 /* Left panel styles */
 .left-panel {
-  flex: 0 0 350px;
   background: var(--glass-bg);
   border-radius: 12px;
   display: flex;
@@ -337,16 +339,16 @@
 
 /* Right panel styles */
 .right-panel {
-  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
   overflow: hidden;
+  min-width: 0;
 }
 
 .stats-cards {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1rem;
 }
 
@@ -611,12 +613,11 @@
 /* Responsive styles */
 @media (max-width: 1024px) {
   .solar-trade-content {
-    flex-direction: column;
+    grid-template-columns: 1fr;
     height: auto;
   }
 
   .left-panel {
-    flex: 0 0 auto;
     max-height: 400px;
   }
 
