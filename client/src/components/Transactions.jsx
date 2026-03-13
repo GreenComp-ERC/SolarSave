@@ -409,46 +409,7 @@ const Transactions = () => {
                 </div>
               </div>
               <div className="trans-shop-grid">
-                <div className="trans-panel-card">
-                  <div className="trans-card-header">
-                    <h3 className="trans-panel-title">Market Overview</h3>
-                  </div>
-                  <div className="trans-performance-section">
-                    <div className="trans-metrics-grid" style={{ marginBottom: 0 }}>
-                      <div className="trans-metric-item">
-                        <div className="trans-metric-label">Available Supply</div>
-                        <div className="trans-metric-value" style={{ color: "var(--success-color)", fontSize: "1.2rem" }}>
-                          {formatNumber(normalizeEnergy(supplyEnergy))} W
-                        </div>
-                      </div>
-                      <div className="trans-metric-item">
-                        <div className="trans-metric-label">Total Demand</div>
-                        <div className="trans-metric-value">{formatNumber(normalizeEnergy(demandEnergy))} W</div>
-                      </div>
-                      <div className="trans-metric-item" style={{ marginTop: "1rem" }}>
-                        <div className="trans-metric-label">Current Deficit</div>
-                        <div className="trans-metric-value" style={{ color: deficitEnergy > 0 ? "var(--error-color)" : "inherit" }}>
-                          {formatNumber(normalizeEnergy(deficitEnergy))} W
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  {/* Visual Indicator of Supply relative to Demand */}
-                  <div className="trans-power-section" style={{ marginTop: "1rem", padding: "0 1rem" }}>
-                    <div className="trans-power-header">
-                      <span className="trans-power-label">Supply vs Total Demand</span>
-                      <span className="trans-power-value">{demandEnergy > 0 ? Math.min(100, (supplyEnergy / demandEnergy) * 100).toFixed(1) : 100}%</span>
-                    </div>
-                    <div className="trans-power-bar" style={{ backgroundColor: "rgba(244, 67, 54, 0.2)" }}>
-                      <div className="trans-power-fill trans-ac-fill" style={{ 
-                        width: `${demandEnergy > 0 ? Math.min(100, (supplyEnergy / demandEnergy) * 100) : 100}%`,
-                        backgroundColor: supplyEnergy >= demandEnergy ? "var(--success-color)" : "var(--warning-color)"
-                      }}></div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="trans-panel-card">
+                <div className="trans-panel-card trans-buy-card">
                   <div className="trans-card-header">
                     <h3 className="trans-panel-title">Buy Energy</h3>
                   </div>
@@ -496,6 +457,45 @@ const Transactions = () => {
                       "Purchase & Burn"
                     )}
                   </button>
+                </div>
+
+                <div className="trans-panel-card trans-market-card">
+                  <div className="trans-card-header">
+                    <h3 className="trans-panel-title">Market Overview</h3>
+                  </div>
+                  <div className="trans-performance-section">
+                    <div className="trans-metrics-grid" style={{ marginBottom: 0 }}>
+                      <div className="trans-metric-item">
+                        <div className="trans-metric-label">Available Supply</div>
+                        <div className="trans-metric-value" style={{ color: "var(--success-color)", fontSize: "1.2rem" }}>
+                          {formatNumber(normalizeEnergy(supplyEnergy))} W
+                        </div>
+                      </div>
+                      <div className="trans-metric-item">
+                        <div className="trans-metric-label">Total Demand</div>
+                        <div className="trans-metric-value">{formatNumber(normalizeEnergy(demandEnergy))} W</div>
+                      </div>
+                      <div className="trans-metric-item" style={{ marginTop: "1rem" }}>
+                        <div className="trans-metric-label">Current Deficit</div>
+                        <div className="trans-metric-value" style={{ color: deficitEnergy > 0 ? "var(--error-color)" : "inherit" }}>
+                          {formatNumber(normalizeEnergy(deficitEnergy))} W
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {/* Visual Indicator of Supply relative to Demand */}
+                  <div className="trans-power-section" style={{ marginTop: "1rem", padding: "0 1rem" }}>
+                    <div className="trans-power-header">
+                      <span className="trans-power-label">Supply vs Total Demand</span>
+                      <span className="trans-power-value">{demandEnergy > 0 ? Math.min(100, (supplyEnergy / demandEnergy) * 100).toFixed(1) : 100}%</span>
+                    </div>
+                    <div className="trans-power-bar" style={{ backgroundColor: "rgba(244, 67, 54, 0.2)" }}>
+                      <div className="trans-power-fill trans-ac-fill" style={{ 
+                        width: `${demandEnergy > 0 ? Math.min(100, (supplyEnergy / demandEnergy) * 100) : 100}%`,
+                        backgroundColor: supplyEnergy >= demandEnergy ? "var(--success-color)" : "var(--warning-color)"
+                      }}></div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
