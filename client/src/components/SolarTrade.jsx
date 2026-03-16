@@ -58,7 +58,12 @@ const PowerChart = ({ data, chartType }) => {
         const options = {
           title: "Solar Panel Output Comparison",
           backgroundColor: "transparent",
-          colors: ["#55A79B", "#3DAB8E"],
+          // Keep energy theme but maximize DC/AC contrast for legend readability.
+          colors: ["#2F8F79", "#F59E0B"],
+          series: {
+            0: { color: "#2F8F79" },
+            1: { color: "#F59E0B" }
+          },
           titleTextStyle: { color: "#1e293b", fontSize: 17, bold: true },
           fontName: "Open Sans",
           hAxis: {
