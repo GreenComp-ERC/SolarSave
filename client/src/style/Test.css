@@ -5,11 +5,14 @@
 /* Main container with sporty gradient */
 .pred-test-container {
   min-height: 100vh;
-  padding: calc(var(--navbar-height) + 16px) 20px 20px;
+  padding: 0 0 2rem;
+  width: 100%;
+  box-sizing: border-box;
   font-family: var(--font-sans);
   background: transparent;
   position: relative;
-  overflow-x: hidden;
+  overflow: visible;
+  z-index: 10;
 }
 
 .pred-test-container::before {
@@ -27,26 +30,65 @@
   z-index: 0;
 }
 
-/* Title styling */
-.pred-test-title {
-  font-family: 'Orbitron', monospace;
-  font-size: 3.5rem;
-  font-weight: 800;
-  text-align: center;
-  margin-bottom: 40px;
-  background: linear-gradient(135deg, #00a2ff, #0078ff, #004cff);
+/* Sticky header aligned with Solar Energy Exchange */
+.pred-header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: var(--navbar-height);
+  z-index: 10;
+}
+
+.pred-main-title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-content: center;
+  grid-column: 2;
+}
+
+.pred-main-title h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  background: var(--accent-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  text-shadow: 0 0 30px rgba(0, 162, 255, 0.3);
-  position: relative;
-  z-index: 1;
-  animation: pred-titlePulse 3s ease-in-out infinite alternate;
 }
 
-@keyframes pred-titlePulse {
-  0% { transform: scale(1); filter: brightness(1); }
-  100% { transform: scale(1.02); filter: brightness(1.1); }
+.pred-title-icon {
+  font-size: 2rem;
+  color: #FFD700;
+  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+  animation: pulse 3s infinite;
+}
+
+.pred-content {
+  padding: 1.5rem 0 0;
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
 }
 
 /* Input container with sporty glassmorphism */
@@ -502,10 +544,6 @@
 
 /* Responsive design */
 @media (max-width: 768px) {
-  .pred-test-title {
-    font-size: 2.5rem;
-  }
-
   .pred-coordinate-inputs,
   .pred-time-controls {
     grid-template-columns: 1fr;
@@ -532,11 +570,7 @@
 
 @media (max-width: 480px) {
   .pred-test-container {
-    padding: 15px;
-  }
-
-  .pred-test-title {
-    font-size: 2rem;
+    padding: 0 0 2rem;
   }
 
   .pred-input-container {
@@ -560,9 +594,4 @@
   min-height: 120px;
   height: 120px;
   overflow: visible; /* Prevent being clipped */
-}
-.pred-test-container {
-  min-height: 100vh;
-  position: relative;
-  z-index: 10; /* 🔹 Ensure chart rendering isn't obscured */
 }

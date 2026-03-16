@@ -5,6 +5,7 @@ import { TransactionContext } from "../context/TransactionContext";
 import EnergyExchange from "../utils/test/EnergyExchange.json";
 import SolarToken from "../utils/test/SolarToken.json";
 import contractAddresses from "../utils/contractAddress.json";
+import SolarPredict from "./SolarPredict";
 import "../style/Transactions.css";
 
 const exchangeAddress = contractAddresses.energyExchange;
@@ -501,6 +502,10 @@ const Transactions = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="bg-transparent py-6 px-4 relative z-10 min-h-[800px]">
+        <SolarPredict />
       </div>
     </div>
   );

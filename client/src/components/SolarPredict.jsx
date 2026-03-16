@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
+import { FiSun } from "react-icons/fi";
 import "../style/Test.css";
 
 const formatLocalDate = (date) => {
@@ -431,10 +432,14 @@ const SolarPredict = () => {
         ))}
       </div>
 
-      <h1 className="pred-test-title">
-        ⚡ Solar Data Visualization ⚡
-        <div className="pred-title-glow"></div>
-      </h1>
+      <div className="pred-header">
+        <div className="pred-main-title">
+          <FiSun className="pred-title-icon" />
+          <h1>Solar Data Visualization</h1>
+        </div>
+      </div>
+
+      <div className="pred-content">
 
       <div className="pred-input-container">
         <div className="pred-coordinate-inputs">
@@ -558,6 +563,7 @@ const SolarPredict = () => {
           {viewMode === "compact" ? renderEnhancedChartCards() : renderEnhancedChartList()}
         </div>
       )}
+      </div>
 
       {/* Enhanced modal */}
       {modalOpen && (
