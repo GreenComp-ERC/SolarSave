@@ -141,12 +141,12 @@ const SolarPredict = () => {
     if (active && payload && payload.length) {
       return (
         <div className="pred-custom-tooltip" style={{
-          background: 'rgba(15, 14, 19, 0.95)',
-          border: '2px solid rgba(0, 162, 255, 0.5)',
+          background: 'rgba(255, 255, 255, 0.96)',
+          border: '1px solid rgba(148, 163, 184, 0.35)',
           borderRadius: '12px',
           padding: '12px 16px',
           backdropFilter: 'blur(20px)',
-          color: '#ffffff',
+          color: '#1e293b',
           fontSize: '14px',
           fontWeight: '600'
         }}>
@@ -304,7 +304,7 @@ const SolarPredict = () => {
                   </defs>
                   <CartesianGrid
                     strokeDasharray="3 3"
-                    stroke="rgba(255,255,255,0.1)"
+                    stroke="rgba(148, 163, 184, 0.28)"
                     horizontal={true}
                     vertical={false}
                   />
@@ -312,13 +312,13 @@ const SolarPredict = () => {
                     dataKey="time"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: '#ffffff', fontSize: 12 }}
+                    tick={{ fill: '#475569', fontSize: 12 }}
                     interval="preserveStartEnd"
                   />
                   <YAxis
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: '#ffffff', fontSize: 12 }}
+                    tick={{ fill: '#475569', fontSize: 12 }}
                     domain={['dataMin - 5', 'dataMax + 5']}
                   />
                   <Tooltip content={<CustomTooltip />} />
@@ -373,18 +373,18 @@ const SolarPredict = () => {
         <stop offset="95%" stopColor={chartColors.primary} stopOpacity={0.05}/>
       </linearGradient>
     </defs>
-    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.15)" />
+    <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.3)" />
     <XAxis
       dataKey="time"
       axisLine={false}
       tickLine={false}
-      tick={{ fill: '#ffffff', fontSize: 12 }}
+      tick={{ fill: '#475569', fontSize: 12 }}
       interval="preserveStartEnd"
     />
     <YAxis
       axisLine={false}
       tickLine={false}
-      tick={{ fill: '#ffffff', fontSize: 12 }}
+      tick={{ fill: '#475569', fontSize: 12 }}
       domain={['dataMin - 10', 'dataMax + 10']}
     />
     <Tooltip
@@ -669,16 +669,16 @@ const SolarPredict = () => {
           left: 0;
           right: 0;
           bottom: 0;
-          background: rgba(10, 10, 15, 0.7);
+          background: rgba(248, 250, 252, 0.76);
         }
 
         .pred-modal-content {
           position: relative;
-          background: rgba(20, 20, 30, 0.85);
+          background: rgba(255, 255, 255, 0.9);
           backdrop-filter: blur(25px);
           -webkit-backdrop-filter: blur(25px);
-          border: 1px solid rgba(0, 162, 255, 0.3);
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 30px rgba(0, 162, 255, 0.15);
+          border: 1px solid rgba(148, 163, 184, 0.34);
+          box-shadow: 0 20px 60px rgba(15, 23, 42, 0.18), 0 0 20px rgba(14, 165, 233, 0.12);
           border-radius: 24px;
           padding: 30px;
           width: 90%;
@@ -696,9 +696,9 @@ const SolarPredict = () => {
           width: 40px;
           height: 40px;
           border-radius: 50%;
-          background: rgba(255, 255, 255, 0.1);
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          color: #fff;
+          background: rgba(255, 255, 255, 0.86);
+          border: 1px solid rgba(148, 163, 184, 0.3);
+          color: #334155;
           font-size: 1.2rem;
           display: flex;
           align-items: center;
@@ -723,8 +723,8 @@ const SolarPredict = () => {
         }
 
         .pred-chart-preview-card {
-          background: rgba(15, 15, 25, 0.6);
-          border: 1px solid rgba(0, 162, 255, 0.15);
+          background: rgba(255, 255, 255, 0.86);
+          border: 1px solid rgba(148, 163, 184, 0.26);
           border-radius: 20px;
           padding: 24px;
           cursor: pointer;
@@ -749,7 +749,7 @@ const SolarPredict = () => {
         .pred-chart-preview-card:hover {
           transform: translateY(-8px) scale(1.02);
           border-color: rgba(0, 162, 255, 0.6);
-          box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 162, 255, 0.2);
+          box-shadow: 0 15px 30px rgba(15, 23, 42, 0.18), 0 0 16px rgba(0, 162, 255, 0.16);
         }
 
         .pred-chart-preview-card:hover::before {
@@ -784,9 +784,9 @@ const SolarPredict = () => {
         .pred-view-mode-btn {
           padding: 10px 20px;
           border-radius: 12px;
-          border: 1px solid rgba(255,255,255,0.2);
-          background: rgba(0,0,0,0.3);
-          color: #fff;
+          border: 1px solid rgba(148,163,184,0.3);
+          background: rgba(255,255,255,0.9);
+          color: #1e293b;
           cursor: pointer;
           transition: all 0.3s ease;
           font-weight: 600;
@@ -819,10 +819,10 @@ const SolarPredict = () => {
           margin: 0;
           font-size: 1.2rem;
           font-weight: 700;
-          color: #fff;
+          color: #1e293b;
           font-family: 'Orbitron', monospace;
           text-transform: capitalize;
-          background: linear-gradient(90deg, #fff, #a0d8ef);
+          background: linear-gradient(90deg, #0f172a, #0ea5e9);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
         }
@@ -833,23 +833,23 @@ const SolarPredict = () => {
         }
 
         .pred-stat-badge {
-          background: rgba(0, 0, 0, 0.4);
+          background: rgba(255, 255, 255, 0.9);
           padding: 6px 10px;
           border-radius: 12px;
           font-size: 0.8rem;
           font-weight: 600;
           backdrop-filter: blur(10px);
-          border: 1px solid rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(148, 163, 184, 0.22);
         }
 
         .pred-stats-row {
           display: flex;
           justify-content: space-between;
           margin-bottom: 20px;
-          background: rgba(0, 0, 0, 0.3);
+          background: rgba(255, 255, 255, 0.88);
           border-radius: 12px;
           padding: 12px 15px;
-          border: 1px solid rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(148, 163, 184, 0.22);
           position: relative;
           z-index: 1;
         }
@@ -863,7 +863,7 @@ const SolarPredict = () => {
 
         .pred-stat-label {
           font-size: 0.75rem;
-          color: rgba(255, 255, 255, 0.6);
+          color: #64748b;
           text-transform: uppercase;
           letter-spacing: 1px;
         }
@@ -904,15 +904,15 @@ const SolarPredict = () => {
           flex-direction: column;
           align-items: flex-end;
           gap: 4px;
-          background: rgba(0, 0, 0, 0.3);
+          background: rgba(255, 255, 255, 0.9);
           padding: 8px 16px;
           border-radius: 12px;
-          border: 1px solid rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(148, 163, 184, 0.24);
         }
 
         .pred-modal-stat-label {
           font-size: 0.8rem;
-          color: rgba(255, 255, 255, 0.5);
+          color: #64748b;
           text-transform: uppercase;
           letter-spacing: 0.5px;
         }
@@ -920,15 +920,15 @@ const SolarPredict = () => {
         .pred-modal-stat-value {
           font-size: 1.2rem;
           font-weight: 700;
-          color: #fff;
+          color: #1e293b;
           font-family: 'Orbitron', monospace;
         }
 
         .pred-loading-spinner {
           width: 20px;
           height: 20px;
-          border: 3px solid rgba(255, 255, 255, 0.2);
-          border-top: 3px solid #ffffff;
+          border: 3px solid rgba(148, 163, 184, 0.26);
+          border-top: 3px solid #1d4ed8;
           border-radius: 50%;
           animation: pred-spin 1s linear infinite;
           margin-right: 10px;

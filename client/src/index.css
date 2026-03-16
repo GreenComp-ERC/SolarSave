@@ -6,12 +6,18 @@
   --font-mono: "Share Tech Mono", "Consolas", "Courier New", monospace;
   --navbar-height: 70px;
   --sidebar-width: 320px;
-  --glass-bg: rgba(15, 23, 42, 0.72);
-  --glass-border: rgba(148, 163, 184, 0.24);
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(148, 163, 184, 0.38);
   --glass-shadow:
-    0 22px 50px rgba(0, 0, 0, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  --glass-blur: blur(18px) saturate(140%);
+    0 16px 42px rgba(15, 23, 42, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  --glass-blur: blur(20px) saturate(135%);
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --text-inverse: #ffffff;
+  --btn-primary: #2563eb;
+  --btn-primary-hover: #1d4ed8;
+  --btn-secondary: rgba(255, 255, 255, 0.82);
 }
 
 * {
@@ -24,11 +30,11 @@ body {
   margin: 0;
   font-family: var(--font-sans);
   background:
-    radial-gradient(circle at 15% 20%, rgba(37, 99, 235, 0.2), transparent 40%),
-    radial-gradient(circle at 85% 10%, rgba(16, 185, 129, 0.18), transparent 35%),
-    radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.18), transparent 40%),
-    #0b1222;
-  color: #e2e8f0;
+    radial-gradient(circle at 15% 20%, rgba(56, 189, 248, 0.2), transparent 42%),
+    radial-gradient(circle at 85% 10%, rgba(34, 197, 94, 0.14), transparent 36%),
+    radial-gradient(circle at 22% 82%, rgba(14, 165, 233, 0.16), transparent 42%),
+    linear-gradient(145deg, #f8fbff 0%, #eff6ff 48%, #f1f5f9 100%);
+  color: var(--text-primary);
   background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -87,6 +93,21 @@ textarea {
   box-shadow: var(--glass-shadow);
 }
 
+button {
+  color: var(--text-inverse);
+}
+
+input,
+select,
+textarea {
+  color: var(--text-primary);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #64748b;
+}
+
 .eth-card {
   background-color:#a099ff;
   background-image:
@@ -102,6 +123,7 @@ textarea {
 .text-gradient {
   background-color: #fff;
   background-image: radial-gradient(at 4% 36%, hsla(0,0%,100%,1) 0, transparent 53%), radial-gradient(at 100% 60%, rgb(0, 0, 0) 0, transparent 50%);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -120,10 +142,10 @@ textarea {
 
 .sidebar {
   width: 25%;
-  background-color: #0f0e13;
+  background-color: rgba(255, 255, 255, 0.86);
   padding: 20px;
   transition: width 0.3s ease;
-  color: white;
+  color: var(--text-primary);
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -136,15 +158,15 @@ textarea {
 }
 
 .sidebar-toggle {
-  background-color: #333;
-  color: white;
+  background-color: rgba(255, 255, 255, 0.9);
+  color: var(--text-primary);
   padding: 5px;
   cursor: pointer;
   margin-bottom: 10px;
 }
 
 .sidebar-toggle.collapsed {
-  background-color: #222; /* Even darker when collapsed */
+  background-color: rgba(241, 245, 249, 0.94);
   padding: 5px;
 }
 
@@ -155,7 +177,7 @@ textarea {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: #0f0e13;
+  background-color: rgba(255, 255, 255, 0.88);
 }
 
 .map {

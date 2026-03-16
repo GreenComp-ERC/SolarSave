@@ -123,7 +123,7 @@
 }
 
 .pred-coordinate-inputs label {
-  color: #ffffff;
+  color: #1e293b;
   font-weight: 600;
   font-size: 1.1rem;
   display: flex;
@@ -132,11 +132,11 @@
 }
 
 .pred-coordinate-input {
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(255, 255, 255, 0.9);
   border: 2px solid rgba(0, 162, 255, 0.3);
   border-radius: 12px;
   padding: 12px 16px;
-  color: #ffffff;
+  color: #1e293b;
   font-size: 1rem;
   font-family: 'Rajdhani', sans-serif;
   font-weight: 500;
@@ -147,7 +147,7 @@
 .pred-coordinate-input:focus {
   border-color: #00a2ff;
   box-shadow: 0 0 20px rgba(0, 162, 255, 0.4);
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(255, 255, 255, 0.96);
 }
 
 /* Time controls */
@@ -159,7 +159,7 @@
 }
 
 .pred-time-controls label {
-  color: #ffffff;
+  color: #1e293b;
   font-weight: 600;
   font-size: 1.1rem;
   display: flex;
@@ -168,11 +168,11 @@
 }
 
 .pred-time-input, .pred-time-interval-select {
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(255, 255, 255, 0.9);
   border: 2px solid rgba(46, 213, 115, 0.3);
   border-radius: 12px;
   padding: 12px 16px;
-  color: #ffffff;
+  color: #1e293b;
   font-size: 1rem;
   font-family: 'Rajdhani', sans-serif;
   font-weight: 500;
@@ -183,7 +183,7 @@
 .pred-time-input:focus, .pred-time-interval-select:focus {
   border-color: #2ed573;
   box-shadow: 0 0 20px rgba(46, 213, 115, 0.4);
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(255, 255, 255, 0.96);
 }
 
 /* Range slider */
@@ -276,7 +276,7 @@
   align-items: center;
   justify-content: center;
   gap: 15px;
-  color: #ffffff;
+  color: #1e293b;
   font-size: 1.3rem;
   font-weight: 600;
   margin: 30px 0;
@@ -329,7 +329,7 @@
   border: 1px solid var(--glass-border);
   border-radius: 12px;
   padding: 12px 25px;
-  color: #ffffff;
+  color: #1e293b;
   font-size: 1rem;
   font-weight: 600;
   font-family: 'Rajdhani', sans-serif;
@@ -361,7 +361,7 @@
 
 /* Chart preview cards */
 .pred-chart-preview-card {
-  background: rgba(15, 23, 42, 0.65);
+  background: rgba(255, 255, 255, 0.82);
   backdrop-filter: blur(16px) saturate(140%);
   -webkit-backdrop-filter: blur(16px) saturate(140%);
   border: 1px solid var(--glass-border);
@@ -393,12 +393,12 @@
   transform: translateY(-5px) scale(1.02);
   border-color: rgba(0, 162, 255, 0.4);
   box-shadow:
-    0 15px 40px rgba(0, 0, 0, 0.3),
-    0 0 30px rgba(0, 162, 255, 0.2);
+    0 15px 40px rgba(15, 23, 42, 0.16),
+    0 0 20px rgba(0, 162, 255, 0.16);
 }
 
 .pred-chart-subtitle {
-  color: #ffffff;
+  color: #1e293b;
   font-size: 1.4rem;
   font-weight: 700;
   font-family: 'Orbitron', monospace;
@@ -411,7 +411,7 @@
 }
 
 .pred-chart-preview {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.92);
   border-radius: 12px;
   padding: 15px;
   margin-bottom: 15px;
@@ -450,7 +450,7 @@
 }
 
 .pred-chart-box {
-  background: rgba(15, 23, 42, 0.65);
+  background: rgba(255, 255, 255, 0.82);
   backdrop-filter: blur(16px) saturate(140%);
   -webkit-backdrop-filter: blur(16px) saturate(140%);
   border: 1px solid var(--glass-border);
@@ -461,7 +461,7 @@
 
 .pred-chart-box:hover {
   border-color: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.14);
 }
 
 /* Modal styles */
@@ -484,7 +484,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(248, 250, 252, 0.76);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
@@ -500,7 +500,7 @@
   max-width: 90vw;
   max-height: 90vh;
   overflow: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.16);
 }
 
 .pred-modal-close-btn {
@@ -528,7 +528,7 @@
 }
 
 .pred-modal-chart-title {
-  color: #ffffff;
+  color: #1e293b;
   font-size: 2rem;
   font-weight: 700;
   font-family: 'Orbitron', monospace;

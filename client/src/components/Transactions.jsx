@@ -431,7 +431,7 @@ const Transactions = () => {
                         value={purchaseAmount}
                         onChange={(e) => setPurchaseAmount(e.target.value)}
                         disabled={isPurchasing}
-                        style={{ width: "100%", padding: "0.5rem", borderRadius: "6px", border: "1px solid var(--border-color)", background: "rgba(0,0,0,0.3)", color: "white" }}
+                        style={{ width: "100%", padding: "0.5rem", borderRadius: "6px", border: "1px solid var(--border-color)", background: "rgba(255,255,255,0.9)", color: "var(--text-primary)" }}
                       />
                       <div className="trans-quick-btn-group">
                         <button className="trans-quick-btn" onClick={() => handleQuickFill("deficit")} disabled={!selectedFactory || isPurchasing}>Fill Deficit</button>

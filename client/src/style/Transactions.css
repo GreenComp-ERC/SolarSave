@@ -110,7 +110,7 @@
 
 /* Section Cards - 统一玻璃态容器 */
 .trans-section-card {
-  background: var(--glass-bg, rgba(15, 23, 42, 0.6));
+  background: var(--glass-bg, rgba(255, 255, 255, 0.78));
   border: 1px solid var(--border-color);
   border-radius: 12px;
   backdrop-filter: blur(14px) saturate(140%);
@@ -121,7 +121,7 @@
 
 .trans-section-header {
   padding: 1.25rem;
-  background-color: #1c1f2b; /* 与上方 card-header 对齐 */
+  background-color: rgba(248, 250, 252, 0.9);
   border-bottom: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
@@ -206,7 +206,7 @@
   width: 6px;
 }
 .trans-panels-list::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(148, 163, 184, 0.14);
   border-radius: 4px;
 }
 .trans-panels-list::-webkit-scrollbar-thumb {
@@ -216,7 +216,7 @@
 
 /* Panel Cards */
 .trans-panel-card {
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(255, 255, 255, 0.8);
   border: 1px solid var(--border-color);
   border-radius: 8px; /* 修改为8px，与上方卡片统一 */
   padding: 1rem;
@@ -229,7 +229,7 @@
 .trans-panel-card:hover {
   transform: translateY(-2px);
   border-color: rgba(41, 82, 227, 0.3);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.16);
 }
 
 .trans-selected {
@@ -267,7 +267,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: var(--panel-bg);
+  background: rgba(255, 255, 255, 0.88);
   padding: 0.25rem 0.5rem;
   border-radius: 6px;
   border: 1px solid var(--border-color);
@@ -298,7 +298,7 @@
 
 /* Performance Section */
 .trans-performance-section {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.82);
   border-radius: 8px;
   padding: 1rem;
   margin-bottom: 1rem;
@@ -383,7 +383,7 @@
 
 .trans-power-bar {
   height: 6px;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(148, 163, 184, 0.26);
   border-radius: 3px;
   overflow: hidden;
 }
@@ -466,7 +466,7 @@
 }
 
 .trans-quick-btn {
-  background: var(--panel-bg);
+  background: rgba(255, 255, 255, 0.86);
   border: 1px solid var(--border-color);
   color: var(--text-secondary);
   font-size: 0.7rem;
@@ -494,11 +494,11 @@
 
 .trans-buy-card {
   border-color: rgba(41, 82, 227, 0.35);
-  background: linear-gradient(180deg, rgba(41, 82, 227, 0.12) 0%, rgba(15, 23, 42, 0.6) 100%);
+  background: linear-gradient(180deg, rgba(41, 82, 227, 0.12) 0%, rgba(255, 255, 255, 0.82) 100%);
 }
 
 .trans-market-card {
-  border-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(148, 163, 184, 0.24);
 }
 
 /* Pagination */
@@ -512,7 +512,7 @@
 }
 
 .trans-pagination-btn {
-  background: var(--panel-bg);
+  background: rgba(255, 255, 255, 0.86);
   border: 1px solid var(--border-color);
   border-radius: 6px;
   color: var(--text-primary);
@@ -548,7 +548,7 @@
 
 /* Approval Card */
 .trans-approval-card {
-  background: var(--panel-bg);
+  background: rgba(255, 255, 255, 0.8);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 1rem;
@@ -566,8 +566,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid rgba(148, 163, 184, 0.24);
   border-radius: 6px;
   padding: 0.5rem 0.75rem;
 }

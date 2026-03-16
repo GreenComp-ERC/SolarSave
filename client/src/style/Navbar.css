@@ -1,16 +1,16 @@
 /* Navbar.css - Sleek, modern styles for the updated navbar */
 
 :root {
-  --primary: #2952e3;
-  --secondary: #ffcc00;
-  --accent: #00eeff;
-  --dark: #0c0c14;
-  --darker: #070711;
-  --light: #f0f0f0;
+  --primary: #2563eb;
+  --secondary: #ca8a04;
+  --accent: #0ea5e9;
+  --dark: #0f172a;
+  --darker: #020617;
+  --light: #f8fafc;
   --success: #00cc66;
   --warning: #ffcc00;
-  --error: #ff3366;
-  --glow: 0 0 10px rgba(0, 238, 255, 0.7);
+  --error: #e11d48;
+  --glow: 0 0 10px rgba(14, 165, 233, 0.3);
   --navbar-height: 70px;
 }
 
@@ -30,7 +30,7 @@
 }
 
 .cyberpunk-navbar.scrolled {
-  background: rgba(15, 23, 42, 0.85);
+  background: rgba(255, 255, 255, 0.86);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   box-shadow: var(--glass-shadow);
@@ -75,7 +75,7 @@
 .logo-text {
   font-size: 1.5rem;
   font-weight: 700;
-  color: white;
+  color: var(--text-primary);
   letter-spacing: 1px;
 }
 
@@ -126,7 +126,7 @@
   align-items: center;
   margin: 0 0.75rem;
   padding: 0.5rem 0.75rem;
-  color: white;
+  color: var(--text-primary);
   cursor: pointer;
   position: relative;
   border-radius: 4px;
@@ -184,11 +184,11 @@
   top: 100%;
   left: 0;
   width: 200px;
-  background: rgba(12, 12, 20, 0.95);
+  background: rgba(255, 255, 255, 0.92);
   border-radius: 6px;
   padding: 0.5rem 0;
   list-style: none;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.18), 0 0 0 1px rgba(148, 163, 184, 0.3);
   backdrop-filter: blur(10px);
   transform-origin: top center;
   animation: dropdownFadeIn 0.2s ease forwards;
@@ -210,7 +210,7 @@
   display: flex;
   align-items: center;
   padding: 0.75rem 1rem;
-  color: white;
+  color: var(--text-primary);
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -243,7 +243,7 @@
 }
 
 .connect-wallet-btn {
-  background: linear-gradient(135deg, var(--primary) 0%, #1a3ad3 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, #1d4ed8 100%);
   color: white;
 }
 
@@ -254,9 +254,9 @@
 }
 
 .wallet-address-btn {
-  background: rgba(41, 82, 227, 0.1);
-  border: 1px solid rgba(41, 82, 227, 0.5);
-  color: white;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(37, 99, 235, 0.4);
+  color: var(--text-primary);
 }
 
 .wallet-address-btn:hover {
@@ -271,7 +271,7 @@
 /* Mobile Menu */
 .mobile-menu-btn {
   display: none;
-  color: white;
+  color: var(--text-primary);
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -286,11 +286,11 @@
   top: var(--navbar-height);
   left: 0;
   width: 100%;
-  background: rgba(7, 7, 17, 0.98);
+  background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(10px);
   z-index: 10000;
   animation: slideDown 0.3s ease forwards;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.16);
 }
 
 @keyframes slideDown {
@@ -314,8 +314,8 @@
   display: flex;
   align-items: center;
   padding: 1rem 2rem;
-  color: white;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.22);
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -338,7 +338,7 @@
   align-items: center;
   width: 100%;
   padding: 0.8rem 1.5rem;
-  background: linear-gradient(135deg, var(--primary) 0%, #1a3ad3 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, #1d4ed8 100%);
   border: none;
   border-radius: 6px;
   color: white;
@@ -362,7 +362,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(248, 250, 252, 0.74);
   backdrop-filter: blur(5px);
   display: flex;
   align-items: flex-start;
@@ -384,7 +384,7 @@
 }
 
 .modal-container {
-  background: rgba(15, 23, 42, 0.72);
+  background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(18px) saturate(140%);
   -webkit-backdrop-filter: blur(18px) saturate(140%);
   border-radius: 10px;
@@ -396,9 +396,9 @@
   position: relative;
   margin: 0 auto;
   box-shadow:
-    0 22px 50px rgba(0, 0, 0, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(148, 163, 184, 0.24);
+    0 22px 50px rgba(15, 23, 42, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(148, 163, 184, 0.32);
   animation: modalSlideUp 0.3s ease forwards;
 }
 
@@ -409,7 +409,7 @@
 }
 
 .wallet-modal-overlay {
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(248, 250, 252, 0.62);
   backdrop-filter: blur(6px) saturate(120%);
   -webkit-backdrop-filter: blur(6px) saturate(120%);
 }
@@ -441,7 +441,7 @@
   z-index: 2;
   background: none;
   border: none;
-  color: white;
+  color: var(--text-primary);
   width: auto;
   height: auto;
   padding: 5px;
@@ -451,8 +451,8 @@
 }
 
 .wallet-modal-body .modal-close-btn:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-  color: white;
+  background-color: rgba(37, 99, 235, 0.14);
+  color: var(--primary);
   transform: none;
 }
 
@@ -471,7 +471,7 @@
   position: absolute;
   top: 1rem;
   right: 1rem;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.72);
   border: none;
   border-radius: 50%;
   width: 36px;
@@ -479,13 +479,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: var(--text-primary);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .modal-close-btn:hover {
-  background: rgba(255, 51, 102, 0.2);
+  background: rgba(255, 51, 102, 0.14);
   color: var(--error);
   transform: rotate(90deg);
 }

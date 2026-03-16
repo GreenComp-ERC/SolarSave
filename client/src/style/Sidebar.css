@@ -3,17 +3,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
 :root {
-  --solar-yellow: #FFD600;
-  --solar-orange: #FF7A00;
-  --solar-accent: #00F0FF;
-  --dark-bg: #0F1218;
-  --dark-card: #161C26;
-  --dark-border: #1F2937;
-  --panel-glow: rgba(255, 214, 0, 0.15);
+  --solar-yellow: #ca8a04;
+  --solar-orange: #ea580c;
+  --solar-accent: #0284c7;
+  --dark-bg: #f8fbff;
+  --dark-card: rgba(255, 255, 255, 0.72);
+  --dark-border: rgba(148, 163, 184, 0.4);
+  --panel-glow: rgba(14, 165, 233, 0.2);
   --success: #00E676;
-  --error: #FF1744;
-  --cyberpunk-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
-  --neon-border: 1px solid rgba(0, 240, 255, 0.3);
+  --error: #e11d48;
+  --cyberpunk-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
+  --neon-border: 1px solid rgba(148, 163, 184, 0.36);
+  --sidebar-text: #1e293b;
+  --sidebar-text-soft: #475569;
   --transition-speed: 0.3s;
   --sidebar-width: 320px;
 }
@@ -27,7 +29,7 @@
 
 body {
   font-family: var(--font-sans);
-  color: #ffffff;
+  color: var(--sidebar-text);
   background-color: var(--dark-bg);
 }
 
@@ -38,11 +40,11 @@ body {
   left: 0;
   height: 100vh;
   width: var(--sidebar-width);
-  background: rgba(15, 23, 42, 0.72);
+  background: rgba(255, 255, 255, 0.74);
   border-right: var(--neon-border);
   box-shadow:
-    0 22px 50px rgba(0, 0, 0, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    0 18px 40px rgba(15, 23, 42, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
   transition: transform var(--transition-speed);
   z-index: 100;
   overflow-y: auto;
@@ -86,7 +88,7 @@ body {
 .logo-container h1 {
   font-size: 24px;
   font-weight: 700;
-  color: white;
+  color: var(--sidebar-text);
   letter-spacing: 1px;
 }
 
@@ -107,8 +109,8 @@ body {
   height: 30px;
   border-radius: 6px;
   border: 1px solid var(--dark-border);
-  background: rgba(15, 18, 24, 0.8);
-  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--sidebar-text-soft);
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -136,14 +138,14 @@ body {
 
 /* Account Card */
 .account-card {
-  background: rgba(15, 23, 42, 0.72);
+  background: rgba(255, 255, 255, 0.72);
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 8px;
   border: 1px solid rgba(148, 163, 184, 0.24);
   box-shadow:
-    0 12px 30px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    0 12px 30px rgba(15, 23, 42, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
   backdrop-filter: blur(16px) saturate(140%);
   -webkit-backdrop-filter: blur(16px) saturate(140%);
 }
@@ -180,9 +182,9 @@ body {
 .address {
   font-family: 'Share Tech Mono', monospace;
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--sidebar-text-soft);
   padding: 4px 8px;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.78);
   border-radius: 4px;
   border: 1px solid var(--dark-border);
 }
@@ -224,13 +226,13 @@ body {
 
 /* Create Panel Form */
 .create-panel-card {
-  background: rgba(15, 23, 42, 0.72);
+  background: rgba(255, 255, 255, 0.72);
   border-radius: 8px;
   padding: 16px;
   border: 1px solid rgba(148, 163, 184, 0.24);
   box-shadow:
-    0 12px 30px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    0 12px 30px rgba(15, 23, 42, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
   backdrop-filter: blur(16px) saturate(140%);
   -webkit-backdrop-filter: blur(16px) saturate(140%);
 }
@@ -260,9 +262,9 @@ body {
 
 .input-group input {
   width: 100%;
-  background: rgba(15, 18, 24, 0.8);
+  background: rgba(255, 255, 255, 0.84);
   border: 1px solid var(--dark-border);
-  color: white;
+  color: var(--sidebar-text);
   padding: 10px;
   border-radius: 4px;
   font-family: 'Share Tech Mono', monospace;
@@ -276,13 +278,13 @@ body {
 }
 
 .input-group input::placeholder {
-  color: rgba(255, 255, 255, 0.5);
+  color: #64748b;
 }
 
 .create-button {
   width: 100%;
-  background: linear-gradient(90deg, #00B8D4, var(--solar-accent));
-  color: var(--dark-bg);
+  background: linear-gradient(90deg, #0ea5e9, var(--solar-accent));
+  color: #ffffff;
   border: none;
   padding: 10px;
   border-radius: 6px;
@@ -319,7 +321,7 @@ body {
   gap: 6px;
   background: var(--dark-card);
   border: 1px solid var(--dark-border);
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--sidebar-text-soft);
   padding: 8px 12px;
   border-radius: 6px;
   font-family: 'Rajdhani', sans-serif;
@@ -329,7 +331,7 @@ body {
 }
 
 .switch-button:hover {
-  background: rgba(31, 41, 55, 0.8);
+  background: rgba(255, 255, 255, 0.9);
 }
 
 .switch-button.active {
@@ -366,18 +368,18 @@ body {
 }
 
 .panel-count {
-  background: rgba(15, 18, 24, 0.8);
+  background: rgba(255, 255, 255, 0.82);
   padding: 2px 8px;
   border-radius: 12px;
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--sidebar-text-soft);
 }
 
 /* Added: search and filter controls */
 .panel-controls {
   padding: 8px;
   border-bottom: 1px solid var(--dark-border);
-  background: rgba(15, 18, 24, 0.4);
+  background: rgba(241, 245, 249, 0.7);
 }
 
 .search-box {
@@ -392,8 +394,8 @@ body {
   padding: 6px 30px 6px 26px;
   border-radius: 4px;
   border: 1px solid var(--dark-border);
-  background: rgba(15, 18, 24, 0.8);
-  color: white;
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--sidebar-text);
   font-family: 'Rajdhani', sans-serif;
 }
 
@@ -405,7 +407,7 @@ body {
 .search-box svg {
   position: absolute;
   left: 8px;
-  color: rgba(255, 255, 255, 0.5);
+  color: #64748b;
 }
 
 .clear-search {
@@ -413,14 +415,14 @@ body {
   right: 8px;
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.5);
+  color: #64748b;
   cursor: pointer;
   font-size: 16px;
   line-height: 1;
 }
 
 .clear-search:hover {
-  color: white;
+  color: var(--sidebar-text);
 }
 
 .sort-controls {
@@ -436,15 +438,15 @@ body {
   padding: 4px 8px;
   border-radius: 4px;
   border: 1px solid var(--dark-border);
-  background: rgba(15, 18, 24, 0.8);
-  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--sidebar-text-soft);
   font-size: 12px;
   cursor: pointer;
   font-family: 'Rajdhani', sans-serif;
 }
 
 .sort-button:hover {
-  background: rgba(31, 41, 55, 0.8);
+  background: rgba(255, 255, 255, 0.95);
 }
 
 .sort-button.active {
@@ -479,7 +481,7 @@ body {
 }
 
 .factory-item {
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(255, 255, 255, 0.78);
   border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 8px;
   padding: 10px;
@@ -515,13 +517,13 @@ body {
   align-items: center;
   justify-content: center;
   height: 150px;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--sidebar-text-soft);
   gap: 12px;
 }
 
 /* Updated panel item styles - compact */
 .panel-item {
-  background: rgba(15, 18, 24, 0.8);
+  background: rgba(255, 255, 255, 0.82);
   border: 1px solid var(--dark-border);
   border-radius: 6px;
   padding: 8px 12px;
@@ -584,7 +586,7 @@ body {
   gap: 5px;
   font-family: 'Share Tech Mono', monospace;
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--sidebar-text-soft);
 }
 
 .panel-details {
@@ -612,12 +614,12 @@ body {
 }
 
 .label {
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--sidebar-text-soft);
   font-size: 12px;
 }
 
 .value {
-  color: white;
+  color: var(--sidebar-text);
 }
 
 /* Added: pagination controls */
@@ -656,7 +658,7 @@ body {
 
 .page-info {
   font-family: 'Share Tech Mono', monospace;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--sidebar-text-soft);
   padding: 0 8px;
   font-size: 14px;
 }
@@ -843,9 +845,9 @@ body {
   width: 24px;
   height: 24px;
   border-radius: 4px;
-  background: rgba(15, 18, 24, 0.6);
+  background: rgba(255, 255, 255, 0.75);
   border: 1px solid var(--dark-border);
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--sidebar-text-soft);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -896,6 +898,16 @@ body {
 .panel-status-indicator.warning {
   background: var(--solar-yellow);
   box-shadow: 0 0 5px var(--solar-yellow);
+}
+
+.cyberpunk-sidebar,
+.cyberpunk-sidebar h2,
+.cyberpunk-sidebar h3,
+.cyberpunk-sidebar p,
+.cyberpunk-sidebar span,
+.cyberpunk-sidebar button,
+.cyberpunk-sidebar li {
+  color: var(--sidebar-text);
 }
 
 .panel-status-indicator.danger {

@@ -1,16 +1,16 @@
 /* Wallet.css - About-like Glass Popup Theme */
 
 :root {
-  --wallet-bg-main: rgba(15, 23, 42, 0.72);
-  --wallet-bg-soft: rgba(15, 23, 42, 0.52);
-  --wallet-bg-deep: #0b1222;
-  --wallet-text-main: #e2e8f0;
-  --wallet-text-soft: #cbd5f5;
-  --wallet-text-muted: #94a3b8;
+  --wallet-bg-main: rgba(255, 255, 255, 0.8);
+  --wallet-bg-soft: rgba(255, 255, 255, 0.72);
+  --wallet-bg-deep: #f8fbff;
+  --wallet-text-main: #1e293b;
+  --wallet-text-soft: #475569;
+  --wallet-text-muted: #64748b;
   --wallet-accent: #60a5fa;
   --wallet-accent-strong: #2563eb;
-  --wallet-accent-cyan: rgba(0, 240, 255, 0.3);
-  --wallet-border: rgba(148, 163, 184, 0.22);
+  --wallet-accent-cyan: rgba(14, 165, 233, 0.26);
+  --wallet-border: rgba(148, 163, 184, 0.32);
 }
 
 .wallet-container {
@@ -25,8 +25,8 @@
   color: var(--wallet-text-main);
   border: 1px solid var(--wallet-accent-cyan);
   box-shadow:
-    0 16px 34px rgba(0, 0, 0, 0.34),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    0 16px 34px rgba(15, 23, 42, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.52);
   font-family: var(--font-sans);
   backdrop-filter: blur(18px) saturate(140%);
   -webkit-backdrop-filter: blur(18px) saturate(140%);
@@ -62,7 +62,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(15, 23, 42, 0.45);
+  background: rgba(255, 255, 255, 0.86);
   border: 1px solid var(--wallet-border);
   padding: 0.5rem;
   border-radius: 50%;
@@ -93,7 +93,7 @@
   border: 1px solid var(--wallet-border);
   border-radius: 0.9rem;
   padding: 0.9rem;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
 }
 
 /* Account Section */
@@ -135,7 +135,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: rgba(11, 18, 34, 0.74);
+  background-color: rgba(255, 255, 255, 0.9);
   padding: 0.75rem 1rem;
   border-radius: 0.75rem;
   border: 1px solid var(--wallet-border);
@@ -160,7 +160,7 @@
 }
 
 .wallet-copy-btn:hover {
-  color: #ffffff;
+  color: var(--wallet-text-main);
   background: rgba(59, 130, 246, 0.2);
   border-color: rgba(96, 165, 250, 0.5);
 }
@@ -197,7 +197,7 @@
 
 /* Owner Section */
 .wallet-owner-section {
-  background: rgba(15, 23, 42, 0.45);
+  background: rgba(255, 255, 255, 0.82);
   padding: 1rem;
   border-radius: 0.75rem;
   border: 1px solid rgba(148, 163, 184, 0.18);
@@ -222,7 +222,7 @@
 
 .wallet-owner-btn {
   background: linear-gradient(135deg, rgba(14, 116, 144, 0.92), rgba(37, 99, 235, 0.92));
-  color: #f8fafc;
+  color: #ffffff;
   border: 1px solid rgba(34, 211, 238, 0.45);
   padding: 0 1rem;
   border-radius: 0.5rem;
@@ -271,7 +271,7 @@
   width: 100%;
   padding: 0.875rem 1rem;
   border-radius: 0.75rem;
-  background-color: rgba(11, 18, 34, 0.78);
+  background-color: rgba(255, 255, 255, 0.92);
   border: 1px solid var(--wallet-border);
   color: var(--wallet-text-main);
   font-size: 1rem;
@@ -333,7 +333,7 @@
 
 .wallet-send-btn {
   background: linear-gradient(135deg, #0ea5e9, #2563eb);
-  color: #f8fafc;
+  color: #ffffff;
   margin-top: 0.5rem;
 }
 
@@ -374,7 +374,7 @@
   align-items: center;
   padding: 0.75rem;
   border-radius: 0.5rem;
-  background-color: rgba(15, 23, 42, 0.56);
+  background-color: rgba(255, 255, 255, 0.86);
   border: 1px solid rgba(148, 163, 184, 0.18);
 }
 

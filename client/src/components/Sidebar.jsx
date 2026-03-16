@@ -415,13 +415,13 @@ const Sidebar = ({ sidebarOpen, toggleSidebar, onVisibilityChange }) => {
 
   const tabStyle = {
     display: "flex", gap: "10px", margin: "0 15px 15px", padding: "4px",
-    background: "rgba(0, 0, 0, 0.3)", borderRadius: "8px"
+    background: "rgba(255, 255, 255, 0.86)", borderRadius: "8px"
   };
   
   const tabBtnStyle = (isActive) => ({
     flex: 1, padding: "8px 0", border: "none", borderRadius: "6px",
-    background: isActive ? "rgba(0, 255, 136, 0.2)" : "transparent",
-    color: isActive ? "#00ff88" : "#888",
+    background: isActive ? "rgba(37, 99, 235, 0.16)" : "transparent",
+    color: isActive ? "#1d4ed8" : "#64748b",
     cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
     fontWeight: isActive ? "bold" : "normal", transition: "all 0.2s"
   });
@@ -448,7 +448,7 @@ const Sidebar = ({ sidebarOpen, toggleSidebar, onVisibilityChange }) => {
                 <button
                   className="lock-toggle"
                   onClick={() => setIsLocked(!isLocked)}
-                  style={{ background: "transparent", border: "none", color: isLocked ? "#00ff88" : "#888", cursor: "pointer" }}
+                  style={{ background: "transparent", border: "none", color: isLocked ? "#1d4ed8" : "#64748b", cursor: "pointer" }}
                   title={isLocked ? "Unlock sidebar" : "Lock sidebar"}
                 >
                   {isLocked ? <Lock size={16} /> : <Unlock size={16} />}

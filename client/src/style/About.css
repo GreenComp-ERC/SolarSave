@@ -4,7 +4,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(248, 250, 252, 0.74);
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -17,7 +17,7 @@
 }
 
 .about-modal {
-  background: rgba(15, 23, 42, 0.72);
+  background: rgba(255, 255, 255, 0.82);
   border-radius: 12px;
   width: min(1100px, 96vw);
   max-height: calc(100vh - var(--navbar-height) - 32px);
@@ -25,10 +25,10 @@
   display: flex;
   flex-direction: column;
   box-shadow:
-    0 22px 50px rgba(0, 0, 0, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(0, 240, 255, 0.3);
-  color: #e2e8f0;
+    0 22px 50px rgba(15, 23, 42, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(148, 163, 184, 0.34);
+  color: #1e293b;
   font-family: var(--font-sans);
   backdrop-filter: blur(18px) saturate(140%);
   -webkit-backdrop-filter: blur(18px) saturate(140%);
@@ -36,8 +36,8 @@
 }
 
 .about-header {
-  background: rgba(15, 23, 42, 0.5);
-  color: white;
+  background: rgba(255, 255, 255, 0.9);
+  color: #1e293b;
   padding: 20px;
   position: relative;
   text-align: center;
@@ -56,7 +56,7 @@
   margin: 5px 0 0;
   font-size: 16px;
   opacity: 0.8;
-  color: #cbd5f5;
+  color: #64748b;
 }
 
 .close-button {
@@ -66,7 +66,7 @@
   z-index: 2;
   background: none;
   border: none;
-  color: white;
+  color: #1e293b;
   cursor: pointer;
   padding: 5px;
   display: flex;
@@ -77,7 +77,7 @@
 }
 
 .close-button:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(37, 99, 235, 0.12);
 }
 
 .about-content {
@@ -94,7 +94,7 @@
 
 .about-nav {
   width: 200px;
-  background-color: #0b1222;
+  background-color: rgba(241, 245, 249, 0.84);
   padding: 20px 0;
   display: flex;
   flex-direction: column;
@@ -109,17 +109,17 @@
   font-size: 15px;
   cursor: pointer;
   transition: background-color 0.2s, color 0.2s;
-  color: #cbd5f5;
+  color: #475569;
 }
 
 .about-nav button:hover {
   background-color: rgba(59, 130, 246, 0.15);
-  color: #ffffff;
+  color: #1e293b;
 }
 
 .about-nav button.active {
   background-color: rgba(59, 130, 246, 0.25);
-  color: #e2e8f0;
+  color: #1e293b;
   font-weight: 600;
   border-left: 3px solid #60a5fa;
 }
@@ -128,7 +128,7 @@
   flex: 1;
   padding: 20px;
   overflow-y: auto;
-  background: #0f172a;
+  background: rgba(255, 255, 255, 0.86);
   scrollbar-gutter: stable;
 }
 
@@ -148,21 +148,21 @@ section {
 .section-header h2 {
   margin: 0;
   font-size: 22px;
-  color: #e2e8f0;
+  color: #1e293b;
 }
 
 .section-content {
   padding: 15px 0;
-  color: #cbd5f5;
+  color: #334155;
   line-height: 1.6;
 }
 
 .feature-card, .contract-card {
-  background-color: rgba(15, 23, 42, 0.7);
+  background-color: rgba(255, 255, 255, 0.86);
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 15px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
   border: 1px solid rgba(148, 163, 184, 0.15);
 }
 
@@ -203,7 +203,7 @@ section {
 
 .tech-cell:first-child {
   width: 30%;
-  background-color: rgba(15, 23, 42, 0.6);
+  background-color: rgba(241, 245, 249, 0.92);
 }
 
 .tech-cell:last-child {
@@ -211,7 +211,7 @@ section {
 }
 
 .code-block {
-  background-color: #0b1222;
+  background-color: rgba(248, 250, 252, 0.96);
   border-radius: 6px;
   padding: 15px;
   margin: 10px 0;
@@ -223,7 +223,7 @@ section {
   display: block;
   margin-bottom: 5px;
   font-family: var(--font-mono);
-  color: #e2e8f0;
+  color: #1e293b;
 }
 
 .installation-step {
@@ -238,7 +238,7 @@ section {
 }
 
 .contact-info {
-  background-color: rgba(15, 23, 42, 0.7);
+  background-color: rgba(255, 255, 255, 0.88);
   padding: 15px;
   border-radius: 8px;
   margin-top: 20px;
@@ -247,14 +247,14 @@ section {
 
 .contact-info h3 {
   margin-top: 0;
-  color: #e2e8f0;
+  color: #1e293b;
   font-size: 18px;
   margin-bottom: 10px;
 }
 
 .contact-info p {
   margin: 5px 0;
-  color: #cbd5f5;
+  color: #334155;
 }
 
 .contact-info a {
@@ -275,7 +275,7 @@ section {
 }
 
 .about-footer {
-  background: rgba(15, 23, 42, 0.5);
+  background: rgba(255, 255, 255, 0.88);
   padding: 12px 20px;
   text-align: center;
   border-top: 1px solid rgba(148, 163, 184, 0.2);
