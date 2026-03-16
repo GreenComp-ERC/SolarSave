@@ -58,21 +58,30 @@ const PowerChart = ({ data, chartType }) => {
         const options = {
           title: "Solar Panel Output Comparison",
           backgroundColor: "transparent",
-          colors: ["#4CAF50", "#2952E3"],
-          titleTextStyle: { color: "#ffffff", fontSize: 16 },
+          colors: ["#55A79B", "#3DAB8E"],
+          titleTextStyle: { color: "#1e293b", fontSize: 17, bold: true },
+          fontName: "Open Sans",
           hAxis: {
             title: "Solar Panels",
-            textStyle: { color: "#cccccc" },
-            titleTextStyle: { color: "#ffffff" }
+            textStyle: { color: "#334155", fontSize: 12 },
+            titleTextStyle: { color: "#1e293b", italic: false },
+            gridlines: { color: "rgba(148, 163, 184, 0.18)" },
+            baselineColor: "rgba(148, 163, 184, 0.38)"
           },
           vAxis: {
             title: "Power (W)",
-            textStyle: { color: "#cccccc" },
-            titleTextStyle: { color: "#ffffff" }
+            textStyle: { color: "#334155", fontSize: 12 },
+            titleTextStyle: { color: "#1e293b", italic: false },
+            gridlines: { color: "rgba(148, 163, 184, 0.18)" },
+            baselineColor: "rgba(148, 163, 184, 0.38)"
           },
           legend: {
             position: "top",
-            textStyle: { color: "#ffffff" }
+            textStyle: { color: "#1e293b", fontSize: 12 }
+          },
+          tooltip: {
+            textStyle: { color: "#1e293b", fontSize: 12 },
+            showColorCode: true
           },
           chartArea: {
             width: '80%',

@@ -61,7 +61,7 @@ const SolarPanelModel = ({ intensity }) => {
         <RoundedBox args={[2.05, 0.05, 3.05]} position={[0, 0.03, 0]} radius={0.005}>
           <meshPhysicalMaterial 
             color="#082f49" 
-            emissive="#0284c7"
+            emissive="#55A79B"
             emissiveIntensity={intensity * 0.15}
             metalness={0.9} 
             roughness={0.05}

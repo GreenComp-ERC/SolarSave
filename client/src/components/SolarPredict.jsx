@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
 import { FiSun } from "react-icons/fi";
 import "../style/Test.css";
@@ -40,12 +41,12 @@ const SolarPredict = () => {
 
   // Chart color palette
   const chartColors = {
-    primary: "#00a2ff",
+    primary: "#3DAB8E",
     secondary: "#2ed573",
     accent: "#ff6b6b",
-    highlight: "#26d0ce",
-    gradient1: "#00a2ff",
-    gradient2: "#0078ff"
+    highlight: "#6FBBA4",
+    gradient1: "#55A79B",
+    gradient2: "#2F8F79"
   };
 
   // Fetch solar data
@@ -150,7 +151,7 @@ const SolarPredict = () => {
           fontSize: '14px',
           fontWeight: '600'
         }}>
-          <p style={{ margin: '0 0 8px 0', color: '#00a2ff' }}>{`Time: ${label}`}</p>
+          <p style={{ margin: '0 0 8px 0', color: '#3DAB8E' }}>{`Time: ${label}`}</p>
           <p style={{ margin: '0', color: '#2ed573' }}>
             {`Value: ${payload[0].value.toFixed(2)}`}
           </p>
@@ -233,7 +234,7 @@ const SolarPredict = () => {
                 </div>
                 <div className="pred-stat-item">
                   <span className="pred-stat-label">Avg</span>
-                  <span className="pred-stat-value" style={{ color: '#00a2ff' }}>
+                  <span className="pred-stat-value" style={{ color: '#3DAB8E' }}>
                     {stats.avg.toFixed(2)}
                   </span>
                 </div>
@@ -565,8 +566,8 @@ const SolarPredict = () => {
       )}
       </div>
 
-      {/* Enhanced modal */}
-      {modalOpen && (
+      {/* Enhanced modal rendered at document root to avoid footer/section stacking overlap */}
+      {modalOpen && typeof document !== "undefined" && createPortal(
         <div className="pred-chart-modal">
           <div className="pred-modal-overlay" onClick={closeModal}></div>
           <div className="pred-modal-content">
@@ -575,7 +576,8 @@ const SolarPredict = () => {
             </button>
             {renderEnhancedModalChart()}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Dynamic styles */}
@@ -594,7 +596,7 @@ const SolarPredict = () => {
           position: absolute;
           width: var(--size);
           height: var(--size);
-          background: radial-gradient(circle, rgba(0, 162, 255, 0.8) 0%, transparent 70%);
+          background: radial-gradient(circle, rgba(85, 167, 155, 0.8) 0%, transparent 70%);
           border-radius: 50%;
           animation: pred-float var(--duration) linear infinite;
           animation-delay: var(--delay);
@@ -678,7 +680,7 @@ const SolarPredict = () => {
           backdrop-filter: blur(25px);
           -webkit-backdrop-filter: blur(25px);
           border: 1px solid rgba(148, 163, 184, 0.34);
-          box-shadow: 0 20px 60px rgba(15, 23, 42, 0.18), 0 0 20px rgba(14, 165, 233, 0.12);
+          box-shadow: 0 20px 60px rgba(15, 23, 42, 0.18), 0 0 20px rgba(85, 167, 155, 0.12);
           border-radius: 24px;
           padding: 30px;
           width: 90%;
@@ -741,15 +743,15 @@ const SolarPredict = () => {
           left: 0;
           width: 100%;
           height: 100%;
-          background: linear-gradient(135deg, rgba(0, 162, 255, 0.1), transparent);
+          background: linear-gradient(135deg, rgba(85, 167, 155, 0.1), transparent);
           opacity: 0;
           transition: opacity 0.4s ease;
         }
 
         .pred-chart-preview-card:hover {
           transform: translateY(-8px) scale(1.02);
-          border-color: rgba(0, 162, 255, 0.6);
-          box-shadow: 0 15px 30px rgba(15, 23, 42, 0.18), 0 0 16px rgba(0, 162, 255, 0.16);
+          border-color: rgba(85, 167, 155, 0.6);
+          box-shadow: 0 15px 30px rgba(15, 23, 42, 0.18), 0 0 16px rgba(85, 167, 155, 0.16);
         }
 
         .pred-chart-preview-card:hover::before {
@@ -760,10 +762,10 @@ const SolarPredict = () => {
           width: 100%;
           padding: 12px;
           margin-top: 15px;
-          background: rgba(0, 162, 255, 0.1);
-          border: 1px solid rgba(0, 162, 255, 0.3);
+          background: rgba(85, 167, 155, 0.1);
+          border: 1px solid rgba(85, 167, 155, 0.3);
           border-radius: 12px;
-          color: #00a2ff;
+          color: #3DAB8E;
           font-weight: 600;
           cursor: pointer;
           transition: all 0.3s ease;
@@ -776,9 +778,9 @@ const SolarPredict = () => {
         }
 
         .pred-chart-preview-card:hover .pred-view-chart-btn {
-          background: #00a2ff;
+          background: #3DAB8E;
           color: #fff;
-          box-shadow: 0 0 15px rgba(0, 162, 255, 0.4);
+          box-shadow: 0 0 15px rgba(85, 167, 155, 0.4);
         }
 
         .pred-view-mode-btn {
@@ -793,10 +795,10 @@ const SolarPredict = () => {
         }
 
         .pred-view-mode-btn.active {
-          background: rgba(0, 162, 255, 0.2);
-          border-color: #00a2ff;
-          color: #00a2ff;
-          box-shadow: 0 0 15px rgba(0, 162, 255, 0.2);
+          background: rgba(85, 167, 155, 0.2);
+          border-color: #3DAB8E;
+          color: #3DAB8E;
+          box-shadow: 0 0 15px rgba(85, 167, 155, 0.2);
         }
 
         .pred-view-controls {
@@ -822,7 +824,7 @@ const SolarPredict = () => {
           color: #1e293b;
           font-family: 'Orbitron', monospace;
           text-transform: capitalize;
-          background: linear-gradient(90deg, #0f172a, #0ea5e9);
+          background: linear-gradient(90deg, #0f172a, #55A79B);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
         }
@@ -888,7 +890,7 @@ const SolarPredict = () => {
           font-family: 'Orbitron', monospace;
           font-size: 1.8rem;
           margin: 0;
-          background: linear-gradient(135deg, #00a2ff, #2ed573);
+          background: linear-gradient(135deg, #55A79B, #3DAB8E);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           text-transform: capitalize;
@@ -928,7 +930,7 @@ const SolarPredict = () => {
           width: 20px;
           height: 20px;
           border: 3px solid rgba(148, 163, 184, 0.26);
-          border-top: 3px solid #1d4ed8;
+          border-top: 3px solid #2F8F79;
           border-radius: 50%;
           animation: pred-spin 1s linear infinite;
           margin-right: 10px;

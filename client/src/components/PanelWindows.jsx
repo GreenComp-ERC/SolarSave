@@ -106,7 +106,7 @@ const PanelWindows = ({ panel, closeWindow }) => {
   };
 
   const getLineColors = (index) => {
-    const colors = ['#2196F3', '#FF5722', '#4CAF50', '#9C27B0', '#FFEB3B', '#E91E63'];
+    const colors = ['#3DAB8E', '#55A79B', '#6FBBA4', '#88CBAE', '#A8D19D', '#2F8F79'];
     return colors[index % colors.length];
   };
 
@@ -144,7 +144,7 @@ const PanelWindows = ({ panel, closeWindow }) => {
               <Line
                 type="monotone"
                 dataKey="value"
-                stroke="#2196F3"
+                stroke="#3DAB8E"
                 activeDot={{ r: 8 }}
                 dot={{ r: 4 }}
                 strokeWidth={2}

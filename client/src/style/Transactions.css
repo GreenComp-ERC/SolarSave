@@ -5,7 +5,7 @@
   background: transparent;
   width: 100%;
   font-family: var(--font-sans);
-  /* 移除多余的 min-height，让其作为下方组件自然伸展 */
+  /* Remove fixed min-height so this section flows naturally */
   padding-bottom: 2rem;
 }
 
@@ -50,8 +50,8 @@
 
 .trans-title-icon {
   font-size: 2rem;
-  color: #FFD700;
-  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+  color: #FACC15;
+  filter: drop-shadow(0 0 10px rgba(250, 204, 21, 0.45));
   animation: pulse 3s infinite;
 }
 
@@ -89,7 +89,7 @@
 
 @media (min-width: 1024px) {
   .trans-layout {
-    /* 增加工厂列表的宽度比例，降低右侧市场占位 */
+    /* Give factory list a bit more width on large screens */
     grid-template-columns: 1.3fr 1fr;
     gap: 1.5rem;
   }
@@ -108,7 +108,7 @@
   flex-direction: column;
 }
 
-/* Section Cards - 统一玻璃态容器 */
+/* Section Cards - unified glass container */
 .trans-section-card {
   background: var(--glass-bg, rgba(255, 255, 255, 0.78));
   border: 1px solid var(--border-color);
@@ -131,8 +131,8 @@
 .trans-market-timer {
   font-size: 0.85rem;
   color: var(--text-secondary);
-  background: rgba(41, 82, 227, 0.1);
-  border: 1px solid rgba(41, 82, 227, 0.3);
+  background: rgba(61, 171, 142, 0.1);
+  border: 1px solid rgba(61, 171, 142, 0.3);
   padding: 0.3rem 0.75rem;
   border-radius: 999px;
   display: flex;
@@ -184,9 +184,9 @@
 
 .trans-panel-count,
 .trans-items-count {
-  background: rgba(41, 82, 227, 0.1);
+  background: rgba(61, 171, 142, 0.1);
   color: var(--primary-color);
-  border: 1px solid rgba(41, 82, 227, 0.3);
+  border: 1px solid rgba(61, 171, 142, 0.3);
   padding: 0.25rem 0.75rem;
   border-radius: 20px;
   font-size: 0.85rem;
@@ -210,7 +210,7 @@
   border-radius: 4px;
 }
 .trans-panels-list::-webkit-scrollbar-thumb {
-  background: rgba(41, 82, 227, 0.5);
+  background: rgba(61, 171, 142, 0.5);
   border-radius: 4px;
 }
 
@@ -218,7 +218,7 @@
 .trans-panel-card {
   background: rgba(255, 255, 255, 0.8);
   border: 1px solid var(--border-color);
-  border-radius: 8px; /* 修改为8px，与上方卡片统一 */
+  border-radius: 8px; /* Keep card corner radius consistent */
   padding: 1rem;
   margin-bottom: 1rem;
   transition: all var(--transition-speed) ease;
@@ -228,13 +228,13 @@
 
 .trans-panel-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(41, 82, 227, 0.3);
+  border-color: rgba(61, 171, 142, 0.3);
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.16);
 }
 
 .trans-selected {
-  border-color: rgba(255, 215, 0, 0.6);
-  box-shadow: 0 0 12px rgba(255, 215, 0, 0.25);
+  border-color: rgba(111, 187, 164, 0.6);
+  box-shadow: 0 0 12px rgba(111, 187, 164, 0.28);
 }
 
 /* Card Header */
@@ -356,7 +356,7 @@
   color: var(--warning-color);
 }
 
-/* Power Section - 统一 Meter 风格 */
+/* Power Section - unified meter style */
 .trans-power-section {
   display: flex;
   flex-direction: column;
@@ -450,7 +450,7 @@
 
 .trans-action-button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(41, 82, 227, 0.3);
+  box-shadow: 0 4px 12px rgba(61, 171, 142, 0.3);
 }
 
 .trans-action-button:disabled {
@@ -477,9 +477,9 @@
 }
 
 .trans-quick-btn:hover {
-  background: rgba(41, 82, 227, 0.1);
+  background: rgba(61, 171, 142, 0.1);
   color: var(--primary-color);
-  border-color: rgba(41, 82, 227, 0.3);
+  border-color: rgba(61, 171, 142, 0.3);
 }
 
 /* Shop Grid */
@@ -493,8 +493,8 @@
 }
 
 .trans-buy-card {
-  border-color: rgba(41, 82, 227, 0.35);
-  background: linear-gradient(180deg, rgba(41, 82, 227, 0.12) 0%, rgba(255, 255, 255, 0.82) 100%);
+  border-color: rgba(61, 171, 142, 0.35);
+  background: linear-gradient(180deg, rgba(61, 171, 142, 0.12) 0%, rgba(255, 255, 255, 0.82) 100%);
 }
 
 .trans-market-card {
@@ -523,9 +523,9 @@
 }
 
 .trans-pagination-btn:hover:not(:disabled) {
-  background: rgba(41, 82, 227, 0.1);
+  background: rgba(61, 171, 142, 0.1);
   color: var(--primary-color);
-  border-color: rgba(41, 82, 227, 0.3);
+  border-color: rgba(61, 171, 142, 0.3);
 }
 
 .trans-pagination-btn:disabled {
@@ -591,11 +591,11 @@
 }
 
 .trans-approval-button:hover {
-  background-color: #3d9140; /* Match SolarTrade trade-button hover */
+  background-color: #2f8f79;
   transform: translateY(-1px);
 }
 
-/* Responsive Design (匹配 SolarTrade 断点) */
+/* Responsive Design (aligned with SolarTrade breakpoints) */
 @media (max-width: 1024px) {
   .trans-layout {
     grid-template-columns: 1fr;

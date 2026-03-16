@@ -70,7 +70,7 @@
 }
 
 .nav-link:hover {
-  color: #ffcc00;
+  color: #6FBBA4;
   transform: scale(1.05);
   text-decoration: underline;
 }
@@ -136,3 +136,4 @@
 .copyright-text:hover {
   opacity: 0.8;
 }
+

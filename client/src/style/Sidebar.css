@@ -3,13 +3,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
 :root {
-  --solar-yellow: #ca8a04;
-  --solar-orange: #ea580c;
-  --solar-accent: #0284c7;
+  --solar-yellow: #6FBBA4;
+  --solar-orange: #3DAB8E;
+  --sun-yellow: #facc15;
+  --solar-accent: #55A79B;
   --dark-bg: #f8fbff;
   --dark-card: rgba(255, 255, 255, 0.72);
   --dark-border: rgba(148, 163, 184, 0.4);
-  --panel-glow: rgba(14, 165, 233, 0.2);
+  --panel-glow: rgba(85, 167, 155, 0.2);
   --success: #00E676;
   --error: #e11d48;
   --cyberpunk-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
@@ -93,12 +94,12 @@ body {
 }
 
 .logo-container h1 span {
-  color: var(--solar-yellow);
+  color: var(--sun-yellow);
 }
 
 .sun-icon {
-  color: var(--solar-yellow);
-  filter: drop-shadow(0 0 5px rgba(255, 214, 0, 0.5));
+  color: var(--sun-yellow);
+  filter: drop-shadow(0 0 5px rgba(250, 204, 21, 0.5));
 }
 
 .lock-toggle {
@@ -163,9 +164,9 @@ body {
   justify-content: center;
   width: 24px;
   height: 24px;
-  background: rgba(255, 214, 0, 0.1);
+  background: rgba(250, 204, 21, 0.14);
   border-radius: 4px;
-  color: var(--solar-yellow);
+  color: var(--sun-yellow);
 }
 
 .account-header h2 {
@@ -283,7 +284,7 @@ body {
 
 .create-button {
   width: 100%;
-  background: linear-gradient(90deg, #0ea5e9, var(--solar-accent));
+  background: linear-gradient(90deg, #55A79B, var(--solar-accent));
   color: #ffffff;
   border: none;
   padding: 10px;

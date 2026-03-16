@@ -1,16 +1,16 @@
 /* SolarTrade.css */
 :root {
-  --primary-color: #2952E3;
-  --secondary-color: #4CAF50;
-  --tertiary-color: #7c62e2;
+  --primary-color: #3DAB8E;
+  --secondary-color: #88CBAE;
+  --tertiary-color: #55A79B;
   --dark-bg: #f8fbff;
   --card-bg: rgba(255, 255, 255, 0.8);
   --panel-bg: rgba(255, 255, 255, 0.76);
   --text-primary: #1e293b;
   --text-secondary: #64748b;
   --border-color: rgba(148, 163, 184, 0.28);
-  --success-color: #4CAF50;
-  --warning-color: #FF9800;
+  --success-color: #3DAB8E;
+  --warning-color: #6FBBA4;
   --error-color: #F44336;
   --accent-gradient: linear-gradient(135deg, var(--primary-color), var(--tertiary-color));
   --card-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
@@ -51,9 +51,9 @@
 }
 
 .sun-icon {
-  color: #FFD700;
+  color: #FACC15;
   font-size: 2rem;
-  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+  filter: drop-shadow(0 0 10px rgba(250, 204, 21, 0.45));
   animation: pulse 3s infinite;
 }
 
@@ -134,12 +134,12 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(41, 82, 227, 0.3);
+  box-shadow: 0 4px 12px rgba(61, 171, 142, 0.3);
 }
 
 .connect-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(41, 82, 227, 0.4);
+  box-shadow: 0 6px 15px rgba(61, 171, 142, 0.4);
 }
 
 .connect-button:disabled {
@@ -227,12 +227,12 @@
 .panel-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.16);
-  border-color: rgba(41, 82, 227, 0.3);
+  border-color: rgba(61, 171, 142, 0.3);
 }
 
 .panel-card.selected {
   border: 1px solid var(--primary-color);
-  box-shadow: 0 0 0 1px var(--primary-color), 0 4px 15px rgba(41, 82, 227, 0.3);
+  box-shadow: 0 0 0 1px var(--primary-color), 0 4px 15px rgba(61, 171, 142, 0.3);
 }
 
 .panel-card-header {
@@ -386,7 +386,7 @@
 }
 
 .stats-card.ac-power .stats-icon {
-  background-color: rgba(41, 82, 227, 0.1);
+  background-color: rgba(61, 171, 142, 0.1);
   color: var(--primary-color);
 }
 
@@ -455,7 +455,7 @@
 .chart-type-button {
   background-color: rgba(255, 255, 255, 0.84);
   border: 1px solid var(--border-color);
-  color: var(--text-secondary);
+  color: #334155;
   width: 36px;
   height: 36px;
   border-radius: 8px;
@@ -466,15 +466,21 @@
   transition: all 0.2s ease;
 }
 
+.chart-type-button svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.2;
+}
+
 .chart-type-button:hover {
   background-color: rgba(255, 255, 255, 0.96);
   color: var(--text-primary);
 }
 
 .chart-type-button.active {
-  background-color: rgba(41, 82, 227, 0.1);
+  background-color: rgba(61, 171, 142, 0.18);
   color: var(--primary-color);
-  border-color: rgba(41, 82, 227, 0.3);
+  border-color: rgba(61, 171, 142, 0.48);
 }
 
 .chart-container {
@@ -543,7 +549,7 @@
 .loading-spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid rgba(41, 82, 227, 0.2);
+  border: 3px solid rgba(61, 171, 142, 0.2);
   border-radius: 50%;
   border-top-color: var(--primary-color);
   animation: spin 1s ease-in-out infinite;
@@ -602,7 +608,7 @@
 }
 
 .modal-close-button:hover {
-  background-color: rgba(37, 99, 235, 0.12);
+  background-color: rgba(61, 171, 142, 0.12);
   color: var(--text-primary);
 }
 
@@ -744,8 +750,8 @@
 /* Background grid effects */
 .grid-background {
   background-image:
-    linear-gradient(rgba(41, 82, 227, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(41, 82, 227, 0.05) 1px, transparent 1px);
+    linear-gradient(rgba(61, 171, 142, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(61, 171, 142, 0.05) 1px, transparent 1px);
   background-size: 20px 20px;
   background-position: center center;
 }
@@ -866,7 +872,7 @@
 .trade-input:focus {
   border-color: var(--primary-color);
   outline: none;
-  box-shadow: 0 0 0 2px rgba(41, 82, 227, 0.2);
+  box-shadow: 0 0 0 2px rgba(61, 171, 142, 0.2);
 }
 
 .trade-submit-button {
@@ -883,7 +889,7 @@
 
 .trade-submit-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(41, 82, 227, 0.3);
+  box-shadow: 0 4px 12px rgba(61, 171, 142, 0.3);
 }
 
 /* Panel details modal */
@@ -957,12 +963,12 @@
 
 /* Dark theme enhancements */
 ::selection {
-  background: rgba(41, 82, 227, 0.3);
+  background: rgba(61, 171, 142, 0.3);
   color: white;
 }
 
 :focus {
-  outline: 2px solid rgba(41, 82, 227, 0.5);
+  outline: 2px solid rgba(61, 171, 142, 0.5);
   outline-offset: 2px;
 }
 
