@@ -5,6 +5,24 @@ import Draggable from "react-draggable";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import "../style/PanelWindows.css";
 
+const formatLocalDate = (date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
+
+const getDefaultDateRange = () => {
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+
+  return {
+    startDate: formatLocalDate(yesterday),
+    endDate: formatLocalDate(today),
+  };
+};
+
 const PanelWindows = ({ panel, closeWindow }) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -22,7 +40,7 @@ const PanelWindows = ({ panel, closeWindow }) => {
     setData(null);
 
     try {
-      // 修正异常坐标
+      // Normalize out-of-range coordinates
       let fixedLat = panel.lat;
       let fixedLng = panel.lng;
 
@@ -31,20 +49,22 @@ const PanelWindows = ({ panel, closeWindow }) => {
         fixedLng = fixedLng / 10000;
       }
 
-      const response = await axios.post("https://solarpay-8e3p.onrender.com/run_model/", {
+      const { startDate, endDate } = getDefaultDateRange();
+
+      const response = await axios.post("http://127.0.0.1:8000/run_model/", {
         lat: fixedLat,
         lon: fixedLng,
-        start_date: "2022-06-21",
-        end_date: "2022-06-22",
+        start_date: startDate,
+        end_date: endDate,
       });
 
       if (response.data.status === "success") {
         setData(response.data.data);
       } else {
-        setError("API返回错误: " + response.data.message);
+        setError("API error: " + response.data.message);
       }
     } catch (err) {
-      setError("获取数据失败: " + err.message);
+      setError("Failed to fetch data: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -86,7 +106,7 @@ const PanelWindows = ({ panel, closeWindow }) => {
   };
 
   const getLineColors = (index) => {
-    const colors = ['#2196F3', '#FF5722', '#4CAF50', '#9C27B0', '#FFEB3B', '#E91E63'];
+    const colors = ['#3DAB8E', '#55A79B', '#6FBBA4', '#88CBAE', '#A8D19D', '#2F8F79'];
     return colors[index % colors.length];
   };
 
@@ -124,7 +144,7 @@ const PanelWindows = ({ panel, closeWindow }) => {
               <Line
                 type="monotone"
                 dataKey="value"
-                stroke="#2196F3"
+                stroke="#3DAB8E"
                 activeDot={{ r: 8 }}
                 dot={{ r: 4 }}
                 strokeWidth={2}
@@ -136,9 +156,19 @@ const PanelWindows = ({ panel, closeWindow }) => {
     );
   };
 
-  // Calculate efficiency
-  const efficiency = panel.acPower > 0 && panel.dcPower > 0
-    ? ((panel.acPower / panel.dcPower) * 100).toFixed(1)
+  const normalizedDcPower = fixValue(panel.dcPower);
+  const normalizedAcPower = fixValue(panel.acPower);
+
+  console.log("[PanelWindows] Inverter efficiency inputs", {
+    rawDcPower: panel.dcPower,
+    rawAcPower: panel.acPower,
+    dcPower: normalizedDcPower,
+    acPower: normalizedAcPower,
+  });
+
+  // Calculate inverter efficiency from normalized values only.
+  const efficiency = normalizedAcPower > 0 && normalizedDcPower > 0
+    ? ((normalizedAcPower / normalizedDcPower) * 100).toFixed(1)
     : 'N/A';
 
   return (
@@ -154,7 +184,7 @@ const PanelWindows = ({ panel, closeWindow }) => {
 
             <span className="control green" onClick={() => setExpanded(!expanded)}></span>
           </div>
-          <h3>太阳能面板信息</h3>
+          <h3>Solar Panel Info</h3>
         </div>
 
         <div className="panel-tabs">
@@ -166,7 +196,7 @@ const PanelWindows = ({ panel, closeWindow }) => {
             }
             }
           >
-            概览
+            Overview
           </button>
           <button
             className={`tab ${activeTab === 'charts' ? 'active' : ''}`}
@@ -176,7 +206,7 @@ const PanelWindows = ({ panel, closeWindow }) => {
           }
             }
           >
-            图表
+            Charts
           </button>
         </div>
 
@@ -187,31 +217,31 @@ const PanelWindows = ({ panel, closeWindow }) => {
                 <div className="stat-card">
                   <div className="stat-icon location-icon"></div>
                   <div className="stat-info">
-                    <h4>位置</h4>
-                    <p>纬度: {fixValue(panel.lat).toFixed(4)}</p>
-                    <p>经度: {fixValue(panel.lng).toFixed(4)}</p>
+                    <h4>Location</h4>
+                    <p>Latitude: {fixValue(panel.lat).toFixed(4)}</p>
+                    <p>Longitude: {fixValue(panel.lng).toFixed(4)}</p>
                   </div>
                 </div>
 
                 <div className="stat-card">
                   <div className="stat-icon power-icon"></div>
                   <div className="stat-info">
-                    <h4>功率</h4>
+                    <h4>Power</h4>
 
-                    <p>直流: <span className="highlight">{fixValue(panel.dcPower).toFixed(2)} W</span></p>
-                    <p>交流: <span className="highlight">{fixValue(panel.acPower).toFixed(2)} W</span></p>
+                    <p>DC: <span className="highlight">{fixValue(panel.dcPower).toFixed(2)} W</span></p>
+                    <p>AC: <span className="highlight">{fixValue(panel.acPower).toFixed(2)} W</span></p>
 
-                    <p>效率: <span className="highlight">{efficiency}%</span></p>
+                    <p>Inverter Efficiency: <span className="highlight">{efficiency}%</span></p>
                   </div>
                 </div>
 
                 <div className="stat-card">
                   <div className="stat-icon temp-icon"></div>
                   <div className="stat-info">
-                    <h4>温度</h4>
+                    <h4>Temperature</h4>
                     <p><span className="highlight">{fixValue(panel.batteryTemp)}°C</span></p>
                     <p className={panel.batteryTemp > 40 ? 'warning' : ''}>
-                      {panel.batteryTemp > 40 ? '温度偏高' : '正常范围'}
+                      {panel.batteryTemp > 40 ? 'High temperature' : 'Normal range'}
                     </p>
                   </div>
                 </div>
@@ -219,9 +249,9 @@ const PanelWindows = ({ panel, closeWindow }) => {
                 <div className="stat-card">
                   <div className={`stat-icon ${panel.occupied ? 'occupied-icon' : 'vacant-icon'}`}></div>
                   <div className="stat-info">
-                    <h4>状态</h4>
+                    <h4>Status</h4>
                     <p className={panel.occupied ? 'occupied' : 'vacant'}>
-                      {panel.occupied ? '已占用' : '空闲'}
+                      {panel.occupied ? 'Occupied' : 'Available'}
                     </p>
                   </div>
                 </div>
@@ -231,11 +261,11 @@ const PanelWindows = ({ panel, closeWindow }) => {
 
           {activeTab === 'charts' && (
             <div className="charts-content">
-              {loading && <div className="loading-spinner">加载数据中...</div>}
+              {loading && <div className="loading-spinner">Loading data...</div>}
               {error && <div className="error-message">{error}</div>}
 
               {data && Object.keys(data).length === 0 && (
-                <div className="no-data">无可用数据</div>
+                <div className="no-data">No data available</div>
               )}
 
               {data && Object.keys(data).map((key) => (

@@ -1,23 +1,27 @@
-/* Cyberpunk Solar Theme Sidebar CSS - 更新版 */
+/* Cyberpunk Solar Theme Sidebar CSS - Updated */
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
 :root {
-  --solar-yellow: #FFD600;
-  --solar-orange: #FF7A00;
-  --solar-accent: #00F0FF;
-  --dark-bg: #0F1218;
-  --dark-card: #161C26;
-  --dark-border: #1F2937;
-  --panel-glow: rgba(255, 214, 0, 0.15);
+  --solar-yellow: #6FBBA4;
+  --solar-orange: #3DAB8E;
+  --sun-yellow: #facc15;
+  --solar-accent: #55A79B;
+  --dark-bg: #f8fbff;
+  --dark-card: rgba(255, 255, 255, 0.72);
+  --dark-border: rgba(148, 163, 184, 0.4);
+  --panel-glow: rgba(85, 167, 155, 0.2);
   --success: #00E676;
-  --error: #FF1744;
-  --cyberpunk-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
-  --neon-border: 1px solid rgba(0, 240, 255, 0.3);
+  --error: #e11d48;
+  --cyberpunk-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
+  --neon-border: 1px solid rgba(148, 163, 184, 0.36);
+  --sidebar-text: #1e293b;
+  --sidebar-text-soft: #475569;
   --transition-speed: 0.3s;
+  --sidebar-width: 320px;
 }
 
-/* 基础样式保持不变 */
+/* Keep base styles unchanged */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -25,29 +29,34 @@
 }
 
 body {
-  font-family: 'Rajdhani', sans-serif;
-  color: #ffffff;
+  font-family: var(--font-sans);
+  color: var(--sidebar-text);
   background-color: var(--dark-bg);
 }
 
-/* Cyberpunk Sidebar - 保持基本样式不变 */
+/* Cyberpunk Sidebar - Keep basic styles unchanged */
 .cyberpunk-sidebar {
   position: fixed;
   top: 0;
   left: 0;
   height: 100vh;
-  width: 320px;
-  background: var(--dark-bg);
+  width: var(--sidebar-width);
+  background: rgba(255, 255, 255, 0.74);
   border-right: var(--neon-border);
-  box-shadow: var(--cyberpunk-shadow);
+  box-shadow:
+    0 18px 40px rgba(15, 23, 42, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
   transition: transform var(--transition-speed);
   z-index: 100;
   overflow-y: auto;
   overflow-x: hidden;
+  font-family: var(--font-display);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
 }
 
 .cyberpunk-sidebar.closed {
-  transform: translateX(-320px);
+  transform: translateX(calc(-1 * var(--sidebar-width)));
 }
 
 .cyberpunk-sidebar.open {
@@ -66,6 +75,9 @@ body {
   padding: 10px 0;
   border-bottom: 1px solid var(--dark-border);
   margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .logo-container {
@@ -77,27 +89,66 @@ body {
 .logo-container h1 {
   font-size: 24px;
   font-weight: 700;
-  color: white;
+  color: var(--sidebar-text);
   letter-spacing: 1px;
 }
 
 .logo-container h1 span {
-  color: var(--solar-yellow);
+  color: var(--sun-yellow);
 }
 
 .sun-icon {
+  color: var(--sun-yellow);
+  filter: drop-shadow(0 0 5px rgba(250, 204, 21, 0.5));
+}
+
+.lock-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid var(--dark-border);
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--sidebar-text-soft);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.lock-toggle:hover {
+  border-color: var(--solar-accent);
+  color: var(--solar-accent);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+}
+
+.lock-toggle.locked {
   color: var(--solar-yellow);
-  filter: drop-shadow(0 0 5px rgba(255, 214, 0, 0.5));
+  border-color: rgba(255, 214, 0, 0.35);
+  box-shadow: 0 0 10px rgba(255, 214, 0, 0.15);
+}
+
+.sidebar-hover-zone {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 14px;
+  height: 100vh;
+  z-index: 999;
 }
 
 /* Account Card */
 .account-card {
-  background: var(--dark-card);
+  background: rgba(255, 255, 255, 0.72);
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 8px;
-  border: 1px solid var(--dark-border);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  box-shadow:
+    0 12px 30px rgba(15, 23, 42, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
 }
 
 .account-header {
@@ -113,9 +164,9 @@ body {
   justify-content: center;
   width: 24px;
   height: 24px;
-  background: rgba(255, 214, 0, 0.1);
+  background: rgba(250, 204, 21, 0.14);
   border-radius: 4px;
-  color: var(--solar-yellow);
+  color: var(--sun-yellow);
 }
 
 .account-header h2 {
@@ -132,9 +183,9 @@ body {
 .address {
   font-family: 'Share Tech Mono', monospace;
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--sidebar-text-soft);
   padding: 4px 8px;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.78);
   border-radius: 4px;
   border: 1px solid var(--dark-border);
 }
@@ -176,11 +227,15 @@ body {
 
 /* Create Panel Form */
 .create-panel-card {
-  background: var(--dark-card);
+  background: rgba(255, 255, 255, 0.72);
   border-radius: 8px;
   padding: 16px;
-  border: 1px solid var(--dark-border);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  box-shadow:
+    0 12px 30px rgba(15, 23, 42, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
 }
 
 .card-header {
@@ -208,9 +263,9 @@ body {
 
 .input-group input {
   width: 100%;
-  background: rgba(15, 18, 24, 0.8);
+  background: rgba(255, 255, 255, 0.84);
   border: 1px solid var(--dark-border);
-  color: white;
+  color: var(--sidebar-text);
   padding: 10px;
   border-radius: 4px;
   font-family: 'Share Tech Mono', monospace;
@@ -224,13 +279,13 @@ body {
 }
 
 .input-group input::placeholder {
-  color: rgba(255, 255, 255, 0.5);
+  color: #64748b;
 }
 
 .create-button {
   width: 100%;
-  background: linear-gradient(90deg, #00B8D4, var(--solar-accent));
-  color: var(--dark-bg);
+  background: linear-gradient(90deg, #55A79B, var(--solar-accent));
+  color: #ffffff;
   border: none;
   padding: 10px;
   border-radius: 6px;
@@ -267,7 +322,7 @@ body {
   gap: 6px;
   background: var(--dark-card);
   border: 1px solid var(--dark-border);
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--sidebar-text-soft);
   padding: 8px 12px;
   border-radius: 6px;
   font-family: 'Rajdhani', sans-serif;
@@ -277,7 +332,7 @@ body {
 }
 
 .switch-button:hover {
-  background: rgba(31, 41, 55, 0.8);
+  background: rgba(255, 255, 255, 0.9);
 }
 
 .switch-button.active {
@@ -286,7 +341,7 @@ body {
   color: var(--solar-accent);
 }
 
-/* 更新的面板列表样式 */
+/* Updated panel list styles */
 .panels-section {
   flex: 1;
   display: flex;
@@ -314,18 +369,18 @@ body {
 }
 
 .panel-count {
-  background: rgba(15, 18, 24, 0.8);
+  background: rgba(255, 255, 255, 0.82);
   padding: 2px 8px;
   border-radius: 12px;
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--sidebar-text-soft);
 }
 
-/* 新增: 搜索和筛选控件 */
+/* Added: search and filter controls */
 .panel-controls {
   padding: 8px;
   border-bottom: 1px solid var(--dark-border);
-  background: rgba(15, 18, 24, 0.4);
+  background: rgba(241, 245, 249, 0.7);
 }
 
 .search-box {
@@ -340,8 +395,8 @@ body {
   padding: 6px 30px 6px 26px;
   border-radius: 4px;
   border: 1px solid var(--dark-border);
-  background: rgba(15, 18, 24, 0.8);
-  color: white;
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--sidebar-text);
   font-family: 'Rajdhani', sans-serif;
 }
 
@@ -353,7 +408,7 @@ body {
 .search-box svg {
   position: absolute;
   left: 8px;
-  color: rgba(255, 255, 255, 0.5);
+  color: #64748b;
 }
 
 .clear-search {
@@ -361,14 +416,14 @@ body {
   right: 8px;
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.5);
+  color: #64748b;
   cursor: pointer;
   font-size: 16px;
   line-height: 1;
 }
 
 .clear-search:hover {
-  color: white;
+  color: var(--sidebar-text);
 }
 
 .sort-controls {
@@ -384,15 +439,15 @@ body {
   padding: 4px 8px;
   border-radius: 4px;
   border: 1px solid var(--dark-border);
-  background: rgba(15, 18, 24, 0.8);
-  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--sidebar-text-soft);
   font-size: 12px;
   cursor: pointer;
   font-family: 'Rajdhani', sans-serif;
 }
 
 .sort-button:hover {
-  background: rgba(31, 41, 55, 0.8);
+  background: rgba(255, 255, 255, 0.95);
 }
 
 .sort-button.active {
@@ -401,11 +456,60 @@ body {
   background: rgba(0, 240, 255, 0.1);
 }
 
-/* 更新面板列表 */
+/* Updated panel list */
 .panel-list {
   flex: 1;
   overflow-y: auto;
   padding: 8px;
+}
+
+/* Factories Section */
+.factories-section {
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px solid var(--dark-border);
+}
+
+.factories-switch {
+  margin-top: 8px;
+}
+
+.factory-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.factory-item {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 8px;
+  padding: 10px;
+  transition: border-color 0.2s ease;
+}
+
+.factory-item:hover {
+  border-color: rgba(255, 122, 0, 0.5);
+}
+
+.factory-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.factory-id {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.factory-metrics {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
 .empty-state {
@@ -414,13 +518,13 @@ body {
   align-items: center;
   justify-content: center;
   height: 150px;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--sidebar-text-soft);
   gap: 12px;
 }
 
-/* 更新面板项目样式 - 紧凑版 */
+/* Updated panel item styles - compact */
 .panel-item {
-  background: rgba(15, 18, 24, 0.8);
+  background: rgba(255, 255, 255, 0.82);
   border: 1px solid var(--dark-border);
   border-radius: 6px;
   padding: 8px 12px;
@@ -483,7 +587,7 @@ body {
   gap: 5px;
   font-family: 'Share Tech Mono', monospace;
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--sidebar-text-soft);
 }
 
 .panel-details {
@@ -511,15 +615,15 @@ body {
 }
 
 .label {
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--sidebar-text-soft);
   font-size: 12px;
 }
 
 .value {
-  color: white;
+  color: var(--sidebar-text);
 }
 
-/* 新增: 分页控件 */
+/* Added: pagination controls */
 .pagination-controls {
   display: flex;
   align-items: center;
@@ -555,12 +659,12 @@ body {
 
 .page-info {
   font-family: 'Share Tech Mono', monospace;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--sidebar-text-soft);
   padding: 0 8px;
   font-size: 14px;
 }
 
-/* 侧边栏切换按钮 */
+/* Sidebar toggle button */
 .sidebar-toggle-btn {
   position: fixed;
   top: 20px;
@@ -589,7 +693,7 @@ body {
   left: 20px;
 }
 
-/* 通知样式 */
+/* Notification styles */
 .notification {
   position: fixed;
   bottom: 20px;
@@ -613,7 +717,7 @@ body {
   color: var(--error);
 }
 
-/* 动画效果 */
+/* Animation effects */
 @keyframes slideIn {
   0% {
     transform: translateY(20px);
@@ -634,7 +738,7 @@ body {
   }
 }
 
-/* 滚动条样式 */
+/* Scrollbar styles */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -652,7 +756,7 @@ body {
   background: var(--solar-accent);
 }
 
-/* 虚拟列表滚动指示器 */
+/* Virtual list scroll indicator */
 .scroll-indicator {
   position: absolute;
   right: 0;
@@ -664,7 +768,7 @@ body {
   transition: top 0.1s;
 }
 
-/* 媒体查询以适应不同屏幕尺寸 */
+/* Media queries for different screen sizes */
 @media screen and (max-width: 768px) {
   .cyberpunk-sidebar {
     width: 280px;
@@ -694,7 +798,7 @@ body {
   }
 }
 
-/* 当列表为空时显示的动画样式 */
+/* Animation for empty list state */
 @keyframes pulse {
   0% {
     opacity: 0.6;
@@ -711,7 +815,7 @@ body {
   animation: pulse 2s infinite ease-in-out;
 }
 
-/* 高级数据显示样式 */
+/* Advanced data display styles */
 .panel-data-visual {
   width: 100%;
   height: 30px;
@@ -729,7 +833,7 @@ body {
   transition: width 0.5s;
 }
 
-/* 收藏和置顶面板功能样式 */
+/* Favorite and pin panel styles */
 .panel-actions {
   position: absolute;
   top: 8px;
@@ -742,9 +846,9 @@ body {
   width: 24px;
   height: 24px;
   border-radius: 4px;
-  background: rgba(15, 18, 24, 0.6);
+  background: rgba(255, 255, 255, 0.75);
   border: 1px solid var(--dark-border);
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--sidebar-text-soft);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -763,7 +867,7 @@ body {
   background: rgba(255, 214, 0, 0.1);
 }
 
-/* 面板展开时的过渡效果 */
+/* Panel expand transition */
 .panel-details {
   animation: expandDown 0.3s ease-out;
   transform-origin: top center;
@@ -780,7 +884,7 @@ body {
   }
 }
 
-/* 面板项目中添加状态指示器 */
+/* Status indicator in panel items */
 .panel-status-indicator {
   position: absolute;
   top: 8px;
@@ -797,12 +901,22 @@ body {
   box-shadow: 0 0 5px var(--solar-yellow);
 }
 
+.cyberpunk-sidebar,
+.cyberpunk-sidebar h2,
+.cyberpunk-sidebar h3,
+.cyberpunk-sidebar p,
+.cyberpunk-sidebar span,
+.cyberpunk-sidebar button,
+.cyberpunk-sidebar li {
+  color: var(--sidebar-text);
+}
+
 .panel-status-indicator.danger {
   background: var(--error);
   box-shadow: 0 0 5px var(--error);
 }
 
-/* 添加数据标签 */
+/* Add data labels */
 .panel-data-label {
   font-size: 10px;
   text-transform: uppercase;
@@ -812,7 +926,7 @@ body {
   margin-bottom: 2px;
 }
 
-/* 加载状态动画 */
+/* Loading state animation */
 .panel-loading {
   display: flex;
   justify-content: center;
@@ -838,7 +952,7 @@ body {
   }
 }
 
-/* 群组展开控制 */
+/* Group expand controls */
 .panel-group-header {
   padding: 8px;
   background: rgba(31, 41, 55, 0.6);

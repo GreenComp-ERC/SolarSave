@@ -1,8 +1,29 @@
 import React, { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
+import { FiSun } from "react-icons/fi";
 import "../style/Test.css";
 
+const formatLocalDate = (date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
+
+const getDefaultDateRange = () => {
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+
+  return {
+    startDate: formatLocalDate(yesterday),
+    endDate: formatLocalDate(today),
+  };
+};
+
 const SolarPredict = () => {
+  const defaultDateRange = getDefaultDateRange();
   const [lat, setLat] = useState(31.2992);
   const [lng, setLng] = useState(120.7467);
   const [data, setData] = useState(null);
@@ -10,25 +31,25 @@ const SolarPredict = () => {
   const [error, setError] = useState(null);
   const [interval, setInterval] = useState("hour");
   const [timeRange, setTimeRange] = useState(24);
-  const [startDate, setStartDate] = useState("2022-06-21");
-  const [endDate, setEndDate] = useState("2022-06-22");
+  const [startDate, setStartDate] = useState(defaultDateRange.startDate);
+  const [endDate, setEndDate] = useState(defaultDateRange.endDate);
   const [modalOpen, setModalOpen] = useState(false);
   const [activeChart, setActiveChart] = useState(null);
   const [viewMode, setViewMode] = useState("compact");
   const [animationDelay, setAnimationDelay] = useState(0);
   const containerRef = useRef(null);
 
-  // 图表颜色配置
+  // Chart color palette
   const chartColors = {
-    primary: "#00a2ff",
+    primary: "#3DAB8E",
     secondary: "#2ed573",
     accent: "#ff6b6b",
-    highlight: "#26d0ce",
-    gradient1: "#00a2ff",
-    gradient2: "#0078ff"
+    highlight: "#6FBBA4",
+    gradient1: "#55A79B",
+    gradient2: "#2F8F79"
   };
 
-  // 获取太阳能数据
+  // Fetch solar data
   const fetchSolarData = async () => {
     setLoading(true);
     setData(null);
@@ -36,7 +57,7 @@ const SolarPredict = () => {
     setAnimationDelay(0);
 
     try {
-      const response = await fetch("https://solarpay-8e3p.onrender.com/run_model/", {
+      const response = await fetch("http://127.0.0.1:8000/run_model/", {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -53,23 +74,23 @@ const SolarPredict = () => {
       const responseData = await response.json();
 
       if (responseData.status === "success") {
-        // 添加动画延迟效果
+        // Add animation delay
         setTimeout(() => {
           setData(responseData.data);
           setViewMode("compact");
           triggerCardAnimations();
         }, 500);
       } else {
-        setError("API 返回错误: " + responseData.message);
+        setError("API returned an error: " + responseData.message);
       }
     } catch (err) {
-      setError("数据获取失败: " + err.message);
+      setError("Failed to fetch data: " + err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  // 触发卡片动画
+  // Trigger card animation
   const triggerCardAnimations = () => {
     const cards = document.querySelectorAll('.pred-chart-preview-card');
     cards.forEach((card, index) => {
@@ -87,7 +108,7 @@ const SolarPredict = () => {
     fetchSolarData();
   }, []);
 
-  // 为图表转换数据格式
+  // Transform data for charts
   const transformDataForChart = (dataKey) => {
     if (!data || !data[dataKey]) return [];
 
@@ -103,7 +124,7 @@ const SolarPredict = () => {
     }));
   };
 
-  // 获取数据统计信息
+  // Get data statistics
   const getDataStats = (dataKey) => {
     if (!data || !data[dataKey]) return { min: 0, max: 0, avg: 0, trend: 0 };
 
@@ -116,23 +137,23 @@ const SolarPredict = () => {
     return { min, max, avg, trend };
   };
 
-  // 自定义Tooltip组件
+  // Custom Tooltip component
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
         <div className="pred-custom-tooltip" style={{
-          background: 'rgba(15, 14, 19, 0.95)',
-          border: '2px solid rgba(0, 162, 255, 0.5)',
+          background: 'rgba(255, 255, 255, 0.96)',
+          border: '1px solid rgba(148, 163, 184, 0.35)',
           borderRadius: '12px',
           padding: '12px 16px',
           backdropFilter: 'blur(20px)',
-          color: '#ffffff',
+          color: '#1e293b',
           fontSize: '14px',
           fontWeight: '600'
         }}>
-          <p style={{ margin: '0 0 8px 0', color: '#00a2ff' }}>{`时间: ${label}`}</p>
+          <p style={{ margin: '0 0 8px 0', color: '#3DAB8E' }}>{`Time: ${label}`}</p>
           <p style={{ margin: '0', color: '#2ed573' }}>
-            {`数值: ${payload[0].value.toFixed(2)}`}
+            {`Value: ${payload[0].value.toFixed(2)}`}
           </p>
         </div>
       );
@@ -140,13 +161,13 @@ const SolarPredict = () => {
     return null;
   };
 
-  // 打开模态框
+  // Open modal
   const openChartModal = (chartKey) => {
     setActiveChart(chartKey);
     setModalOpen(true);
     document.body.style.overflow = "hidden";
 
-    // 添加模态框打开动画
+    // Add modal open animation
     setTimeout(() => {
       const modal = document.querySelector('.pred-modal-content');
       if (modal) {
@@ -155,7 +176,7 @@ const SolarPredict = () => {
     }, 10);
   };
 
-  // 关闭模态框
+  // Close modal
   const closeModal = () => {
     const modal = document.querySelector('.pred-modal-content');
     if (modal) {
@@ -172,7 +193,7 @@ const SolarPredict = () => {
     }
   };
 
-  // 渲染增强版图表卡片
+  // Render enhanced chart cards
   const renderEnhancedChartCards = () => {
     if (!data) return null;
 
@@ -192,7 +213,7 @@ const SolarPredict = () => {
               }}
               onClick={() => openChartModal(key)}
             >
-              {/* 卡片头部信息 */}
+              {/* Card header */}
               <div className="pred-card-header">
                 <h3 className="pred-chart-subtitle">{key}</h3>
                 <div className="pred-stats-badges">
@@ -203,29 +224,29 @@ const SolarPredict = () => {
                 </div>
               </div>
 
-              {/* 数据统计栏 */}
+              {/* Stats row */}
               <div className="pred-stats-row">
                 <div className="pred-stat-item">
-                  <span className="pred-stat-label">最小值</span>
+                  <span className="pred-stat-label">Min</span>
                   <span className="pred-stat-value" style={{ color: '#26d0ce' }}>
                     {stats.min.toFixed(2)}
                   </span>
                 </div>
                 <div className="pred-stat-item">
-                  <span className="pred-stat-label">平均值</span>
-                  <span className="pred-stat-value" style={{ color: '#00a2ff' }}>
+                  <span className="pred-stat-label">Avg</span>
+                  <span className="pred-stat-value" style={{ color: '#3DAB8E' }}>
                     {stats.avg.toFixed(2)}
                   </span>
                 </div>
                 <div className="pred-stat-item">
-                  <span className="pred-stat-label">最大值</span>
+                  <span className="pred-stat-label">Max</span>
                   <span className="pred-stat-value" style={{ color: '#ff6b6b' }}>
                     {stats.max.toFixed(2)}
                   </span>
                 </div>
               </div>
 
-              {/* 增强版图表预览 */}
+              {/* Enhanced preview */}
               <div className="pred-chart-preview">
                 <ResponsiveContainer width="100%" height={120}>
                   <AreaChart data={chartData}>
@@ -249,9 +270,9 @@ const SolarPredict = () => {
                 </ResponsiveContainer>
               </div>
 
-              {/* 交互按钮 */}
+              {/* Action button */}
               <button className="pred-view-chart-btn">
-                <span>🔍 查看详情</span>
+                <span>🔍 View details</span>
                 <div className="pred-btn-glow"></div>
               </button>
             </div>
@@ -261,7 +282,7 @@ const SolarPredict = () => {
     );
   };
 
-  // 渲染增强版列表视图
+  // Render enhanced list view
   const renderEnhancedChartList = () => {
     if (!data) return null;
 
@@ -272,7 +293,7 @@ const SolarPredict = () => {
 
           return (
             <div key={key} className="pred-chart-box" style={{ animationDelay: `${index * 0.2}s` }}>
-              <h3 className="pred-chart-subtitle">{key} 数据趋势</h3>
+              <h3 className="pred-chart-subtitle">{key} Trend</h3>
               <ResponsiveContainer width="100%" height={400}>
                 <LineChart data={chartData}>
                   <defs>
@@ -284,7 +305,7 @@ const SolarPredict = () => {
                   </defs>
                   <CartesianGrid
                     strokeDasharray="3 3"
-                    stroke="rgba(255,255,255,0.1)"
+                    stroke="rgba(148, 163, 184, 0.28)"
                     horizontal={true}
                     vertical={false}
                   />
@@ -292,13 +313,13 @@ const SolarPredict = () => {
                     dataKey="time"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: '#ffffff', fontSize: 12 }}
+                    tick={{ fill: '#475569', fontSize: 12 }}
                     interval="preserveStartEnd"
                   />
                   <YAxis
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: '#ffffff', fontSize: 12 }}
+                    tick={{ fill: '#475569', fontSize: 12 }}
                     domain={['dataMin - 5', 'dataMax + 5']}
                   />
                   <Tooltip content={<CustomTooltip />} />
@@ -320,7 +341,7 @@ const SolarPredict = () => {
     );
   };
 
-  // 渲染增强版模态框图表
+  // Render enhanced modal chart
   const renderEnhancedModalChart = () => {
     if (!activeChart || !data) return null;
 
@@ -330,14 +351,14 @@ const SolarPredict = () => {
     return (
       <div className="pred-modal-chart-container">
         <div className="pred-modal-header">
-          <h2 className="pred-modal-chart-title">{activeChart} 详细分析</h2>
+          <h2 className="pred-modal-chart-title">{activeChart} Detailed Analysis</h2>
           <div className="pred-modal-stats">
             <div className="pred-modal-stat">
-              <span className="pred-modal-stat-label">数据点</span>
+              <span className="pred-modal-stat-label">Data points</span>
               <span className="pred-modal-stat-value">{chartData.length}</span>
             </div>
             <div className="pred-modal-stat">
-              <span className="pred-modal-stat-label">变化趋势</span>
+              <span className="pred-modal-stat-label">Trend</span>
               <span className="pred-modal-stat-value" style={{ color: stats.trend >= 0 ? '#2ed573' : '#ff6b6b' }}>
                 {stats.trend >= 0 ? '+' : ''}{stats.trend.toFixed(2)}%
               </span>
@@ -353,18 +374,18 @@ const SolarPredict = () => {
         <stop offset="95%" stopColor={chartColors.primary} stopOpacity={0.05}/>
       </linearGradient>
     </defs>
-    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.15)" />
+    <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.3)" />
     <XAxis
       dataKey="time"
       axisLine={false}
       tickLine={false}
-      tick={{ fill: '#ffffff', fontSize: 12 }}
+      tick={{ fill: '#475569', fontSize: 12 }}
       interval="preserveStartEnd"
     />
     <YAxis
       axisLine={false}
       tickLine={false}
-      tick={{ fill: '#ffffff', fontSize: 12 }}
+      tick={{ fill: '#475569', fontSize: 12 }}
       domain={['dataMin - 10', 'dataMax + 10']}
     />
     <Tooltip
@@ -395,7 +416,7 @@ const SolarPredict = () => {
 
   return (
     <div className="pred-test-container" ref={containerRef}>
-      {/* 动态粒子背景效果 */}
+      {/* Dynamic particle background */}
       <div className="pred-particles-container">
         {[...Array(20)].map((_, i) => (
           <div
@@ -412,40 +433,44 @@ const SolarPredict = () => {
         ))}
       </div>
 
-      <h1 className="pred-test-title">
-        ⚡ 太阳能数据可视化 ⚡
-        <div className="pred-title-glow"></div>
-      </h1>
+      <div className="pred-header">
+        <div className="pred-main-title">
+          <FiSun className="pred-title-icon" />
+          <h1>Solar Data Visualization</h1>
+        </div>
+      </div>
+
+      <div className="pred-content">
 
       <div className="pred-input-container">
         <div className="pred-coordinate-inputs">
           <label>
-            🌍 纬度坐标:
+            🌍 Latitude:
             <input
               type="number"
               value={lat}
               onChange={(e) => setLat(e.target.value)}
               className="pred-coordinate-input"
               step="0.0001"
-              placeholder="输入纬度坐标"
+              placeholder="Enter latitude"
             />
           </label>
           <label>
-            🗺️ 经度坐标:
+            🗺️ Longitude:
             <input
               type="number"
               value={lng}
               onChange={(e) => setLng(e.target.value)}
               className="pred-coordinate-input"
               step="0.0001"
-              placeholder="输入经度坐标"
+              placeholder="Enter longitude"
             />
           </label>
         </div>
 
         <div className="pred-time-controls">
           <label>
-            📅 开始日期:
+            📅 Start date:
             <input
               type="date"
               value={startDate}
@@ -454,7 +479,7 @@ const SolarPredict = () => {
             />
           </label>
           <label>
-            📅 结束日期:
+            📅 End date:
             <input
               type="date"
               value={endDate}
@@ -463,20 +488,20 @@ const SolarPredict = () => {
             />
           </label>
           <label>
-            ⏱️ 时间间隔:
+            ⏱️ Interval:
             <select
               value={interval}
               onChange={(e) => setInterval(e.target.value)}
               className="pred-time-interval-select"
             >
-              <option value="second">⚡ 秒级精度</option>
-              <option value="minute">⏰ 分钟级别</option>
-              <option value="hour">🕐 小时维度</option>
-              <option value="day">📊 日级统计</option>
+              <option value="second">⚡ Second-level</option>
+              <option value="minute">⏰ Minute-level</option>
+              <option value="hour">🕐 Hourly</option>
+              <option value="day">📊 Daily</option>
             </select>
           </label>
           <label>
-            📊 时间范围 (小时):
+            📊 Time range (hours):
             <div className="pred-range-container">
               <input
                 type="range"
@@ -486,7 +511,7 @@ const SolarPredict = () => {
                 onChange={(e) => setTimeRange(e.target.value)}
                 className="pred-time-range-slider"
               />
-              <span>🔥 {timeRange} 小时</span>
+              <span>🔥 {timeRange} hours</span>
             </div>
           </label>
         </div>
@@ -495,11 +520,11 @@ const SolarPredict = () => {
           {loading ? (
             <>
               <div className="pred-loading-spinner"></div>
-              🔄 数据获取中...
+              🔄 Fetching data...
             </>
           ) : (
             <>
-              🚀 获取太阳能数据
+              🚀 Fetch solar data
               <div className="pred-btn-particles"></div>
             </>
           )}
@@ -509,7 +534,7 @@ const SolarPredict = () => {
       {loading && (
         <div className="pred-loading-text">
           <div className="pred-spinner"></div>
-          <span>⚡ 正在分析太阳能数据...</span>
+          <span>⚡ Analyzing solar data...</span>
         </div>
       )}
 
@@ -526,22 +551,23 @@ const SolarPredict = () => {
               className={`pred-view-mode-btn ${viewMode === "compact" ? "active" : ""}`}
               onClick={() => setViewMode("compact")}
             >
-              🎯 卡片视图
+              🎯 Card view
             </button>
             <button
               className={`pred-view-mode-btn ${viewMode === "list" ? "active" : ""}`}
               onClick={() => setViewMode("list")}
             >
-              📊 列表视图
+              📊 List view
             </button>
           </div>
 
           {viewMode === "compact" ? renderEnhancedChartCards() : renderEnhancedChartList()}
         </div>
       )}
+      </div>
 
-      {/* 增强版模态框 */}
-      {modalOpen && (
+      {/* Enhanced modal rendered at document root to avoid footer/section stacking overlap */}
+      {modalOpen && typeof document !== "undefined" && createPortal(
         <div className="pred-chart-modal">
           <div className="pred-modal-overlay" onClick={closeModal}></div>
           <div className="pred-modal-content">
@@ -550,10 +576,11 @@ const SolarPredict = () => {
             </button>
             {renderEnhancedModalChart()}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {/* 添加动态样式 */}
+      {/* Dynamic styles */}
       <style jsx>{`
         .pred-particles-container {
           position: fixed;
@@ -569,7 +596,7 @@ const SolarPredict = () => {
           position: absolute;
           width: var(--size);
           height: var(--size);
-          background: radial-gradient(circle, rgba(0, 162, 255, 0.8) 0%, transparent 70%);
+          background: radial-gradient(circle, rgba(85, 167, 155, 0.8) 0%, transparent 70%);
           border-radius: 50%;
           animation: pred-float var(--duration) linear infinite;
           animation-delay: var(--delay);
@@ -592,9 +619,20 @@ const SolarPredict = () => {
           }
         }
 
+        @keyframes pred-modalFadeIn {
+          0% {
+            opacity: 0;
+            backdrop-filter: blur(0px);
+          }
+          100% {
+            opacity: 1;
+            backdrop-filter: blur(15px);
+          }
+        }
+
         @keyframes pred-modalSlideIn {
           0% {
-            transform: scale(0.7) translateY(50px);
+            transform: scale(0.9) translateY(30px);
             opacity: 0;
           }
           100% {
@@ -609,9 +647,165 @@ const SolarPredict = () => {
             opacity: 1;
           }
           100% {
-            transform: scale(0.7) translateY(50px);
+            transform: scale(0.9) translateY(30px);
             opacity: 0;
           }
+        }
+
+        .pred-chart-modal {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 9999;
+          animation: pred-modalFadeIn 0.3s ease-out forwards;
+        }
+
+        .pred-modal-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(248, 250, 252, 0.76);
+        }
+
+        .pred-modal-content {
+          position: relative;
+          background: rgba(255, 255, 255, 0.9);
+          backdrop-filter: blur(25px);
+          -webkit-backdrop-filter: blur(25px);
+          border: 1px solid rgba(148, 163, 184, 0.34);
+          box-shadow: 0 20px 60px rgba(15, 23, 42, 0.18), 0 0 20px rgba(85, 167, 155, 0.12);
+          border-radius: 24px;
+          padding: 30px;
+          width: 90%;
+          max-width: 1000px;
+          max-height: 90vh;
+          overflow-y: auto;
+          overflow-x: hidden;
+          z-index: 10000;
+        }
+
+        .pred-modal-close-btn {
+          position: absolute;
+          top: 20px;
+          right: 20px;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.86);
+          border: 1px solid rgba(148, 163, 184, 0.3);
+          color: #334155;
+          font-size: 1.2rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          z-index: 10;
+        }
+
+        .pred-modal-close-btn:hover {
+          background: rgba(255, 107, 107, 0.2);
+          border-color: #ff6b6b;
+          color: #ff6b6b;
+          transform: rotate(90deg);
+        }
+
+        .pred-chart-cards-container {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 24px;
+          margin-top: 30px;
+        }
+
+        .pred-chart-preview-card {
+          background: rgba(255, 255, 255, 0.86);
+          border: 1px solid rgba(148, 163, 184, 0.26);
+          border-radius: 20px;
+          padding: 24px;
+          cursor: pointer;
+          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          position: relative;
+          overflow: hidden;
+          backdrop-filter: blur(10px);
+        }
+
+        .pred-chart-preview-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(135deg, rgba(85, 167, 155, 0.1), transparent);
+          opacity: 0;
+          transition: opacity 0.4s ease;
+        }
+
+        .pred-chart-preview-card:hover {
+          transform: translateY(-8px) scale(1.02);
+          border-color: rgba(85, 167, 155, 0.6);
+          box-shadow: 0 15px 30px rgba(15, 23, 42, 0.18), 0 0 16px rgba(85, 167, 155, 0.16);
+        }
+
+        .pred-chart-preview-card:hover::before {
+          opacity: 1;
+        }
+
+        .pred-view-chart-btn {
+          width: 100%;
+          padding: 12px;
+          margin-top: 15px;
+          background: rgba(85, 167, 155, 0.1);
+          border: 1px solid rgba(85, 167, 155, 0.3);
+          border-radius: 12px;
+          color: #3DAB8E;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 8px;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .pred-chart-preview-card:hover .pred-view-chart-btn {
+          background: #3DAB8E;
+          color: #fff;
+          box-shadow: 0 0 15px rgba(85, 167, 155, 0.4);
+        }
+
+        .pred-view-mode-btn {
+          padding: 10px 20px;
+          border-radius: 12px;
+          border: 1px solid rgba(148,163,184,0.3);
+          background: rgba(255,255,255,0.9);
+          color: #1e293b;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          font-weight: 600;
+        }
+
+        .pred-view-mode-btn.active {
+          background: rgba(85, 167, 155, 0.2);
+          border-color: #3DAB8E;
+          color: #3DAB8E;
+          box-shadow: 0 0 15px rgba(85, 167, 155, 0.2);
+        }
+
+        .pred-view-controls {
+          display: flex;
+          gap: 15px;
+          justify-content: center;
+          margin-bottom: 20px;
         }
 
         .pred-card-header {
@@ -619,6 +813,20 @@ const SolarPredict = () => {
           justify-content: space-between;
           align-items: center;
           margin-bottom: 15px;
+          position: relative;
+          z-index: 1;
+        }
+
+        .pred-chart-subtitle {
+          margin: 0;
+          font-size: 1.2rem;
+          font-weight: 700;
+          color: #1e293b;
+          font-family: 'Orbitron', monospace;
+          text-transform: capitalize;
+          background: linear-gradient(90deg, #0f172a, #55A79B);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
         }
 
         .pred-stats-badges {
@@ -627,21 +835,25 @@ const SolarPredict = () => {
         }
 
         .pred-stat-badge {
-          background: rgba(255, 255, 255, 0.1);
-          padding: 4px 8px;
+          background: rgba(255, 255, 255, 0.9);
+          padding: 6px 10px;
           border-radius: 12px;
           font-size: 0.8rem;
           font-weight: 600;
           backdrop-filter: blur(10px);
+          border: 1px solid rgba(148, 163, 184, 0.22);
         }
 
         .pred-stats-row {
           display: flex;
           justify-content: space-between;
-          margin-bottom: 15px;
-          background: rgba(0, 0, 0, 0.2);
-          border-radius: 10px;
-          padding: 10px;
+          margin-bottom: 20px;
+          background: rgba(255, 255, 255, 0.88);
+          border-radius: 12px;
+          padding: 12px 15px;
+          border: 1px solid rgba(148, 163, 184, 0.22);
+          position: relative;
+          z-index: 1;
         }
 
         .pred-stat-item {
@@ -652,23 +864,36 @@ const SolarPredict = () => {
         }
 
         .pred-stat-label {
-          font-size: 0.7rem;
-          color: rgba(255, 255, 255, 0.7);
+          font-size: 0.75rem;
+          color: #64748b;
           text-transform: uppercase;
-          letter-spacing: 0.5px;
+          letter-spacing: 1px;
         }
 
         .pred-stat-value {
-          font-size: 0.9rem;
+          font-size: 1.05rem;
           font-weight: 700;
           font-family: 'Orbitron', monospace;
+          text-shadow: 0 0 10px currentColor;
         }
 
         .pred-modal-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 20px;
+          margin-bottom: 30px;
+          padding-bottom: 15px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .pred-modal-chart-title {
+          font-family: 'Orbitron', monospace;
+          font-size: 1.8rem;
+          margin: 0;
+          background: linear-gradient(135deg, #55A79B, #3DAB8E);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          text-transform: capitalize;
         }
 
         .pred-modal-stats {
@@ -679,32 +904,41 @@ const SolarPredict = () => {
         .pred-modal-stat {
           display: flex;
           flex-direction: column;
-          align-items: center;
+          align-items: flex-end;
           gap: 4px;
+          background: rgba(255, 255, 255, 0.9);
+          padding: 8px 16px;
+          border-radius: 12px;
+          border: 1px solid rgba(148, 163, 184, 0.24);
         }
 
         .pred-modal-stat-label {
           font-size: 0.8rem;
-          color: rgba(255, 255, 255, 0.7);
+          color: #64748b;
           text-transform: uppercase;
           letter-spacing: 0.5px;
         }
 
         .pred-modal-stat-value {
-          font-size: 1.1rem;
+          font-size: 1.2rem;
           font-weight: 700;
-          color: #00a2ff;
+          color: #1e293b;
           font-family: 'Orbitron', monospace;
         }
 
         .pred-loading-spinner {
-          width: 16px;
-          height: 16px;
-          border: 2px solid rgba(255, 255, 255, 0.3);
-          border-top: 2px solid #ffffff;
+          width: 20px;
+          height: 20px;
+          border: 3px solid rgba(148, 163, 184, 0.26);
+          border-top: 3px solid #2F8F79;
           border-radius: 50%;
           animation: pred-spin 1s linear infinite;
-          margin-right: 8px;
+          margin-right: 10px;
+        }
+
+        @keyframes pred-spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
       `}</style>
     </div>

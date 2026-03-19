@@ -1,6 +1,31 @@
 @import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap");
 
-* html {
+:root {
+  --font-sans: "Open Sans", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Rajdhani", "Open Sans", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "Share Tech Mono", "Consolas", "Courier New", monospace;
+  --energy-1: #a8d19d;
+  --energy-2: #88cbae;
+  --energy-3: #6fbba4;
+  --energy-4: #55a79b;
+  --energy-5: #3dab8e;
+  --navbar-height: 70px;
+  --sidebar-width: 320px;
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(85, 167, 155, 0.3);
+  --glass-shadow:
+    0 16px 42px rgba(61, 171, 142, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  --glass-blur: blur(20px) saturate(135%);
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --text-inverse: #ffffff;
+  --btn-primary: var(--energy-5);
+  --btn-primary-hover: #2f8f79;
+  --btn-secondary: rgba(255, 255, 255, 0.82);
+}
+
+* {
   padding: 0;
   margin: 0;
   box-sizing: border-box;
@@ -8,40 +33,43 @@
 
 body {
   margin: 0;
-  font-family: "Open Sans", sans-serif;
-  background-color: #f4f4f4;
-  color: #333;
+  font-family: var(--font-sans);
+  background:
+    radial-gradient(circle at 15% 20%, rgba(168, 209, 157, 0.32), transparent 42%),
+    radial-gradient(circle at 85% 10%, rgba(111, 187, 164, 0.22), transparent 36%),
+    radial-gradient(circle at 22% 82%, rgba(85, 167, 155, 0.2), transparent 42%),
+    linear-gradient(145deg, #f7fcf8 0%, #f0faf4 48%, #ecf7f2 100%);
+  color: var(--text-primary);
+  background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
 .gradient-bg-welcome {
-  background-color: #0f0e13;
-  background-image:
-    radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
-    radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%),
-    radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 1) 0, transparent 50%);
+  background-color: transparent;
+  background-image: none;
 }
 
 .gradient-bg-services {
-  background-color: #0f0e13;
-  background-image:
-    radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
-    radial-gradient(at 50% 100%, hsla(225, 39%, 25%, 1) 0, transparent 50%);
+  background-color: transparent;
+  background-image: none;
 }
 
 .gradient-bg-transactions {
-  background-color: #0f0e13;
-  background-image:
-    radial-gradient(at 0% 100%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
-    radial-gradient(at 50% 0%, hsla(225, 39%, 25%, 1) 0, transparent 50%);
+  background-color: transparent;
+  background-image: none;
 }
 
 .gradient-bg-footer {
-  background-color: #0f0e13;
-  background-image:
-    radial-gradient(at 0% 100%, hsla(253, 16%, 7%, 1) 0, transparent 53%),
-    radial-gradient(at 50% 150%, hsla(339, 49%, 30%, 1) 0, transparent 50%);
+  background-color: transparent;
+  background-image: none;
 }
 
 .blue-glassmorphism {
@@ -62,6 +90,29 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
+.glass-surface {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+button {
+  color: var(--text-inverse);
+}
+
+input,
+select,
+textarea {
+  color: var(--text-primary);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #64748b;
+}
+
 .eth-card {
   background-color:#a099ff;
   background-image:
@@ -77,6 +128,7 @@ body {
 .text-gradient {
   background-color: #fff;
   background-image: radial-gradient(at 4% 36%, hsla(0,0%,100%,1) 0, transparent 53%), radial-gradient(at 100% 60%, rgb(0, 0, 0) 0, transparent 50%);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -84,8 +136,6 @@ body {
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap");
 
 /* Existing styles remain unchanged */
 
@@ -97,10 +147,10 @@ body {
 
 .sidebar {
   width: 25%;
-  background-color: #0f0e13;
+  background-color: rgba(255, 255, 255, 0.86);
   padding: 20px;
   transition: width 0.3s ease;
-  color: white;
+  color: var(--text-primary);
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -113,15 +163,15 @@ body {
 }
 
 .sidebar-toggle {
-  background-color: #333;
-  color: white;
+  background-color: rgba(255, 255, 255, 0.9);
+  color: var(--text-primary);
   padding: 5px;
   cursor: pointer;
   margin-bottom: 10px;
 }
 
 .sidebar-toggle.collapsed {
-  background-color: #222; /* Even darker when collapsed */
+  background-color: rgba(241, 245, 249, 0.94);
   padding: 5px;
 }
 
@@ -132,7 +182,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: #0f0e13;
+  background-color: rgba(255, 255, 255, 0.88);
 }
 
 .map {

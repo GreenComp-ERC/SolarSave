@@ -1,15 +1,19 @@
 .panel-window {
-  background: linear-gradient(145deg, #1e2130, #141824);
-  color: #ffffff;
+  background: rgba(255, 255, 255, 0.82);
+  color: #1e293b;
   border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  box-shadow:
+    0 22px 50px rgba(15, 23, 42, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
   width: 380px;
   min-height: 300px;
   position: absolute;
   z-index: 1000;
   overflow: hidden;
   transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
 }
 
 .panel-window.expanded {
@@ -18,11 +22,11 @@
 }
 
 .panel-header {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(248, 250, 252, 0.92);
   padding: 12px 15px;
   display: flex;
   align-items: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.24);
   user-select: none;
   cursor: move;
 }
@@ -62,15 +66,15 @@
 
 .panel-tabs {
   display: flex;
-  background-color: rgba(0, 0, 0, 0.15);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background-color: rgba(241, 245, 249, 0.9);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.24);
 }
 
 .tab {
   padding: 10px 15px;
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.6);
+  color: #64748b;
   cursor: pointer;
   flex: 1;
   transition: all 0.2s ease;
@@ -78,14 +82,14 @@
 }
 
 .tab:hover {
-  color: rgba(255, 255, 255, 0.9);
-  background-color: rgba(255, 255, 255, 0.05);
+  color: #1e293b;
+  background-color: rgba(61, 171, 142, 0.08);
 }
 
 .tab.active {
-  color: #fff;
-  background-color: rgba(33, 150, 243, 0.2);
-  box-shadow: inset 0 -2px 0 #2196F3;
+  color: #1e293b;
+  background-color: rgba(61, 171, 142, 0.2);
+  box-shadow: inset 0 -2px 0 #3DAB8E;
 }
 
 .panel-content {
@@ -110,7 +114,7 @@
 }
 
 .stat-card {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.9);
   border-radius: 8px;
   padding: 12px;
   display: flex;
@@ -119,7 +123,7 @@
 }
 
 .stat-card:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.96);
   transform: translateY(-2px);
 }
 
@@ -165,7 +169,7 @@
 .stat-info h4 {
   font-size: 12px;
   margin: 0 0 5px 0;
-  color: rgba(255, 255, 255, 0.7);
+  color: #64748b;
 }
 
 .stat-info p {
@@ -175,7 +179,7 @@
 
 .highlight {
   font-weight: 600;
-  color: #fff;
+  color: #1e293b;
 }
 
 .warning {
@@ -193,7 +197,7 @@
 }
 
 .chart-container {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.9);
   border-radius: 8px;
   padding: 15px;
   margin-bottom: 20px;
@@ -202,7 +206,7 @@
 .chart-container h4 {
   margin: 0 0 15px 0;
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.9);
+  color: #334155;
   text-align: center;
 }
 
@@ -211,7 +215,7 @@
   justify-content: center;
   align-items: center;
   height: 200px;
-  color: rgba(255, 255, 255, 0.7);
+  color: #64748b;
   position: relative;
 }
 
@@ -219,9 +223,9 @@
   content: "";
   width: 30px;
   height: 30px;
-  border: 3px solid rgba(255, 255, 255, 0.3);
+  border: 3px solid rgba(148, 163, 184, 0.26);
   border-radius: 50%;
-  border-top-color: #2196F3;
+  border-top-color: #3DAB8E;
   animation: spin 1s ease-in-out infinite;
   position: absolute;
 }
@@ -236,7 +240,7 @@
   padding: 12px 15px;
   margin: 15px 0;
   border-radius: 4px;
-  color: #ffcdd2;
+  color: #b91c1c;
 }
 
 .no-data {
@@ -244,7 +248,7 @@
   justify-content: center;
   align-items: center;
   height: 200px;
-  color: rgba(255, 255, 255, 0.5);
+  color: #64748b;
   font-style: italic;
 }
 
@@ -254,16 +258,16 @@
 }
 
 .panel-content::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(148, 163, 184, 0.14);
 }
 
 .panel-content::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(148, 163, 184, 0.36);
   border-radius: 3px;
 }
 
 .panel-content::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(148, 163, 184, 0.5);
 }
 
 /* Responsive adjustments */

@@ -25,7 +25,7 @@ module.exports = {
   },
   plugins: [
     new ESLintPlugin({
-      extensions: ['.js', '.jsx', '.ts', '.tsx'] // 不加 .jsx 就不会检查 jsx 文件了
+      extensions: ['.js', '.jsx', '.ts', '.tsx'] // Without .jsx, JSX files will not be linted
     }),
     mode === 'production' && new MiniCssExtractPlugin({
       filename: '[name].[contenthash].css'
@@ -49,12 +49,12 @@ module.exports = {
       cacheGroups: {
         vendor: {
           priority: 10,
-          minSize: 0, /* 如果不写 0，由于 React 文件尺寸太小，会直接跳过 */
-          test: /[\\/]node_modules[\\/]/, // 为了匹配 /node_modules/ 或 \node_modules\
-          name: 'vendors', // 文件名
-          chunks: 'all',  // all 表示同步加载和异步加载，async 表示异步加载，initial 表示同步加载
-          // 这三行的整体意思就是把两种加载方式的来自 node_modules 目录的文件打包为 vendors.xxx.js
-          // 其中 vendors 是第三方的意思
+          minSize: 0, /* If not set to 0, React files may be too small and get skipped */
+          test: /[\\/]node_modules[\\/]/, // Match /node_modules/ or \node_modules\
+          name: 'vendors', // Output chunk name
+          chunks: 'all',  // all = sync + async, async = async only, initial = sync only
+          // Bundle node_modules from sync and async loads into vendors.xxx.js
+          // Here, vendors means third-party
         },
         common: {
           priority: 5,

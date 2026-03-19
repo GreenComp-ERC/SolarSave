@@ -1,684 +1,514 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
+import { FiSun, FiRefreshCw, FiAlertCircle } from "react-icons/fi";
 import { ethers } from "ethers";
 import { TransactionContext } from "../context/TransactionContext";
-import dummyData from "../utils/dummyData";
-import { shortenAddress } from "../utils/shortenAddress";
+import EnergyExchange from "../utils/test/EnergyExchange.json";
 import SolarToken from "../utils/test/SolarToken.json";
-import Shop from "../utils/test/Shop.json";
-import SolarPanels from "../utils/test/SolarPanels.json";
-import "../style/Transactions.css"; // 引入CSS文件
-const tokenAddress = "0x175da7583f3b085ac4Ab87AEd758c6Cd11A8b81e";
-const shopContractAddress = "0xb997c4257Bc9Ca4e68529A3d649D851562ca8b4c";
-const solarPanelsContractAddress = "0x39Cb00Cf33827D78892b1c83aF166CB7c4FCB3C0";
+import contractAddresses from "../utils/contractAddress.json";
+import SolarPredict from "./SolarPredict";
+import "../style/Transactions.css";
 
-// 太阳能面板卡片组件
-const PanelCard = ({ id, latitude, longitude, batteryTemp, dcPower, acPower, createdAt, owner, price, name, isMine, onList, onBuy, onCancel }) => {
+const exchangeAddress = contractAddresses.energyExchange;
+const tokenAddress = contractAddresses.token;
+const factoryAddress = contractAddresses.factory;
 
-  // 计算电量百分比（假设最大1000W）
-  const dcPowerPercentage = Math.min(100, (dcPower / 1000) * 100);
-  const acPowerPercentage = Math.min(100, (acPower / 1000) * 100);
-  const isActive = dcPower > 0 && acPower > 0;
+const FACTORY_ABI = [
+  "function getAllFactories() view returns (tuple(uint256 id,address owner,uint256 latitude,uint256 longitude,uint256 powerConsumption,uint256 createdAt,bool exists)[])",
+  "function getFactoriesOf(address user) view returns (tuple(uint256 id,address owner,uint256 latitude,uint256 longitude,uint256 powerConsumption,uint256 createdAt,bool exists)[])"
+];
 
-
-
-  return (
-      <div className="trans-panel-card">
-        <div className="trans-card-header">
-          <div className="trans-panel-name-section">
-            <h3 className="trans-panel-title">{name}</h3>
-            <div className="trans-panel-id">#{id}</div>
-          </div>
-
-          <div className="trans-status-indicator">
-            <div className={`trans-status-dot ${isActive ? 'trans-status-active' : 'trans-status-inactive'}`}></div>
-            <span className="trans-status-text">{isActive ? '在线' : '离线'}</span>
-          </div>
-        </div>
-
-        <div className="trans-performance-section">
-          <div className="trans-performance-header">
-            <span className="trans-performance-title">实时性能</span>
-            <div className="trans-price-badge">{isNaN(price) ? price : `${price} SOLR`}</div>
-          </div>
-
-          <div className="trans-metrics-grid">
-            <div className="trans-metric-item">
-              <div className="trans-metric-label">位置坐标</div>
-              <div className="trans-metric-value">{latitude}°, {longitude}°</div>
-            </div>
-
-            <div className="trans-metric-item">
-              <div className="trans-metric-label">电池温度</div>
-              <div className="trans-metric-value trans-temp-value">{batteryTemp}°C</div>
-            </div>
-          </div>
-
-          <div className="trans-power-section">
-            <div className="trans-power-item">
-              <div className="trans-power-header">
-                <span className="trans-power-label">直流功率</span>
-                <span className="trans-power-value">{dcPower} W</span>
-              </div>
-              <div className="trans-power-bar">
-                <div className="trans-power-fill trans-dc-fill" style={{width: `${dcPowerPercentage}%`}}></div>
-              </div>
-            </div>
-
-            <div className="trans-power-item">
-              <div className="trans-power-header">
-                <span className="trans-power-label">交流功率</span>
-                <span className="trans-power-value">{acPower} W</span>
-              </div>
-              <div className="trans-power-bar">
-                <div className="trans-power-fill trans-ac-fill" style={{width: `${acPowerPercentage}%`}}></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="trans-card-footer">
-          <div className="trans-footer-info">
-            <div className="trans-info-item">
-              <span className="trans-info-label">创建时间</span>
-              <span className="trans-info-value">{createdAt}</span>
-            </div>
-            <div className="trans-info-item">
-              <span className="trans-info-label">所有者</span>
-              <span className="trans-info-value trans-owner-address">{shortenAddress(owner)}</span>
-            </div>
-          </div>
-
-          {/* 操作按钮区 */}
-          {isMine ? (
-  <>
-    {price === "未上架" && (
-      <button
-        onClick={() => onList(id)}
-        className="trans-action-button trans-list-button"
-      >
-        <span className="trans-button-icon">⚡</span>
-        上架出售
-      </button>
-    )}
-
-    {price === "已上架" && (
-      <button
-        onClick={() => onCancel(id)}
-        className="trans-action-button trans-cancel-button"
-      >
-        <span className="trans-button-icon">❌</span>
-        下架
-      </button>
-    )}
-  </>
-) : (
-  <button
-    onClick={() => onBuy(id, price)}
-    className="trans-action-button trans-list-button"
-  >
-    <span className="trans-button-icon">💰</span>
-    购买
-  </button>
-)}
-
-        </div>
-
-      </div>
-  );
+const normalizeEnergy = (value) => {
+  if (!value) return 0;
+  return Math.abs(value) > 1000 ? value / 10000 : value;
 };
 
-// 加载占位组件
-const LoadingCard = () => (
-    <div className="trans-panel-card trans-loading-card">
-      <div className="trans-loading-content">
-      <div className="trans-loading-header">
-          <div className="trans-loading-bar trans-loading-title"></div>
-          <div className="trans-loading-bar trans-loading-status"></div>
+const formatNumber = (num) => {
+  return num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+};
+
+const EnergyCard = ({ factory, balance }) => {
+  const normalizedBalance = normalizeEnergy(balance);
+  const normalizedConsumption = normalizeEnergy(factory.powerConsumption);
+  const needsEnergy = normalizedBalance < normalizedConsumption;
+
+  return (
+    <>
+      <div className="trans-card-header">
+        <div className="trans-panel-name-section">
+          <h3 className="trans-panel-title">Factory #{factory.id}</h3>
+          <div className="trans-panel-id">Owner: {factory.owner.slice(0, 6)}...{factory.owner.slice(-4)}</div>
         </div>
-        <div className="trans-loading-body">
-          <div className="trans-loading-bar trans-loading-metric"></div>
-          <div className="trans-loading-bar trans-loading-metric"></div>
-          <div className="trans-loading-bar trans-loading-power"></div>
-          <div className="trans-loading-bar trans-loading-power"></div>
+        {needsEnergy && (
+          <span
+            style={{
+              alignSelf: "flex-start",
+              padding: "2px 6px",
+              borderRadius: "6px",
+              background: "rgba(255, 107, 107, 0.2)",
+              color: "#ff6b6b",
+              fontSize: "12px",
+              fontWeight: "bold"
+            }}
+            title="Energy Balance below Consumption"
+          >
+            NEED ENERGY
+          </span>
+        )}
+      </div>
+    <div className="trans-performance-section">
+      <div className="trans-metrics-grid">
+        <div className="trans-metric-item">
+          <div className="trans-metric-label">Location</div>
+          <div className="trans-metric-value">{factory.latitude.toFixed(4)}°, {factory.longitude.toFixed(4)}°</div>
         </div>
-        <div className="trans-loading-footer">
-          <div className="trans-loading-bar trans-loading-button"></div>
+        <div className="trans-metric-item">
+          <div className="trans-metric-label">Consumption</div>
+          <div className="trans-metric-value">{formatNumber(normalizedConsumption)} W</div>
+        </div>
+      </div>
+      <div className="trans-power-section">
+        <div className="trans-power-item">
+          <div className="trans-power-header">
+            <span className="trans-power-label">Energy Balance</span>
+            <span className="trans-power-value">{formatNumber(normalizedBalance)} W</span>
+          </div>
+          <div className="trans-power-bar">
+            <div className="trans-power-fill trans-ac-fill" style={{ width: `${Math.min(100, (normalizedBalance / normalizedConsumption) * 100 || 0)}%` }}></div>
+          </div>
         </div>
       </div>
     </div>
+  </>
 );
 
+};
+
 const Transactions = () => {
-  const { transactions, currentAccount } = useContext(TransactionContext);
-  const [shopItems, setShopItems] = useState([]);
-  const [myPanels, setMyPanels] = useState([]);
-  const [myPanelsPage, setMyPanelsPage] = useState(1);
-  const panelsPerPage = 2;
-  const [currentPage, setCurrentPage] = useState(1);
+  const { currentAccount } = useContext(TransactionContext);
+  const [exchangeContract, setExchangeContract] = useState(null);
+  const [tokenContract, setTokenContract] = useState(null);
+  const [factoryContract, setFactoryContract] = useState(null);
+  const [supplyEnergy, setSupplyEnergy] = useState(0);
+  const [demandEnergy, setDemandEnergy] = useState(0);
+  const [deficitEnergy, setDeficitEnergy] = useState(0);
+  const [factories, setFactories] = useState([]);
+  const [balances, setBalances] = useState({});
+  const [selectedFactory, setSelectedFactory] = useState(null);
+  const [purchaseAmount, setPurchaseAmount] = useState("100");
+  const [estimatedCost, setEstimatedCost] = useState("0");
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [selectedPanel, setSelectedPanel] = useState(null);
-  const [listingPrice, setListingPrice] = useState("1");
-  const [purchaseHistory, setPurchaseHistory] = useState([]);
-  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [isPurchasing, setIsPurchasing] = useState(false);
+  const [marketStepSeconds, setMarketStepSeconds] = useState(null);
+  const [lastMarketStepAt, setLastMarketStepAt] = useState(null);
+  const [marketCountdownRemaining, setMarketCountdownRemaining] = useState(null);
+  const [message, setMessage] = useState({ type: "", text: "" });
+  const refreshInFlight = useRef(false);
+  const lastForcedRefreshAtRef = useRef(0);
 
-
-useEffect(() => {
-  const fetchHistory = async () => {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const shop = new ethers.Contract(shopContractAddress, Shop.abi, provider);
-    const history = await shop.getPurchaseHistory(currentAccount);
-    setPurchaseHistory(history);
+  const showMessage = (type, text) => {
+    setMessage({ type, text });
+    setTimeout(() => setMessage({ type: "", text: "" }), 5000);
   };
 
-  if (currentAccount) fetchHistory();
-}, [currentAccount]);
+  const formatCountdown = (seconds) => {
+    const clamped = Math.max(0, seconds);
+    const mins = Math.floor(clamped / 60);
+    const secs = clamped % 60;
+    return `${mins}m ${secs}s`;
+  };
 
-   const normalizeValue = (val) => (Math.abs(val) > 1000 ? Math.round(val / 10000) : val);
-  const itemsPerPage = 6;
+  const handleManualRefresh = () => {
+    refreshExchange();
+    showMessage("success", "Market data refreshed.");
+  };
+
+  const handleQuickFill = (type) => {
+    if (!selectedFactory) return;
+    const consumption = normalizeEnergy(selectedFactory.powerConsumption);
+    const balance = normalizeEnergy(balances[selectedFactory.id] || 0);
+    const deficit = Math.max(0, consumption - balance);
+
+    if (type === "deficit") {
+      setPurchaseAmount(Math.ceil(deficit).toString());
+    } else if (type === "100W") {
+      setPurchaseAmount("100");
+    } else if (type === "500W") {
+      setPurchaseAmount("500");
+    }
+  };
+
+  const refreshExchange = async (exchangeCtr = exchangeContract, factoryCtr = factoryContract) => {
+    if (!exchangeCtr || !factoryCtr) return;
+    if (refreshInFlight.current) return;
+    refreshInFlight.current = true;
+
+    try {
+      const [supply, demand, stepSeconds, lastStepAt] = await Promise.all([
+        exchangeCtr.globalSupplyEnergy(),
+        exchangeCtr.totalDemandEnergy(),
+        exchangeCtr.simulatorStepSeconds(),
+        exchangeCtr.lastMarketStepAt()
+      ]);
+
+      const supplyRaw = supply.toNumber();
+      const demandRaw = demand.toNumber();
+      setSupplyEnergy(supplyRaw);
+      setDemandEnergy(demandRaw);
+      setDeficitEnergy(Math.max(0, demandRaw - supplyRaw));
+      setMarketStepSeconds(stepSeconds.toNumber());
+      setLastMarketStepAt(lastStepAt.toNumber());
+
+      const factoryList = await factoryCtr.getAllFactories();
+      const formatted = factoryList.map((factory) => ({
+        id: factory.id.toNumber(),
+        owner: factory.owner,
+        latitude: normalizeEnergy(factory.latitude.toNumber()),
+        longitude: normalizeEnergy(factory.longitude.toNumber()),
+        powerConsumption: factory.powerConsumption.toNumber()
+      }));
+      setFactories(formatted);
+
+      const balanceMap = {};
+      for (const factory of formatted) {
+        const bal = await exchangeCtr.factoryEnergyBalance(factory.id);
+        balanceMap[factory.id] = bal.toNumber();
+      }
+      setBalances(balanceMap);
+    } catch (error) {
+      console.error("Failed to refresh exchange:", error);
+    } finally {
+      refreshInFlight.current = false;
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
+    const connect = async () => {
       if (!window.ethereum || !currentAccount) return;
-
-
-
-      try {
-
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-
-    // ✅ 正确创建 panel 合约并检查授权状态
-    const panelContract = new ethers.Contract(solarPanelsContractAddress, SolarPanels.abi, signer);
-    const shopAddressOnChain = await panelContract.shopContract();
-    const isValidShop =
-    shopAddressOnChain &&
-    shopAddressOnChain !== ethers.constants.AddressZero &&
-    ethers.utils.getAddress(shopAddressOnChain) === ethers.utils.getAddress(shopContractAddress);
-
-  setIsAuthorized(isValidShop);
-    if (
-      shopAddressOnChain &&
-      ethers.utils.getAddress(shopAddressOnChain) === ethers.utils.getAddress(shopContractAddress)
-    ) {
-      setIsAuthorized(true);
-    } else {
-      setIsAuthorized(false);
-    }
-    const shopContract = new ethers.Contract(shopContractAddress, Shop.abi, provider);
-    const solarPanelsContract = new ethers.Contract(solarPanelsContractAddress, SolarPanels.abi, signer);
-
-    // ✅ 获取商店商品数据
-
-
-        // 获取商店商品数据
-        const itemCount = await shopContract.itemCount();
-        let items = [];
-        for (let i = 1; i <= itemCount; i++) {
-  const item = await shopContract.getItem(i);
-  const pendingBuyers = await shopContract.getPendingBuyers(item.id); // 👈 添加这一行
-
-  if (!item.purchased) {
-    items.push({
-      id: item.id.toNumber(),
-      name: item.name,
-      price: ethers.utils.formatEther(item.price),
-      owner: item.seller,
-      latitude: normalizeValue(item.latitude.toNumber()),
-      longitude: normalizeValue(item.longitude.toNumber()),
-      batteryTemp: normalizeValue(item.batteryTemperature.toNumber()),
-      dcPower: normalizeValue(item.dcPower.toNumber()),
-      acPower: normalizeValue(item.acPower.toNumber()),
-      createdAt: new Date(item.createdAt.toNumber() * 1000).toLocaleDateString(),
-      pendingBuyers: pendingBuyers, // 👈 添加到对象里
-    });
-  }
-}
-
-        setShopItems(items);
-
-        // 获取当前用户的太阳能板
-        const myPanelsData = await solarPanelsContract.getMyPanels();
-                // 在获取完 shopItems 之后判断每个面板是否已经上架
-        const shopPanelIds = new Set(items.map(item => item.id));
-
-        const panels = myPanelsData.map((panel) => {
-          const panelId = panel.id.toNumber();
-          const isListed = shopPanelIds.has(panelId);
-
-          return {
-            id: panelId,
-            latitude: normalizeValue(panel.latitude?.toNumber() || 0),
-            longitude: normalizeValue(panel.longitude?.toNumber() || 0),
-            batteryTemp: normalizeValue(panel.batteryTemperature?.toNumber() || 0),
-            dcPower: normalizeValue(panel.dcPower?.toNumber() || 0),
-            acPower: normalizeValue(panel.acPower?.toNumber() || 0),
-            createdAt: panel.createdAt ? new Date(panel.createdAt.toNumber() * 1000).toLocaleDateString() : "未知",
-            owner: currentAccount,
-            name: `太阳能面板 #${panelId}`,
-            price: isListed ? "已上架" : "未上架",   // 👈 状态判断
-            isMine: true,
-            rawLatitude: panel.latitude.toNumber(),
-            rawLongitude: panel.longitude.toNumber(),
-            rawBatteryTemp: panel.batteryTemperature.toNumber(),
-            rawDcPower: panel.dcPower.toNumber(),
-            rawAcPower: panel.acPower.toNumber(),
-            rawCreatedAt: panel.createdAt.toNumber()
-          };
-        });
-
-
-
-        setMyPanels(panels);
-        setLoading(false);
-      } catch (error) {
-        console.error("获取数据失败:", error);
-        setLoading(false);
-      }
-    };
-
-    if (currentAccount) {
-      fetchData();
-    } else {
-      // 如果没有账号，短暂延迟后显示
-      setTimeout(() => setLoading(false), 500);
-    }
-  }, [currentAccount]);
-  const handleBuy = async (itemId, price, seller) => {
-  if (seller.toLowerCase() === currentAccount.toLowerCase()) {
-    alert("❌ 无法购买自己上架的太阳能面板");
-    return;
-  }
-
-  try {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-    const shopContract = new ethers.Contract(shopContractAddress, Shop.abi, signer);
-    const tokenContract = new ethers.Contract(tokenAddress, SolarToken.abi, signer);
-
-    const priceInWei = ethers.utils.parseEther(price.toString());
-    const allowance = await tokenContract.allowance(currentAccount, shopContractAddress);
-
-    if (allowance.lt(priceInWei)) {
-      const approveTx = await tokenContract.approve(shopContractAddress, priceInWei);
-      await approveTx.wait();
-    }
-
-    const tx = await shopContract.offerToBuy(itemId);
-    await tx.wait();
-
-    alert("✅ 出价成功，等待卖家批准");
-    window.location.reload();
-  } catch (err) {
-    console.error("购买失败", err);
-    alert("❌ 购买失败");
-  }
-};
-
-const cancelListing = async (itemId) => {
-  try {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-    const shopContract = new ethers.Contract(shopContractAddress, Shop.abi, signer);
-
-    const tx = await shopContract.cancelListing(itemId);
-    await tx.wait();
-
-    alert(`✅ 面板 ${itemId} 已下架`);
-    window.location.reload();
-  } catch (error) {
-    console.error("下架失败:", error);
-    alert("❌ 下架失败");
-  }
-};
-
-  const authorizeShopContract = async () => {
-    try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const panelContract = new ethers.Contract(solarPanelsContractAddress, SolarPanels.abi, signer);
-      const tx = await panelContract.setShopContract(shopContractAddress);
-      await tx.wait();
-      alert("✅ 已授权 Shop 合约");
-    } catch (e) {
-      console.error("授权失败", e);
-      alert("授权失败");
-    }
-  };
-  const approveSale = async (itemId, buyer) => {
-  try {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-    const shop = new ethers.Contract(shopContractAddress, Shop.abi, signer);
-
-    const tx = await shop.approveSale(itemId, buyer);
-    await tx.wait();
-
-    alert("✅ 成功批准交易！");
-    window.location.reload();
-  } catch (e) {
-    console.error("批准失败:", e);
-    alert("❌ 批准失败");
-  }
-};
-
-
-  const listItemOnShop = async () => {
-    if (!selectedPanel) return;
-    try {
       setLoading(true);
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
-      const shopContract = new ethers.Contract(shopContractAddress, Shop.abi, signer);
 
-      // 将价格转换为Wei单位
-      const priceInWei = ethers.utils.parseEther(listingPrice);
-      const tx = await shopContract.listItem(
-  selectedPanel.name,
-  priceInWei,
-  selectedPanel.rawLatitude,
-  selectedPanel.rawLongitude,
-  selectedPanel.rawBatteryTemp,
-  selectedPanel.rawDcPower,
-  selectedPanel.rawAcPower,
-  selectedPanel.rawCreatedAt,
-  selectedPanel.id  // 注意：你可能需要添加这个字段（时间戳，单位秒）
-);
+      const exchangeCtr = new ethers.Contract(exchangeAddress, EnergyExchange.abi, signer);
+      const tokenCtr = new ethers.Contract(tokenAddress, SolarToken.abi, signer);
+      const factoryCtr = new ethers.Contract(factoryAddress, FACTORY_ABI, signer);
 
+      setExchangeContract(exchangeCtr);
+      setTokenContract(tokenCtr);
+      setFactoryContract(factoryCtr);
 
-
-      // 显示等待状态
-      setShowModal(false);
-      setSelectedPanel(null);
-
-      // 等待交易完成
-      await tx.wait();
-
-      // 更新界面
-      setMyPanels((prevPanels) =>
-        prevPanels.filter(panel => panel.id !== selectedPanel.id)
-      );
-
-      // 成功通知
-      alert(`面板 ${selectedPanel.id} 已成功上架，价格为 ${listingPrice} SOLR`);
-      window.location.reload();
-    } catch (error) {
-      console.error("上架失败:", error);
-      alert("上架失败，请重试");
-    } finally {
+      await refreshExchange(exchangeCtr, factoryCtr);
       setLoading(false);
-      setShowModal(false);
+    };
+
+    connect();
+  }, [currentAccount]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (!lastMarketStepAt || !marketStepSeconds) {
+        setMarketCountdownRemaining(null);
+        return;
+      }
+
+      const now = Math.floor(Date.now() / 1000);
+      const nextUpdate = lastMarketStepAt + marketStepSeconds;
+      const diff = Math.max(0, nextUpdate - now);
+      setMarketCountdownRemaining(diff);
+
+      // Keep refreshing after cycle boundary until chain timestamp advances.
+      if (now >= nextUpdate) {
+        const nowMs = Date.now();
+        if (nowMs - lastForcedRefreshAtRef.current >= 1200) {
+          lastForcedRefreshAtRef.current = nowMs;
+          refreshExchange();
+        }
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [lastMarketStepAt, marketStepSeconds, exchangeContract, factoryContract]);
+
+  useEffect(() => {
+    const handleChainUpdate = () => {
+      refreshExchange();
+    };
+    window.addEventListener("chainStateUpdated", handleChainUpdate);
+    return () => window.removeEventListener("chainStateUpdated", handleChainUpdate);
+  }, [exchangeContract, factoryContract]);
+
+  useEffect(() => {
+    if (!exchangeContract) return;
+
+    const handleMarketStepUpdated = () => {
+      refreshExchange();
+    };
+
+    try {
+      exchangeContract.on("MarketStepUpdated", handleMarketStepUpdated);
+    } catch (error) {
+      // Some providers may not support event subscriptions; timer-based refresh remains active.
+      console.warn("MarketStepUpdated subscription unavailable:", error);
+    }
+
+    return () => {
+      try {
+        exchangeContract.off("MarketStepUpdated", handleMarketStepUpdated);
+      } catch {
+        // no-op
+      }
+    };
+  }, [exchangeContract, factoryContract]);
+
+  useEffect(() => {
+    const updateEstimate = async () => {
+      if (!exchangeContract || !purchaseAmount) return;
+      const energyAmount = Math.max(0, Math.floor(Number(purchaseAmount) * 10000));
+      if (energyAmount === 0) {
+        setEstimatedCost("0");
+        return;
+      }
+      try {
+        const cost = await exchangeContract.previewCost(energyAmount);
+        setEstimatedCost(ethers.utils.formatEther(cost));
+      } catch (error) {
+        setEstimatedCost("0");
+      }
+    };
+    updateEstimate();
+  }, [purchaseAmount, exchangeContract]);
+
+  const handleBuyEnergy = async () => {
+    if (!selectedFactory) {
+      showMessage("error", "Select a factory first");
+      return;
+    }
+    if (!exchangeContract || !tokenContract) {
+      showMessage("error", "Contract not connected");
+      return;
+    }
+    const energyAmount = Math.max(0, Math.floor(Number(purchaseAmount) * 10000));
+    if (energyAmount <= 0) {
+      showMessage("error", "Enter a valid energy amount");
+      return;
+    }
+
+    setIsPurchasing(true);
+    try {
+      const costWei = await exchangeContract.previewCost(energyAmount);
+      const allowance = await tokenContract.allowance(currentAccount, exchangeAddress);
+      if (allowance.lt(costWei)) {
+        const approveTx = await tokenContract.approve(exchangeAddress, costWei);
+        await approveTx.wait();
+      }
+
+      const tx = await exchangeContract.buyEnergyForFactory(selectedFactory.id, energyAmount);
+      await tx.wait();
+      setSupplyEnergy((prev) => Math.max(0, (prev || 0) - energyAmount));
+      setBalances((prev) => ({
+        ...prev,
+        [selectedFactory.id]: (prev[selectedFactory.id] || 0) + energyAmount
+      }));
+      await refreshExchange();
+      window.dispatchEvent(new Event("chainStateUpdated"));
+      showMessage("success", "Energy purchased and burned successfully!");
+    } catch (error) {
+      console.error("Purchase failed", error);
+      showMessage("error", "Purchase failed: " + (error.reason || error.message || "Unknown error"));
+    } finally {
+      setIsPurchasing(false);
     }
   };
 
-  const allTransactions = [...shopItems];
-    // ✅ 只显示链上未售出的商品
-  const currentTransactions = shopItems.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-  const totalPages = Math.ceil(shopItems.length / itemsPerPage);
-
-  const myPanelsTotalPages = Math.ceil(myPanels.length / panelsPerPage);
-  const displayedPanels = myPanels.slice(
-    (myPanelsPage - 1) * panelsPerPage,
-    myPanelsPage * panelsPerPage
-  );
-
   return (
     <div className="trans-marketplace">
+      {message.text && (
+        <div style={{
+          position: "fixed",
+          top: "80px",
+          right: "20px",
+          padding: "1rem 1.5rem",
+          borderRadius: "8px",
+          backgroundColor: message.type === "error" ? "rgba(244, 67, 54, 0.9)" : "rgba(76, 175, 80, 0.9)",
+          color: "white",
+          zIndex: 1000,
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+          backdropFilter: "blur(8px)",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.5rem",
+          fontWeight: "500"
+        }}>
+          {message.type === "error" ? <FiAlertCircle /> : <FiSun />}
+          {message.text}
+        </div>
+      )}
       <div className="trans-container">
         <div className="trans-header">
-          <h1 className="trans-main-title">
-            <span className="trans-title-icon">⚡</span>
-            太阳能交易中心
-            <span className="trans-title-accent">SOLAR EXCHANGE</span>
-          </h1>
+          <div className="trans-main-title">
+            <FiSun className="trans-title-icon" />
+            <h1>Solar Energy Exchange</h1>
+          </div>
         </div>
-        {!isAuthorized && (
-  <button className="trans-action-button" onClick={authorizeShopContract}>
-    🔐 授权 Shop 合约控制面板转移
-  </button>
-)}
 
         <div className="trans-layout">
-          {/* 我的太阳能板区域 */}
-
           <div className="trans-sidebar">
             <div className="trans-section-card">
               <div className="trans-section-header">
                 <h2 className="trans-section-title">
-                  <span className="trans-section-icon">🏠</span>
-                  我的能源设备
+                  <span className="trans-section-icon">🏭</span>
+                  Factories
                 </h2>
-                <div className="trans-panel-count">{myPanels.length} 台设备</div>
+                <div className="trans-panel-count">{factories.length} factories</div>
               </div>
-
               <div className="trans-panels-list">
                 {loading ? (
-                    <>
-                      <LoadingCard/>
-                      <LoadingCard/>
-                    </>
-                ) : myPanels.length > 0 ? (
-                    <>
-                      {displayedPanels.map((panel) => (
-                          <PanelCard
-  key={panel.id}
-  {...panel}
-  onList={() => {
-    setSelectedPanel(panel);
-    setShowModal(true);
-  }}
-  onCancel={cancelListing}
-/>
-
-                      ))}
-
-                      {/* 分页控件 */}
-                      {myPanelsTotalPages > 1 && (
-                          <div className="trans-pagination">
-                            <button
-                                className="trans-pagination-btn trans-prev-btn"
-                                disabled={myPanelsPage === 1}
-                                onClick={() => setMyPanelsPage(myPanelsPage - 1)}
-                            >
-                              ← 上一页
-                            </button>
-                            <div className="trans-pagination-info">
-                              <span className="trans-current-page">{myPanelsPage}</span>
-                              <span className="trans-page-separator">/</span>
-                              <span className="trans-total-pages">{myPanelsTotalPages}</span>
-                            </div>
-                            <button
-                                className="trans-pagination-btn trans-next-btn"
-                                disabled={myPanelsPage === myPanelsTotalPages}
-                                onClick={() => setMyPanelsPage(myPanelsPage + 1)}
-                            >
-                              下一页 →
-                            </button>
-                          </div>
-                      )}
-                    </>
-                ) : (
-                    <div className="trans-empty-state">
-                      <div className="trans-empty-icon">🔋</div>
-                      <p className="trans-empty-text">您还没有太阳能板</p>
-                      <p className="trans-empty-subtext">快去获取您的第一台设备吧！</p>
+                  <div className="trans-empty-state">
+                    <div className="trans-empty-icon">⏳</div>
+                    <p className="trans-empty-text">Loading factories...</p>
+                  </div>
+                ) : factories.length > 0 ? (
+                  factories.map((factory) => (
+                    <div
+                      key={factory.id}
+                      className={`trans-panel-card ${selectedFactory?.id === factory.id ? "trans-selected" : ""}`}
+                      onClick={() => setSelectedFactory(factory)}
+                    >
+                      <EnergyCard factory={factory} balance={balances[factory.id] || 0} />
                     </div>
+                  ))
+                ) : (
+                  <div className="trans-empty-state">
+                    <div className="trans-empty-icon">🔋</div>
+                    <p className="trans-empty-text">No factories found</p>
+                  </div>
                 )}
               </div>
             </div>
           </div>
 
-          {/* 太阳能面板商店区域 */}
           <div className="trans-main-content">
             <div className="trans-section-card">
               <div className="trans-section-header">
                 <h2 className="trans-section-title">
-                  <span className="trans-section-icon">🛒</span>
-                  能源设备商店
+                  <span className="trans-section-icon">⚡</span>
+                  Energy Market
                 </h2>
-                <div className="trans-items-count">{allTransactions.length} 件商品</div>
+                <div className="trans-market-timer">
+                  <span className="trans-market-timer-text">
+                    Next update: {marketCountdownRemaining === null
+                      ? "Loading..."
+                      : formatCountdown(marketCountdownRemaining)}
+                  </span>
+                  <button 
+                    className="trans-refresh-btn" 
+                    onClick={handleManualRefresh}
+                    disabled={refreshInFlight.current}
+                    title="Refresh Market Data"
+                  >
+                    <FiRefreshCw />
+                  </button>
+                </div>
               </div>
-
-              {loading ? (
-                  <div className="trans-shop-grid">
-                    <LoadingCard/>
-                    <LoadingCard/>
-                    <LoadingCard/>
-                    <LoadingCard/>
+              <div className="trans-shop-grid">
+                <div className="trans-panel-card trans-buy-card">
+                  <div className="trans-card-header">
+                    <h3 className="trans-panel-title">Buy Energy</h3>
                   </div>
-              ) : (
-                  <>
-                    <div className="trans-shop-grid">
-                      {currentTransactions.map((transaction, i) => (
-                          <div key={i} className="trans-shop-item">
-                            <PanelCard {...transaction} onBuy={(id, price) => handleBuy(id, price, transaction.owner)} />
-
-
-
-                            {/* 👇 若当前账户是卖家且有 pendingBuyers，则显示审批列表 */}
-                            {transaction.pendingBuyers?.length > 0 && (
-                            <div className="trans-approval-card">
-                              <h4 className="trans-approval-title">📝 待审批买家</h4>
-                              <div className="trans-approval-list">
-                                {transaction.pendingBuyers.map((buyer, idx) => (
-                                  <div key={idx} className="trans-approval-entry">
-                                    <span className="trans-approval-address">{shortenAddress(buyer)}</span>
-                                    <button className="trans-approval-button" onClick={() => approveSale(transaction.id, buyer)}>
-                                      同意交易
-                                    </button>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-
-                          </div>
-                      ))}
+                  <div className="trans-performance-section">
+                    <div className="trans-metric-item">
+                      <div className="trans-metric-label">Selected Factory</div>
+                      <div className="trans-metric-value">
+                        {selectedFactory ? `Factory #${selectedFactory.id}` : "Select a factory"}
+                      </div>
                     </div>
-
-                    {/* 商店分页 */}
-                    {totalPages > 1 && (
-                        <div className="trans-pagination trans-shop-pagination">
-                          <button
-                              className="trans-pagination-btn trans-prev-btn"
-                              disabled={currentPage === 1}
-                              onClick={() => setCurrentPage(currentPage - 1)}
-                          >
-                            ← 上一页
-                          </button>
-                          <div className="trans-pagination-info">
-                            <span className="trans-current-page">{currentPage}</span>
-                            <span className="trans-page-separator">/</span>
-                            <span className="trans-total-pages">{totalPages}</span>
-                          </div>
-                          <button
-                              className="trans-pagination-btn trans-next-btn"
-                              disabled={currentPage === totalPages}
-                              onClick={() => setCurrentPage(currentPage + 1)}
-                          >
-                            下一页 →
-                          </button>
-                        </div>
+                    <div className="trans-metric-item" style={{ marginTop: "1rem" }}>
+                      <div className="trans-metric-label">Energy Amount (W)</div>
+                      <input
+                        className="trans-price-input"
+                        type="number"
+                        min="1"
+                        step="1"
+                        value={purchaseAmount}
+                        onChange={(e) => setPurchaseAmount(e.target.value)}
+                        disabled={isPurchasing}
+                        style={{ width: "100%", padding: "0.5rem", borderRadius: "6px", border: "1px solid var(--border-color)", background: "rgba(255,255,255,0.9)", color: "var(--text-primary)" }}
+                      />
+                      <div className="trans-quick-btn-group">
+                        <button className="trans-quick-btn" onClick={() => handleQuickFill("deficit")} disabled={!selectedFactory || isPurchasing}>Fill Deficit</button>
+                        <button className="trans-quick-btn" onClick={() => handleQuickFill("100W")} disabled={isPurchasing}>100 W</button>
+                        <button className="trans-quick-btn" onClick={() => handleQuickFill("500W")} disabled={isPurchasing}>500 W</button>
+                      </div>
+                    </div>
+                    <div className="trans-metric-item" style={{ marginTop: "1rem" }}>
+                      <div className="trans-metric-label">Estimated Cost</div>
+                      <div className="trans-metric-value" style={{ color: "var(--primary-color)" }}>{formatNumber(Number(estimatedCost))} SOLR</div>
+                    </div>
+                  </div>
+                  <button
+                    className="trans-action-button"
+                    onClick={handleBuyEnergy}
+                    disabled={isPurchasing || !selectedFactory}
+                  >
+                    {isPurchasing ? (
+                      <>
+                        <FiRefreshCw className="trans-title-icon" style={{ animation: "spin 1s linear infinite", fontSize: "1rem" }} />
+                        Processing...
+                      </>
+                    ) : (
+                      "Purchase & Burn"
                     )}
-                  </>
-              )}
+                  </button>
+                </div>
+
+                <div className="trans-panel-card trans-market-card">
+                  <div className="trans-card-header">
+                    <h3 className="trans-panel-title">Market Overview</h3>
+                  </div>
+                  <div className="trans-performance-section">
+                    <div className="trans-metrics-grid" style={{ marginBottom: 0 }}>
+                      <div className="trans-metric-item">
+                        <div className="trans-metric-label">Available Supply</div>
+                        <div className="trans-metric-value" style={{ color: "var(--success-color)", fontSize: "1.2rem" }}>
+                          {formatNumber(normalizeEnergy(supplyEnergy))} W
+                        </div>
+                      </div>
+                      <div className="trans-metric-item">
+                        <div className="trans-metric-label">Total Demand</div>
+                        <div className="trans-metric-value">{formatNumber(normalizeEnergy(demandEnergy))} W</div>
+                      </div>
+                      <div className="trans-metric-item" style={{ marginTop: "1rem" }}>
+                        <div className="trans-metric-label">Current Deficit</div>
+                        <div className="trans-metric-value" style={{ color: deficitEnergy > 0 ? "var(--error-color)" : "inherit" }}>
+                          {formatNumber(normalizeEnergy(deficitEnergy))} W
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {/* Visual Indicator of Supply relative to Demand */}
+                  <div className="trans-power-section" style={{ marginTop: "1rem", padding: "0 1rem" }}>
+                    <div className="trans-power-header">
+                      <span className="trans-power-label">Supply vs Total Demand</span>
+                      <span className="trans-power-value">{demandEnergy > 0 ? Math.min(100, (supplyEnergy / demandEnergy) * 100).toFixed(1) : 100}%</span>
+                    </div>
+                    <div className="trans-power-bar" style={{ backgroundColor: "rgba(244, 67, 54, 0.2)" }}>
+                      <div className="trans-power-fill trans-ac-fill" style={{ 
+                        width: `${demandEnergy > 0 ? Math.min(100, (supplyEnergy / demandEnergy) * 100) : 100}%`,
+                        backgroundColor: supplyEnergy >= demandEnergy ? "var(--success-color)" : "var(--warning-color)"
+                      }}></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 上架确认弹窗 */}
-      {showModal && selectedPanel && (
-          <div className="trans-modal-overlay">
-            <div className="trans-modal">
-              <div className="trans-modal-header">
-                <h3 className="trans-modal-title">
-                  <span className="trans-modal-icon">📈</span>
-                  设备上架出售
-                </h3>
-                <button
-                    className="trans-modal-close"
-                    onClick={() => setShowModal(false)}
-                >
-                  ×
-                </button>
-              </div>
-
-              <div className="trans-modal-body">
-                <div className="trans-modal-panel-info">
-                  <div className="trans-modal-panel-header">
-                    <h4 className="trans-modal-panel-name">{selectedPanel.name}</h4>
-                    <div className="trans-modal-panel-id">ID: #{selectedPanel.id}</div>
-                  </div>
-
-                <div className="trans-modal-specs">
-                  <div className="trans-spec-row">
-                    <div className="trans-spec-item">
-                      <span className="trans-spec-label">位置</span>
-                      <span className="trans-spec-value">{selectedPanel.latitude}°, {selectedPanel.longitude}°</span>
-                    </div>
-                    <div className="trans-spec-item">
-                      <span className="trans-spec-label">温度</span>
-                      <span className="trans-spec-value">{selectedPanel.batteryTemp}°C</span>
-                    </div>
-                  </div>
-                  <div className="trans-spec-row">
-                    <div className="trans-spec-item">
-                      <span className="trans-spec-label">直流功率</span>
-                      <span className="trans-spec-value">{selectedPanel.dcPower} W</span>
-                    </div>
-                    <div className="trans-spec-item">
-                      <span className="trans-spec-label">交流功率</span>
-                      <span className="trans-spec-value">{selectedPanel.acPower} W</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="trans-price-section">
-                <label className="trans-price-label">设置售价</label>
-                <div className="trans-price-input-group">
-                  <input
-                    type="number"
-                    min="0.1"
-                    step="0.1"
-                    value={listingPrice}
-                    onChange={(e) => setListingPrice(e.target.value)}
-                    placeholder="输入价格"
-                    className="trans-price-input"
-                  />
-                  <span className="trans-price-currency">SOLR</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="trans-modal-actions">
-              <button
-                className="trans-modal-btn trans-confirm-btn"
-                onClick={listItemOnShop}
-              >
-                <span className="trans-btn-icon">✅</span>
-                确认上架
-              </button>
-              <button
-                className="trans-modal-btn trans-cancel-btn"
-                onClick={() => setShowModal(false)}
-              >
-                <span className="trans-btn-icon">❌</span>
-                取消
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
+      <div className="bg-transparent py-6 px-4 relative z-10 min-h-[800px]">
+        <SolarPredict />
+      </div>
     </div>
   );
-
 };
 
 export default Transactions;

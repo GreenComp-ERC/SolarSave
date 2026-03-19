@@ -1,0 +1,193 @@
+/* FactoryConfirm modal styling */
+.factory-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(248, 250, 252, 0.74);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10020;
+}
+
+.factory-modal-content {
+  width: 520px;
+  background: var(--popup-bg);
+  border: 1px solid var(--popup-border);
+  border-radius: 14px;
+  padding: 22px;
+  color: var(--text-primary);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: var(--glass-blur);
+}
+
+.factory-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.factory-modal-title {
+  font-size: 1.4rem;
+  margin: 0;
+}
+
+.factory-close-button {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.factory-wallet-card {
+  background: rgba(255, 255, 255, 0.84);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 16px;
+  position: relative;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.factory-wallet-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.factory-wallet-icon {
+  background: rgba(241, 245, 249, 0.9);
+  padding: 6px;
+  border-radius: 8px;
+}
+
+.factory-info-icon {
+  opacity: 0.6;
+}
+
+.factory-wallet-details {
+  margin-top: 8px;
+}
+
+.factory-wallet-address {
+  font-weight: 600;
+  margin: 0;
+}
+
+.factory-wallet-network {
+  font-size: 0.85rem;
+  opacity: 0.7;
+  margin: 4px 0 0;
+}
+
+.factory-details {
+  margin-bottom: 18px;
+}
+
+.factory-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.factory-specs {
+  display: grid;
+  gap: 12px;
+}
+
+.factory-spec-item {
+  background: rgba(255, 255, 255, 0.84);
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  gap: 10px;
+}
+
+.factory-spec-icon {
+  font-size: 1.2rem;
+  opacity: 0.8;
+}
+
+.factory-spec-content {
+  flex: 1;
+}
+
+.factory-spec-label {
+  margin: 0 0 6px;
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.factory-spec-value {
+  margin: 0;
+}
+
+.factory-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(148, 163, 184, 0.36);
+  border-radius: 8px;
+  padding: 8px 10px;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.factory-payment-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.factory-price-tag {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.factory-price-amount {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-accent);
+}
+
+.factory-price-label {
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.factory-submit-button {
+  border: none;
+  border-radius: 10px;
+  padding: 12px 16px;
+  background: var(--primary-color);
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.factory-submit-button.processing {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.factory-processing-text {
+  font-size: 0.9rem;
+}
+
+.factory-wallet-warning {
+  margin: 0;
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+@media (max-width: 640px) {
+  .factory-modal-content {
+    width: 90%;
+  }
+}

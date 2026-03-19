@@ -17,13 +17,14 @@ interface ISolarPanels {
     }
 
     function getMyPanels() external view returns (Panel[] memory);
-    function getPanelsOf(address user) external view returns (Panel[] memory); // ✅ 新增函数声明
+    function getPanelsOf(address user) external view returns (Panel[] memory); // ✅ Add function declaration
 }
 
 contract PowerReward {
     IERC20 public rewardToken;
     ISolarPanels public solarPanelContract;
     address public owner;
+    uint256 public simulatorStepSeconds;
 
     mapping(address => uint256) public lastClaimedAt;
 
@@ -44,37 +45,43 @@ contract PowerReward {
         rewardToken = IERC20(_rewardToken);
         solarPanelContract = ISolarPanels(_solarPanelContract);
         owner = msg.sender;
+        simulatorStepSeconds = 3600;
+    }
+
+    function setSimulatorStepSeconds(uint256 stepSeconds) external onlyOwner {
+        require(stepSeconds > 0, "Step must be > 0");
+        simulatorStepSeconds = stepSeconds;
     }
 
     function claimReward() external {
-    require(
-        block.timestamp - lastClaimedAt[msg.sender] >= 1 hours,
-        "Can only claim once per hour"
-    );
+        require(
+            block.timestamp - lastClaimedAt[msg.sender] >= simulatorStepSeconds,
+            "Claim cooldown active"
+        );
 
-    // ✅ 改这里：用 getPanelsOf(msg.sender) 替代 getMyPanels()
-    ISolarPanels.Panel[] memory panels = solarPanelContract.getPanelsOf(msg.sender);
-    require(panels.length > 0, "No panels found");
+        // ✅ Change here: use getPanelsOf(msg.sender) instead of getMyPanels()
+        ISolarPanels.Panel[] memory panels = solarPanelContract.getPanelsOf(msg.sender);
+        require(panels.length > 0, "No panels found");
 
-    uint256 totalDC = 0;
-    uint256 totalAC = 0;
+        uint256 totalDC = 0;
+        uint256 totalAC = 0;
 
-    for (uint256 i = 0; i < panels.length; i++) {
-        totalDC += panels[i].dcPower;
-        totalAC += panels[i].acPower;
+        for (uint256 i = 0; i < panels.length; i++) {
+            totalDC += panels[i].dcPower;
+            totalAC += panels[i].acPower;
+        }
+
+        require(totalDC > 0, "No DC power to claim");
+
+        uint256 rewardAmount = (totalDC * 1e18) / 100_000;
+
+        require(rewardAmount > 0, "Reward too small");
+
+        lastClaimedAt[msg.sender] = block.timestamp;
+        require(rewardToken.transfer(msg.sender, rewardAmount), "Token transfer failed");
+
+        emit RewardClaimed(msg.sender, totalDC, totalAC, rewardAmount, block.timestamp);
     }
-
-    require(totalDC > 0, "No DC power to claim");
-
-    uint256 rewardAmount = (totalDC * 1e18) / 100_000;
-
-    require(rewardAmount > 0, "Reward too small");
-
-    lastClaimedAt[msg.sender] = block.timestamp;
-    require(rewardToken.transfer(msg.sender, rewardAmount), "Token transfer failed");
-
-    emit RewardClaimed(msg.sender, totalDC, totalAC, rewardAmount, block.timestamp);
-}
 
 
     function deposit(uint256 amount) external onlyOwner {
@@ -84,9 +91,9 @@ contract PowerReward {
         );
     }
 
-    // ✅ 使用用户地址获取面板
+    // ✅ Use user address to fetch panels
     function previewReward(address user) external view returns (uint256 estimatedReward) {
-        if (block.timestamp - lastClaimedAt[user] < 1 hours) return 0;
+        if (block.timestamp - lastClaimedAt[user] < simulatorStepSeconds) return 0;
 
         ISolarPanels.Panel[] memory panels = solarPanelContract.getPanelsOf(user);
         uint256 totalDC = 0;
