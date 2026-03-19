@@ -14,7 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # 暴露端口（如果需要后端 API）
-EXPOSE 5000
+EXPOSE 8000
 
 # 运行模拟器
 #CMD ["python", "main.py"]

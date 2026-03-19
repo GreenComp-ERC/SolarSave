@@ -1,138 +1,94 @@
-# SolarPVModel FastAPI
+# SolarChain Simulator API
 
-`SolarPVModel FastAPI` is a FastAPI-based API service that provides solar PV system simulation and output calculations. By integrating the `SolarPVModel` class and the OpenWeather API, it supports real-time modeling and analysis of solar output for single and multiple locations.
-This library is used to simulate the operation of real solar panels.
-
----
+This service provides solar PV prediction endpoints and an optional on-chain market update loop used by the SolarChain frontend.
 
 ## Features
 
-- **Single-location modeling**: Compute solar PV output for one location.
-- **Multi-location modeling**: Aggregate solar output across multiple locations.
-- **Real-time weather data integration**: Fetch live weather data to improve modeling.
-- **High-performance REST API**: FastAPI-based for fast request handling.
+- FastAPI endpoints for single-location and multi-location prediction
+- CORS enabled for local frontend development
+- Optional background loop that reads on-chain panels/factories and updates market state
 
----
+## Prerequisites
 
-## Requirements
+- Python 3.9+
+- Installed dependencies from `requirements.txt`
+- (Optional) A local Hardhat node and deployed contracts for energy simulation loop
 
-- Python 3.8 or later
-- OpenWeather API key (place it in the `.env` file)
-- Dependencies listed in `requirements.txt`
+## Install
 
----
+```bash
+pip install -r requirements.txt
+```
 
-## Installation
+## Run
 
-1. Clone this repository:
+```bash
+python -m uvicorn main:app --host 127.0.0.1 --port 8000 --reload
+```
 
-    ```bash
-    git clone <repository-url>
-    cd <repository-dir>
-    ```
+Base URL: `http://127.0.0.1:8000`
 
-2. Install dependencies:
+## Environment Variables
 
-    ```bash
-    pip install -r requirements.txt
-    ```
+Create `.env` in this folder when needed:
 
-3. Configure environment variables:
-    - Create a `.env` file in the project root and add the following:
-    ```env
-    API_KEY=<your_openweather_api_key>
-    ```
+```env
+SIMULATOR_RPC_URL=http://127.0.0.1:8545
+SIMULATOR_PRIVATE_KEY=
+SIMULATOR_STEP_SECONDS=3600
+ENABLE_ENERGY_SIM=auto
+```
 
-4. Start the API service:
-    - Run the service with:
-    ```bash
-    uvicorn main:app --host 127.0.0.1 --port 8000 --reload
-    ```
+Notes:
+- `ENABLE_ENERGY_SIM=auto` enables the loop only when a valid private key is available.
+- Contract addresses are loaded from `../smart_contract/scripts/contractAddress.json`.
 
----
+## API Endpoints
 
-## Usage
+### GET /
 
-### Available Endpoints
+Health check endpoint.
 
-#### 1. Root Path Test
-- **Path**: `/`
-- **Method**: `GET`
-- **Purpose**: Check whether the API is running.
-- **Example response**:
-    ```json
-    {
-        "message": "SolarPVModel API is running!"
-    }
-    ```
+### POST /run_model/
 
-#### 2. Single-Location Modeling
-- **Path**: `/run_model/`
-- **Method**: `POST`
-- **Purpose**: Compute solar PV output for a single location.
-- **Request body**:
-    ```json
-    {
-        "lat": 45.739,
-        "lon": 120.683,
-        "start_date": "2022-06-21",
-        "end_date": "2022-06-22",
-        "freq": "60min"
-    }
-    ```
-- **Example response**:
-    ```json
-    {
-        "status": "success",
-        "data": {
-            "aoi": [...],
-            "cell_temperature": [...],
-            "dc(v_mp)": [...],
-            "ac": [...]
-        }
-    }
-    ```
+Runs solar output modeling for one coordinate.
 
-#### 3. Multi-Location Modeling
-- **Path**: `/run_combined_model/`
-- **Method**: `POST`
-- **Purpose**: Compute aggregated solar PV output for multiple locations.
-- **Request body**:
-    ```json
-    {
-        "coordinates": [
-            {"lat": 45.739, "lon": 120.683},
-            {"lat": 46.739, "lon": 121.683}
-        ],
-        "start_date": "2022-06-21",
-        "end_date": "2022-06-22",
-        "freq": "60min"
-    }
-    ```
-- **Example response**:
-    ```json
-    {
-        "status": "success",
-        "combined_ac": 1200.5,
-        "combined_dc": 3000.7,
-        "details": [
-            {
-                "lat": 45.739,
-                "lon": 120.683,
-                "dc(v_mp)": [...],
-                "ac": [...]
-            },
-            {
-                "lat": 46.739,
-                "lon": 121.683,
-                "dc(v_mp)": [...],
-                "ac": [...]
-            }
-        ]
-    }
-    ```
+Example request:
 
----
+```json
+{
+  "lat": 45.739,
+  "lon": 120.683,
+  "start_date": "2022-06-21",
+  "end_date": "2022-06-22",
+  "freq": "60min"
+}
+```
 
+### POST /run_combined_model/
 
-"# SolarPay" 
+Runs aggregated modeling for multiple coordinates.
+
+Example request:
+
+```json
+{
+  "coordinates": [
+    {"lat": 45.739, "lon": 120.683},
+    {"lat": 46.739, "lon": 121.683}
+  ],
+  "start_date": "2022-06-21",
+  "end_date": "2022-06-22",
+  "freq": "60min"
+}
+```
+
+## Troubleshooting
+
+- API not reachable from frontend:
+  - Confirm service is running on port `8000`.
+- Energy simulator loop does not start:
+  - Set `ENABLE_ENERGY_SIM=true`, provide valid `SIMULATOR_PRIVATE_KEY`, and verify RPC URL.
+- On-chain updates fail:
+  - Ensure contracts are deployed and addresses exist in `smart_contract/scripts/contractAddress.json`.
+

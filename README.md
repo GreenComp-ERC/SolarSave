@@ -6,6 +6,8 @@
 
 SolarChain is designed for individuals, communities, and organizations that want transparent energy data, tokenized incentives, and a practical local testbed for renewable energy coordination.
 
+Project naming note: the product name is **SolarChain**, while the repository/folder name remains `SolarSave`.
+
 ---
 
 ## **Key Features**
@@ -46,7 +48,6 @@ SolarChain is designed for individuals, communities, and organizations that want
 | **Solidity**  | Smart contract development        |
 | **Hardhat**   | Local blockchain development and deployment |
 | **ethers.js** | Frontend and script blockchain integration |
-| **Docker**    | Containerized development/deployment |
 
 ---
 
@@ -57,6 +58,7 @@ SolarChain is designed for individuals, communities, and organizations that want
 - **Python**: 3.9+ (3.10 recommended)
 - **Git**: latest
 - **MetaMask**: for local wallet interactions
+- **npm**: comes with Node.js (used by `client/` and `smart_contract/`)
 
 ### **2. Clone the Project**
 ```bash
@@ -83,13 +85,33 @@ cd ../Simulator
 pip install -r requirements.txt
 ```
 
-### **4. Start Local Blockchain**
+### **4. Optional Environment Variables**
+Create `.env` in `smart_contract/` if you want to customize deployment behavior:
+
+```env
+# Optional: simulator update interval written to contracts and Simulator/.env
+SIMULATOR_STEP_SECONDS=60
+
+# Optional: token airdrop and reward pool setup
+AIRDROP_AMOUNT=1000
+REWARD_FUND_AMOUNT=10000
+
+# Optional: explicit private key for simulator sync (0x...)
+DEPLOYER_PRIVATE_KEY=
+SIMULATOR_PRIVATE_KEY=
+```
+
+Notes:
+- If keys are omitted in local Hardhat mode, deploy script tries to derive from default Hardhat mnemonic.
+- Contract addresses are auto-written to frontend files during deployment.
+
+### **5. Start Local Blockchain**
 ```bash
 cd ../smart_contract
 npx hardhat node
 ```
 
-### **5. Deploy Contracts (Local Hardhat)**
+### **6. Deploy Contracts (Local Hardhat)**
 In a second terminal:
 ```bash
 cd smart_contract
@@ -106,28 +128,74 @@ The deployment scripts write addresses to:
 - `smart_contract/scripts/contractAddress.json`
 - `client/src/utils/contractAddress.json` (auto-synced for the frontend)
 
-### **6. Start the Simulator**
+### **7. Start the Simulator**
 ```bash
 cd ../Simulator
 python -m uvicorn main:app --reload
 ```
 
-### **7. Start the Frontend**
+Default API URL used by frontend: `http://127.0.0.1:8000`
+
+### **8. Start the Frontend**
 In another terminal:
 ```bash
 cd client
 npm run dev
 ```
 
-### **8. MetaMask (Local)**
+Default frontend URL: `http://127.0.0.1:3000`
+
+### **9. Local Run Checklist (Recommended Order)**
+Run these in separate terminals:
+
+1. `smart_contract`: `npx hardhat node`
+2. `smart_contract`: `npx hardhat run scripts/deployAll.js --network localhost`
+3. `Simulator`: `python -m uvicorn main:app --reload`
+4. `client`: `npm run dev`
+
+Then in MetaMask:
+- Add local chain `http://127.0.0.1:8545`, chain ID `31337`
+- Import a local Hardhat test account key for development only
+
+### **10. MetaMask (Private Chain / Server)**
+For private-chain deployment on a server, users should manually add a custom network in MetaMask:
+
+- Network Name: `SolarChain Private`
+- RPC URL: `https://<your-domain-or-ip>/rpc`
+- Chain ID: `<your-private-chain-id>`
+- Currency Symbol: `<native-gas-token-symbol>`
+- Block Explorer URL: optional
+
+Notes:
+- The `Chain ID` in MetaMask must exactly match the node's configured chain ID.
+- Use HTTPS RPC in production and ensure public access from user browsers.
+- Do not share or import server/operator private keys into user wallets.
+- Ensure users have enough native gas token to submit transactions.
+- Frontend contract addresses must be the server-deployed addresses (not localhost addresses).
+
+Local development fallback (Hardhat):
 - Network: `Hardhat Local`
 - RPC URL: `http://127.0.0.1:8545`
 - Chain ID: `31337`
-- Import a Hardhat account private key to get test ETH
+- Import a Hardhat test account private key only for local testing
 
 ---
 
 ## **Troubleshooting**
+- **`npx hardhat node` exits with code 1**:
+   - Make sure you are inside `smart_contract/`.
+   - Run `npm install` in `smart_contract/` first.
+   - Check if port `8545` is already in use (stop the existing process or change port).
+
+- **`npm run dev` exits with code 1 in `client/`**:
+   - Ensure `npm install` was executed in `client/`.
+   - Confirm Node.js version is 18+ (`node -v`).
+   - If port `3000` is occupied, free it or change `server.port` in `client/vite.config.js`.
+
+- **Frontend cannot call simulator API**:
+   - Ensure simulator is running on `127.0.0.1:8000`.
+   - Client components call `http://127.0.0.1:8000/run_model/`; if you change backend host/port, update frontend API URLs accordingly.
+
 - **Global Supply / Global Demand is 0**: make sure the simulator is running and that at least one solar panel and factory are created on-chain.
 - **Rewards are 0**: the energy simulator must run at least one step to update the market and reward balances.
 - **Next update stuck at 0m 0s or countdown jumps**:
@@ -140,7 +208,7 @@ npm run dev
 ## **Project Structure**
 
 ```
-SolarChain/
+SolarSave/
 ├── client/                         # Frontend code
 │   ├── src/                        # Frontend source
 │   │   ├── components/             # Shared React components
@@ -235,7 +303,7 @@ This project is licensed under the [MIT License](LICENSE).
 ## **Contact**
 
 For questions or suggestions, please contact:
-- **GitHub Issue**: [Submit an issue](https://github.com/GreenComp-ERC/SolarSave.git)
+- **GitHub Issue**: [Submit an issue](https://github.com/GreenComp-ERC/SolarSave/issues)
 
 ---
 

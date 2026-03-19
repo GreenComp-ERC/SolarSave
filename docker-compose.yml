@@ -9,6 +9,7 @@ services:
     volumes:
       - ./client:/app
       - /app/node_modules
+    command: npm run dev -- --host 0.0.0.0 --port 3000
     stdin_open: true
     tty: true
 
@@ -17,7 +18,7 @@ services:
       context: ./Simulator
       dockerfile: Dockerfile
     ports:
-      - "5000:5000"
+      - "8000:8000"
     volumes:
       - ./Simulator:/app
 
@@ -29,3 +30,5 @@ services:
       - "8545:8545"
     volumes:
       - ./smart_contract:/app
+      - /app/node_modules
+    command: npx hardhat node --hostname 0.0.0.0

@@ -4,12 +4,12 @@ FROM node:18
 # Set the working directory
 WORKDIR /app
 
-# Copy package.json and yarn.lock
-
-COPY yarn.lock ./
+# Copy dependency manifests
+COPY package.json ./
+COPY package-lock.json ./
 
 # Install dependencies
-RUN yarn install
+RUN npm install
 
 # Copy smart contract project files
 COPY . .
@@ -18,4 +18,4 @@ COPY . .
 EXPOSE 8545
 
 # Start Hardhat local dev network
-CMD ["npx", "hardhat", "node"]
+CMD ["npx", "hardhat", "node", "--hostname", "0.0.0.0"]
