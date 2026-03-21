@@ -9,11 +9,9 @@ SolarChain is designed for individuals, communities, and organizations that want
 Project naming note: the product name is **SolarChain**, while the repository/folder name remains `SolarSave`.
 
 ---
-## **Demo Vedio**
+## **Demo Video**
 
-https://github.com/user-attachments/assets/ee2cadce-7e6a-4a9e-aad8-7e288e70bab5
-
-
+https://github.com/user-attachments/assets/958c321f-7562-49f2-bd08-97209db8f078
 
 ## **Key Features**
 
