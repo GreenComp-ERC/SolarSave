@@ -1,0 +1,22 @@
+{
+  "model": "rl_env\\outputs\\optimized_smoke\\20260509_175858_train\\leader_agent.zip",
+  "episodes": 1,
+  "seed": 100,
+  "output_dir": "rl_env\\outputs\\optimized_smoke\\20260509_175858_train\\benchmark",
+  "run_name": "eval",
+  "timestamp_output": true,
+  "scenarios": "normal,mixed_shock",
+  "data_source": "openweather",
+  "use_pvmodel": false,
+  "legacy_observation": false,
+  "forecast_window": 3,
+  "drawdown_penalty": 2.0,
+  "oscillation_penalty": 0.35,
+  "unmet_demand_penalty": 0.5,
+  "liquidity_floor_penalty": 0.35,
+  "drawdown_threshold": 0.35,
+  "drawdown_threshold_penalty": 2.0,
+  "action_smoothing": 0.2,
+  "max_action_delta": 0.08,
+  "skip_ppo": false
+}

@@ -1,0 +1,14 @@
+{
+  "static_1_to_3": {
+    "return": -318.8192294340145,
+    "episode_volume": 8980705.376563756,
+    "liquidity_floor": 0.0,
+    "final_liquidity": 0.0,
+    "mean_liquidity": 50664.303841869354,
+    "low_liquidity_steps": 213.85714285714286,
+    "max_drawdown": 0.9660897264688356,
+    "final_token_price": 0.051320454614349684,
+    "mean_action_oscillation": 5.952366960367986e-05,
+    "total_unmet_demand": 14848196.50651819
+  }
+}
