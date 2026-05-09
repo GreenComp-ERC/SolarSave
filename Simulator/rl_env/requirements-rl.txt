@@ -1,0 +1,9 @@
+gymnasium>=0.29,<1.1
+stable-baselines3>=2.3,<3
+torch>=2.2
+numpy>=1.24
+pandas>=1.5
+requests>=2.31
+pvlib>=0.10
+python-dotenv>=1.0
+pvlib>=0.10

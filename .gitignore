@@ -26,3 +26,7 @@ Simulator/.pytest_cache/
 .DS_Store
 Thumbs.db
 Simulator/data/temp
+
+Simulator/rl_env/outputs
+Simulator/rl_env/outputs_old
+Simulator/rl_env/cache
