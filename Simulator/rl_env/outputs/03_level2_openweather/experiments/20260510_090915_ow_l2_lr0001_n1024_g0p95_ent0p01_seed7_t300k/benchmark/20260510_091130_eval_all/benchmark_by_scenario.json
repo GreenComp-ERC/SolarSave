@@ -1,0 +1,233 @@
+{
+  "normal": {
+    "ppo_leader": {
+      "return": -807.1154135208109,
+      "episode_volume": 11488228.382104138,
+      "liquidity_floor": 0.0,
+      "final_liquidity": 0.0,
+      "mean_liquidity": 67439.11735085273,
+      "low_liquidity_steps": 170.85,
+      "max_drawdown": 0.964177440165016,
+      "final_token_price": 0.050725915856353644,
+      "mean_action_oscillation": 0.017660020859529182,
+      "total_unmet_demand": 9378970.25905389
+    },
+    "static_1_to_3": {
+      "return": -945.260827294004,
+      "episode_volume": 9103310.644759145,
+      "liquidity_floor": 0.0,
+      "final_liquidity": 0.0,
+      "mean_liquidity": 23978.047955810787,
+      "low_liquidity_steps": 219.5,
+      "max_drawdown": 0.9613357564649163,
+      "final_token_price": 0.05039294878699639,
+      "mean_action_oscillation": 5.952429048539626e-05,
+      "total_unmet_demand": 14164750.452603769
+    },
+    "ppo_vs_static_delta_pct": {
+      "episode_volume": 26.198356075193495,
+      "mean_liquidity": 181.25357608399344,
+      "low_liquidity_steps": 22.164009111617315,
+      "max_drawdown": -0.29559742067114575,
+      "total_unmet_demand": 33.78654787857668
+    }
+  },
+  "cloudy_supply_drop": {
+    "ppo_leader": {
+      "return": -842.6153965376432,
+      "episode_volume": 10032499.479625653,
+      "liquidity_floor": 0.0,
+      "final_liquidity": 0.0,
+      "mean_liquidity": 56388.322081339415,
+      "low_liquidity_steps": 203.75,
+      "max_drawdown": 0.964112851113836,
+      "final_token_price": 0.050713026339176445,
+      "mean_action_oscillation": 0.016768390743901376,
+      "total_unmet_demand": 10799821.218325203
+    },
+    "static_1_to_3": {
+      "return": -970.1515452264446,
+      "episode_volume": 7954050.95547647,
+      "liquidity_floor": 0.0,
+      "final_liquidity": 0.0,
+      "mean_liquidity": 21018.17959347217,
+      "low_liquidity_steps": 241.15,
+      "max_drawdown": 0.9613357564649163,
+      "final_token_price": 0.05039294878699639,
+      "mean_action_oscillation": 5.952429048539626e-05,
+      "total_unmet_demand": 15314010.141886443
+    },
+    "ppo_vs_static_delta_pct": {
+      "episode_volume": 26.13069159078172,
+      "mean_liquidity": 168.28356771131837,
+      "low_liquidity_steps": 15.50901928260419,
+      "max_drawdown": -0.2888787429619633,
+      "total_unmet_demand": 29.477510343382622
+    }
+  },
+  "factory_demand_spike": {
+    "ppo_leader": {
+      "return": -830.4090514433174,
+      "episode_volume": 11488228.382104138,
+      "liquidity_floor": 0.0,
+      "final_liquidity": 0.0,
+      "mean_liquidity": 56162.62387784687,
+      "low_liquidity_steps": 204.0,
+      "max_drawdown": 0.9617258842026143,
+      "final_token_price": 0.05079739079775845,
+      "mean_action_oscillation": 0.01722692077914709,
+      "total_unmet_demand": 15029194.889777819
+    },
+    "static_1_to_3": {
+      "return": -964.1436762708557,
+      "episode_volume": 9103310.644759145,
+      "liquidity_floor": 0.0,
+      "final_liquidity": 0.0,
+      "mean_liquidity": 21018.17959347217,
+      "low_liquidity_steps": 241.15,
+      "max_drawdown": 0.9595264233316081,
+      "final_token_price": 0.05048788575971182,
+      "mean_action_oscillation": 5.952429048539626e-05,
+      "total_unmet_demand": 20464505.96173618
+    },
+    "ppo_vs_static_delta_pct": {
+      "episode_volume": 26.198356075193495,
+      "mean_liquidity": 167.20974396512372,
+      "low_liquidity_steps": 15.40534936761352,
+      "max_drawdown": -0.2292235854609784,
+      "total_unmet_demand": 26.559698446281164
+    }
+  },
+  "oversupply": {
+    "ppo_leader": {
+      "return": -701.6223662112882,
+      "episode_volume": 13828768.74857435,
+      "liquidity_floor": 0.0,
+      "final_liquidity": 0.0,
+      "mean_liquidity": 452820.1832359706,
+      "low_liquidity_steps": 104.4,
+      "max_drawdown": 0.9280142413380297,
+      "final_token_price": 0.6446547048597239,
+      "mean_action_oscillation": 0.017357974985032193,
+      "total_unmet_demand": 5570755.213787255
+    },
+    "static_1_to_3": {
+      "return": -894.0269783423288,
+      "episode_volume": 10951569.600888336,
+      "liquidity_floor": 0.0,
+      "final_liquidity": 0.0,
+      "mean_liquidity": 135983.18177951503,
+      "low_liquidity_steps": 170.75,
+      "max_drawdown": 0.9619533605365334,
+      "final_token_price": 0.05036639822319838,
+      "mean_action_oscillation": 5.952429048539626e-05,
+      "total_unmet_demand": 10728536.164818568
+    },
+    "ppo_vs_static_delta_pct": {
+      "episode_volume": 26.272025404035514,
+      "mean_liquidity": 232.99719664611126,
+      "low_liquidity_steps": 38.85797950219619,
+      "max_drawdown": 3.528146019425931,
+      "total_unmet_demand": 48.07534664370065
+    }
+  },
+  "demand_collapse": {
+    "ppo_leader": {
+      "return": -759.9354420715847,
+      "episode_volume": 11488057.264330512,
+      "liquidity_floor": 0.0,
+      "final_liquidity": 0.0,
+      "mean_liquidity": 234143.5570577975,
+      "low_liquidity_steps": 118.75,
+      "max_drawdown": 0.9624649692129618,
+      "final_token_price": 0.05919352258739209,
+      "mean_action_oscillation": 0.017220128120204153,
+      "total_unmet_demand": 6281352.79301451
+    },
+    "static_1_to_3": {
+      "return": -924.2218329391623,
+      "episode_volume": 9103310.644759145,
+      "liquidity_floor": 0.0,
+      "final_liquidity": 0.0,
+      "mean_liquidity": 94422.78137795709,
+      "low_liquidity_steps": 171.7,
+      "max_drawdown": 0.9627597128509734,
+      "final_token_price": 0.05031741569680798,
+      "mean_action_oscillation": 5.952429048539626e-05,
+      "total_unmet_demand": 10765519.322178062
+    },
+    "ppo_vs_static_delta_pct": {
+      "episode_volume": 26.196476343958302,
+      "mean_liquidity": 147.9735860783043,
+      "low_liquidity_steps": 30.838672102504365,
+      "max_drawdown": 0.030614454892261722,
+      "total_unmet_demand": 41.653044270012266
+    }
+  },
+  "token_volatility": {
+    "ppo_leader": {
+      "return": -807.9961381726598,
+      "episode_volume": 11488228.382104136,
+      "liquidity_floor": 0.0,
+      "final_liquidity": 0.0,
+      "mean_liquidity": 67432.05653854633,
+      "low_liquidity_steps": 170.9,
+      "max_drawdown": 0.964177440165016,
+      "final_token_price": 0.050725915856353644,
+      "mean_action_oscillation": 0.017660447535740788,
+      "total_unmet_demand": 9379485.158259148
+    },
+    "static_1_to_3": {
+      "return": -945.260827294004,
+      "episode_volume": 9103310.644759145,
+      "liquidity_floor": 0.0,
+      "final_liquidity": 0.0,
+      "mean_liquidity": 23978.047955810787,
+      "low_liquidity_steps": 219.5,
+      "max_drawdown": 0.9613357564649163,
+      "final_token_price": 0.05039294878699639,
+      "mean_action_oscillation": 5.952429048539626e-05,
+      "total_unmet_demand": 14164750.452603769
+    },
+    "ppo_vs_static_delta_pct": {
+      "episode_volume": 26.198356075193473,
+      "mean_liquidity": 181.22412909848646,
+      "low_liquidity_steps": 22.141230068337126,
+      "max_drawdown": -0.29559742067114575,
+      "total_unmet_demand": 33.78291280426329
+    }
+  },
+  "mixed_shock": {
+    "ppo_leader": {
+      "return": -857.1913934334159,
+      "episode_volume": 9982374.599424172,
+      "liquidity_floor": 0.0,
+      "final_liquidity": 0.0,
+      "mean_liquidity": 55831.3175168999,
+      "low_liquidity_steps": 204.3,
+      "max_drawdown": 0.9617688023754383,
+      "final_token_price": 0.05079465653622647,
+      "mean_action_oscillation": 0.016568083084373103,
+      "total_unmet_demand": 16114961.68605507
+    },
+    "static_1_to_3": {
+      "return": -983.8751994646931,
+      "episode_volume": 7914478.680619793,
+      "liquidity_floor": 0.0,
+      "final_liquidity": 0.0,
+      "mean_liquidity": 21018.17959347217,
+      "low_liquidity_steps": 241.15,
+      "max_drawdown": 0.9596093062981919,
+      "final_token_price": 0.050498026182203705,
+      "mean_action_oscillation": 5.952429048539626e-05,
+      "total_unmet_demand": 21257006.886606663
+    },
+    "ppo_vs_static_delta_pct": {
+      "episode_volume": 26.12801173964928,
+      "mean_liquidity": 165.6334592089983,
+      "low_liquidity_steps": 15.280945469624713,
+      "max_drawdown": -0.22503909279255846,
+      "total_unmet_demand": 24.189883495740062
+    }
+  }
+}

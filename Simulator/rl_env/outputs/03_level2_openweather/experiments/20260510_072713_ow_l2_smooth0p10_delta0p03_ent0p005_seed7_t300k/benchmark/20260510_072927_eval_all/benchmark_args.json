@@ -1,0 +1,22 @@
+{
+  "model": "rl_env/outputs/03_level2_openweather/experiments/20260510_072713_ow_l2_smooth0p10_delta0p03_ent0p005_seed7_t300k/leader_agent.zip",
+  "episodes": 20,
+  "seed": 100,
+  "output_dir": "rl_env/outputs/03_level2_openweather/experiments/20260510_072713_ow_l2_smooth0p10_delta0p03_ent0p005_seed7_t300k/benchmark",
+  "run_name": "eval_all",
+  "timestamp_output": true,
+  "scenarios": "normal,cloudy_supply_drop,factory_demand_spike,oversupply,demand_collapse,token_volatility,mixed_shock",
+  "data_source": "openweather",
+  "use_pvmodel": false,
+  "legacy_observation": false,
+  "forecast_window": 3,
+  "drawdown_penalty": 2.0,
+  "oscillation_penalty": 0.35,
+  "unmet_demand_penalty": 0.5,
+  "liquidity_floor_penalty": 0.35,
+  "drawdown_threshold": 0.35,
+  "drawdown_threshold_penalty": 2.0,
+  "action_smoothing": 0.1,
+  "max_action_delta": 0.03,
+  "skip_ppo": false
+}
