@@ -25,3 +25,4 @@ Simulator/.pytest_cache/
 *.swp
 .DS_Store
 Thumbs.db
+Simulator/data/temp
