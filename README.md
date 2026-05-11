@@ -54,6 +54,141 @@ https://github.com/user-attachments/assets/958c321f-7562-49f2-bd08-97209db8f078
 
 ---
 
+## **Dataset & Research Enablement**
+
+SolarChain includes a reproducible, multi-city simulation dataset under
+`Simulator/data/datasets/`. The dataset covers a 24-hour cycle on
+`2026-05-01` in `Asia/Shanghai`, combines `pvlib` solar modeling with
+Open-Meteo historical weather observations, and injects exactly 5% FDIA
+records for anomaly-detection benchmarking.
+
+Generate or refresh the dataset:
+
+```bash
+conda run -n SolarSave python Simulator/data/generate_multicity_datasets.py
+```
+
+Generate the reviewer and canonical research figures:
+
+```bash
+conda run -n SolarSave python Simulator/data/visualizations.py
+```
+
+### **Dataset Dictionary and Metadata**
+
+| CSV File | Description | Records | Fields |
+|----------|-------------|---------|--------|
+| `urban_energy_nodes.csv` | Static metadata for distributed urban solar nodes across Beijing, Shanghai, Chengdu, Shenzhen, and Hangzhou. | 50 | `node_id`, `city`, `latitude`, `longitude`, `panel_area_m2`, `efficiency`, `temp_coefficient`, `install_date` |
+| `spatiotemporal_generation.csv` | Hourly node-level solar generation records with physical power bounds, reported power, and FDIA labels. | 1,200 | `timestamp`, `hour`, `node_id`, `city`, `latitude`, `longitude`, `irradiance_Wm2`, `air_temp_C`, `P_max_W`, `P_reported_W`, `fdia_detected`, `verification_status` |
+| `market_liquidity.csv` | Hourly market-liquidity comparison between SolarChain's 1:3 forced-split mechanism and the no-split baseline. | 24 | `timestamp`, `hour`, `total_verified_MW`, `solarchain_liquidity_MW`, `baseline_liquidity_MW`, `slippage_solarchain_pct`, `slippage_baseline_pct` |
+| `p2p_trades.csv` | Simulated P2P energy purchases by factories using verified liquidity and token-burning records. | 42 | `trade_id`, `timestamp`, `hour`, `factory_id`, `city`, `energy_purchased_MW`, `tokens_burned`, `exergy_dissipated_MJ` |
+
+#### **`urban_energy_nodes.csv` Field Definitions**
+
+| Field | Definition |
+|-------|------------|
+| `node_id` | Unique identifier for each distributed solar node. |
+| `city` | Chinese city where the node is located. |
+| `latitude` | Node latitude in decimal degrees. |
+| `longitude` | Node longitude in decimal degrees. |
+| `panel_area_m2` | Installed photovoltaic panel area in square meters. |
+| `efficiency` | Panel conversion efficiency used by the simulator. |
+| `temp_coefficient` | Temperature coefficient used to derate output under non-standard temperature conditions. |
+| `install_date` | Synthetic installation date for the node. |
+
+#### **`spatiotemporal_generation.csv` Field Definitions**
+
+| Field | Definition |
+|-------|------------|
+| `timestamp` | Hourly timestamp with `Asia/Shanghai` timezone offset. |
+| `hour` | Hour of day, from 0 to 23. |
+| `node_id` | Node identifier matching `urban_energy_nodes.csv`. |
+| `city` | City associated with the node. |
+| `latitude` | Node latitude in decimal degrees. |
+| `longitude` | Node longitude in decimal degrees. |
+| `irradiance_Wm2` | Modeled/observed solar irradiance in watts per square meter. |
+| `air_temp_C` | Hourly air temperature in degrees Celsius. |
+| `P_max_W` | Physics-based maximum generation bound in watts. |
+| `P_reported_W` | Reported node generation in watts, including injected FDIA samples. |
+| `fdia_detected` | Ground-truth Boolean label for rejected false-data injection records. |
+| `verification_status` | Verification result, either `verified` or `rejected`. |
+
+#### **`market_liquidity.csv` Field Definitions**
+
+| Field | Definition |
+|-------|------------|
+| `timestamp` | Hourly market timestamp with `Asia/Shanghai` timezone offset. |
+| `hour` | Hour of day, from 0 to 23. |
+| `total_verified_MW` | Aggregated verified generation available to the market in megawatts. |
+| `solarchain_liquidity_MW` | Liquidity depth under the 1:3 forced-split SolarChain mechanism. |
+| `baseline_liquidity_MW` | Liquidity depth under the no-split baseline. |
+| `slippage_solarchain_pct` | Estimated slippage percentage under the SolarChain mechanism. |
+| `slippage_baseline_pct` | Estimated slippage percentage under the no-split baseline. |
+
+#### **`p2p_trades.csv` Field Definitions**
+
+| Field | Definition |
+|-------|------------|
+| `trade_id` | Unique identifier for each simulated P2P trade. |
+| `timestamp` | Trade timestamp with `Asia/Shanghai` timezone offset. |
+| `hour` | Hour of day, from 0 to 23. |
+| `factory_id` | Simulated factory buyer identifier. |
+| `city` | City associated with the factory buyer. |
+| `energy_purchased_MW` | Purchased energy volume in megawatts. |
+| `tokens_burned` | SOLR-equivalent tokens burned by the trade. |
+| `exergy_dissipated_MJ` | Estimated dissipated exergy in megajoules. |
+
+### **Research Enablement**
+
+**Urban Resilience**  
+Urban-computing and resilience researchers can use `urban_energy_nodes.csv` and
+`spatiotemporal_generation.csv` to evaluate whether DER nodes are distributed
+reasonably across dense urban regions. Useful visual diagnostics include
+geospatial DER distribution maps, city-level node-density plots, installed
+capacity bubble maps, spatio-temporal heatmaps by city and hour, and intra-city
+generation boxplots. These figures help assess whether solar capacity is
+clustered too heavily in one city, whether generation diversity improves
+resilience during low-irradiance hours, and whether specific cities show
+abnormal volatility that could weaken local energy reliability.
+
+**Incentive Mechanisms**  
+Economists and market-design researchers can extract trade and liquidity
+variables from `p2p_trades.csv` and `market_liquidity.csv` to test alternative
+token policies. Key variables include `energy_purchased_MW`, `tokens_burned`,
+`exergy_dissipated_MJ`, `total_verified_MW`, `solarchain_liquidity_MW`,
+`baseline_liquidity_MW`, `slippage_solarchain_pct`, and
+`slippage_baseline_pct`. These records support counterfactual analysis of burn
+rates, liquidity incentives, slippage controls, and the effect of SolarChain's
+1:3 forced-split mechanism compared with a no-split baseline.
+
+**FDIA Anomaly Detection**  
+Machine-learning researchers can treat `spatiotemporal_generation.csv` as a
+supervised benchmark for false-data injection detection. `P_max_W` provides a
+physics-based upper bound, while `P_reported_W`, `irradiance_Wm2`, `air_temp_C`,
+`hour`, city, and node metadata provide model features. The `fdia_detected`
+column is the ground-truth classification label, and `verification_status`
+records the system-level decision. A typical pipeline is to split records by
+node or city to avoid leakage, train classifiers on physical residuals such as
+`P_reported_W - P_max_W` or ratios such as `P_reported_W / P_max_W`, and validate
+precision, recall, F1, ROC-AUC, and false-rejection rates against the labeled
+FDIA samples.
+
+The visualization script already produces eight English-language PNG figures
+covering reviewer-response plots and canonical urban-computing figures:
+
+| Figure | Output File |
+|--------|-------------|
+| Theoretical generation vs reported generation with rejected FDIA points | `Simulator/data/visualizations/reviewer_a_generation_vs_reported_fdia.png` |
+| Liquidity depth comparison: 1:3 forced-split vs no-split baseline | `Simulator/data/visualizations/reviewer_a_liquidity_depth_comparison.png` |
+| Spatio-temporal heatmap | `Simulator/data/visualizations/canonical_01_spatiotemporal_heatmap.png` |
+| Physics-bounded anomaly scatter plot | `Simulator/data/visualizations/canonical_02_physics_bounded_anomaly_scatter.png` |
+| Comparative policy line chart | `Simulator/data/visualizations/canonical_03_comparative_policy_line_chart.png` |
+| Geospatial DER distribution map | `Simulator/data/visualizations/canonical_04_geospatial_der_distribution.png` |
+| Digital-physical correlation plot | `Simulator/data/visualizations/canonical_05_digital_physical_correlation.png` |
+| Intra-city generation boxplot | `Simulator/data/visualizations/canonical_06_intra_city_generation_boxplots.png` |
+
+---
+
 ## **Installation and Running**
 
 ### **1. Prerequisites**
