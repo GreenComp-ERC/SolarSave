@@ -14,7 +14,7 @@ const tokenAddress = contractAddresses.token; // ERC20 token contract address
 const recipientAddress = "0xf5CcA82D37db8d2B0503c20f0f21A3a8eD25F4E9"; // Funds recipient address
 const fixedPrice = ethers.utils.parseUnits("2", 18); // 2 ERC20 tokens
 const contractAddress = contractAddresses.solarPanels;
-const TradeConfirm = ({ close, lat, lng, batterTemp, dcPower, acPower, sandiaModuleName, cecInverterName }) => {
+const TradeConfirm = ({ close, lat, lng, batterTemp, dcPower, acPower, sandiaModuleName, cecInverterName, evidence }) => {
   const [provider, setProvider] = useState(null);
   const [signer, setSigner] = useState(null);
   const [contract, setContract] = useState(null);
@@ -22,6 +22,18 @@ const TradeConfirm = ({ close, lat, lng, batterTemp, dcPower, acPower, sandiaMod
   const [currentAccount, setCurrentAccount] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [transactionStatus, setTransactionStatus] = useState("");
+  const [plannerDecision, setPlannerDecision] = useState(evidence?.riskLevel === "high" ? "pending" : "approved");
+  const registrationEvidence = evidence || {
+    recordId: "manual-map-selection",
+    city: "Map selection",
+    timestamp: new Date().toISOString(),
+    forecastPower: acPower,
+    physicsMax: dcPower,
+    reported: acPower,
+    residual: acPower - dcPower,
+    riskLevel: acPower > dcPower * 1.05 ? "high" : "low",
+    machineStatus: "verified",
+  };
 
   useEffect(() => {
     const initWallet = async () => {
@@ -62,6 +74,10 @@ const TradeConfirm = ({ close, lat, lng, batterTemp, dcPower, acPower, sandiaMod
       setTransactionStatus("Wallet not ready. Please reconnect MetaMask.");
       return;
     }
+    if (plannerDecision !== "approved") {
+      setTransactionStatus("Planner approval is required before wallet signature.");
+      return;
+    }
     if (currentAccount && currentAccount.toLowerCase() === recipientAddress.toLowerCase()) {
     alert("You cannot register a panel to the recipient address itself!");
     return;
@@ -80,6 +96,14 @@ const TradeConfirm = ({ close, lat, lng, batterTemp, dcPower, acPower, sandiaMod
 
 
       setTransactionStatus("Sending SOLR tokens...");
+      window.dispatchEvent(new CustomEvent("plannerAuditEvent", {
+        detail: {
+          type: "wallet-signed",
+          recordId: registrationEvidence.recordId,
+          decision: plannerDecision,
+          reason: "Planner approved evidence and initiated wallet signature",
+        }
+      }));
       const approvalTx = await tokenContract.transfer(recipientAddress, fixedPrice);
       await approvalTx.wait();
 
@@ -88,6 +112,15 @@ const TradeConfirm = ({ close, lat, lng, batterTemp, dcPower, acPower, sandiaMod
       setTransactionStatus("Registering solar panel...");
       const tx = await contract.createPanel(intLat, intLng, intbatteryTemp, intdcpower, intacpower);
       await tx.wait();
+      window.dispatchEvent(new CustomEvent("plannerAuditEvent", {
+        detail: {
+          type: "on-chain-registered",
+          recordId: registrationEvidence.recordId,
+          decision: "registered",
+          txHash: tx.hash,
+          reason: `Panel registered at ${lat.toFixed(4)}, ${lng.toFixed(4)}`,
+        }
+      }));
 
       setTransactionStatus("Transaction completed successfully!");
       window.dispatchEvent(new Event("chainStateUpdated"));
@@ -109,11 +142,25 @@ const TradeConfirm = ({ close, lat, lng, batterTemp, dcPower, acPower, sandiaMod
     return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
   };
 
+  const rejectWithoutTransaction = () => {
+    setPlannerDecision("rejected");
+    setTransactionStatus("Rejected by planner. No wallet transaction was sent.");
+    window.dispatchEvent(new CustomEvent("plannerAuditEvent", {
+      detail: {
+        type: "planner-reviewed",
+        recordId: registrationEvidence.recordId,
+        decision: "rejected",
+        reason: "Planner rejected evidence before wallet signature",
+      }
+    }));
+    setTimeout(() => close(false), 900);
+  };
+
   return (
     <div className="trade-modal-overlay">
       <div className="trade-modal-content">
         <div className="trade-modal-header">
-          <h2 className="trade-modal-title">Register Solar Panel</h2>
+          <h2 className="trade-modal-title">Planner Review & Registration</h2>
           <button onClick={close} className="trade-close-button">×</button>
         </div>
 
@@ -134,7 +181,7 @@ const TradeConfirm = ({ close, lat, lng, batterTemp, dcPower, acPower, sandiaMod
         <div className="trade-panel-details">
           <h3 className="trade-section-title">
             <FaSolarPanel className="trade-section-icon"/>
-            Panel Details
+            Machine Boundary Check
           </h3>
 
           <div className="trade-panel-specs">
@@ -152,7 +199,12 @@ const TradeConfirm = ({ close, lat, lng, batterTemp, dcPower, acPower, sandiaMod
             <div className="trade-spec-item">
               <FaWhmcs className="trade-spec-icon"/>
               <div className="trade-spec-content">
-                <p className="trade-spec-label">Live Data</p>
+                <p className="trade-spec-label">Physics Evidence</p>
+                <p className="trade-spec-value">Forecast AC: {Number(registrationEvidence.forecastPower || 0).toFixed(2)} W</p>
+                <p className="trade-spec-value">Physics Max: {Number(registrationEvidence.physicsMax || 0).toFixed(2)} W</p>
+                <p className="trade-spec-value">Reported/Selected: {Number(registrationEvidence.reported || 0).toFixed(2)} W</p>
+                <p className="trade-spec-value">Residual: {Number(registrationEvidence.residual || 0).toFixed(2)} W</p>
+                <p className="trade-spec-value">Risk: {registrationEvidence.riskLevel}</p>
                 <p className="trade-spec-value">Battery Temp: {batterTemp}°C</p>
                 <p className="trade-spec-value">DC Power: {dcPower} W</p>
                 <p className="trade-spec-value">AC Power: {acPower} W</p>
@@ -173,6 +225,26 @@ const TradeConfirm = ({ close, lat, lng, batterTemp, dcPower, acPower, sandiaMod
         </div>
       </div>
 
+      <div className="planner-review-section">
+        <p className="trade-spec-label">Planner verification decision</p>
+        <div className="planner-decision-buttons">
+          <button
+            type="button"
+            className={plannerDecision === "approved" ? "decision-active" : ""}
+            onClick={() => setPlannerDecision("approved")}
+          >
+            Approve for registration
+          </button>
+          <button
+            type="button"
+            className={plannerDecision === "rejected" ? "decision-danger-active" : ""}
+            onClick={rejectWithoutTransaction}
+          >
+            Reject FDIA
+          </button>
+        </div>
+      </div>
+
       <div className="trade-payment-section">
         <div className="trade-price-tag">
           <span className="trade-price-amount">2 SOLR</span>
@@ -182,19 +254,22 @@ const TradeConfirm = ({ close, lat, lng, batterTemp, dcPower, acPower, sandiaMod
         <button
             type="button"
             onClick={handleSubmit}
-            disabled={isProcessing || !currentAccount}
+            disabled={isProcessing || !currentAccount || plannerDecision !== "approved"}
             className={`trade-submit-button ${isProcessing ? 'processing' : ''}`}
         >
           {isProcessing ? (
               <span className="trade-processing-text">{transactionStatus}</span>
           ) : (
-              <span>Register and Pay</span>
+              <span>Sign & Register</span>
           )}
           <span className="trade-button-glow"></span>
         </button>
 
         {!currentAccount && (
             <p className="trade-wallet-warning">Please connect your wallet first</p>
+        )}
+        {currentAccount && plannerDecision !== "approved" && (
+            <p className="trade-wallet-warning">Planner approval is required before wallet signature</p>
         )}
       </div>
     </div>

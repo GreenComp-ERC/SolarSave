@@ -15,6 +15,163 @@
   box-sizing: border-box;
 }
 
+.market-impact {
+  width: 100%;
+  font-family: var(--font-sans);
+  background: var(--glass-bg, rgba(255, 255, 255, 0.78));
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  overflow: hidden;
+}
+
+.market-impact-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  background: rgba(248, 250, 252, 0.88);
+}
+
+.market-impact-header .trans-main-title {
+  justify-content: flex-start;
+}
+
+.market-impact-header p {
+  margin: 0.65rem 0 0;
+  color: var(--text-secondary);
+}
+
+.impact-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+}
+
+.impact-card {
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.76);
+  padding: 1rem;
+}
+
+.impact-card span,
+.impact-card strong {
+  display: block;
+}
+
+.impact-card span {
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+}
+
+.impact-card strong {
+  margin-top: 0.4rem;
+  color: var(--text-primary);
+  font-size: 1.25rem;
+}
+
+.impact-chart-card {
+  margin: 0 1.5rem 1.5rem;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 8px;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.76);
+}
+
+.impact-chart-title,
+.impact-legend {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.impact-bars {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 1rem;
+}
+
+.impact-hour {
+  display: grid;
+  grid-template-columns: 34px 1fr 88px;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.impact-hour-label,
+.impact-slip {
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.impact-bar-track {
+  position: relative;
+  height: 20px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.15);
+  overflow: hidden;
+}
+
+.impact-bar {
+  position: absolute;
+  left: 0;
+  height: 50%;
+  border-radius: 999px;
+}
+
+.impact-bar.solarchain {
+  top: 0;
+  background: #0f766e;
+}
+
+.impact-bar.baseline {
+  bottom: 0;
+  background: #f59e0b;
+}
+
+.impact-legend {
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  margin-top: 0.9rem;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+}
+
+.impact-legend i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 0.35rem;
+}
+
+.legend-solarchain {
+  background: #0f766e;
+}
+
+.legend-baseline {
+  background: #f59e0b;
+}
+
+@media (max-width: 900px) {
+  .impact-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .impact-hour {
+    grid-template-columns: 28px 1fr;
+  }
+
+  .impact-slip {
+    grid-column: 2;
+  }
+}
+
 /* Header Styles */
 .trans-header {
   display: grid;

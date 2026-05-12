@@ -1,4 +1,4 @@
-import { Navbar, Footer, Transactions, MapSection,  Store, SolarTrade, SolarToken, TestSolarAPI} from "./components";
+import { Navbar, Footer, Transactions, MapSection,  Store, SolarTrade, SolarToken, TestSolarAPI, MarketImpact} from "./components";
 const App = () => (
   <div className="min-h-screen flex flex-col">
     <div className="gradient-bg-welcome">
@@ -12,6 +12,10 @@ const App = () => (
 
     <div className="bg-transparent py-6 px-4 relative z-0">
       <Transactions />
+    </div>
+
+    <div className="bg-transparent py-6 px-4 relative z-0">
+      <MarketImpact />
     </div>
 
     <Footer />

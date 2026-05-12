@@ -21,6 +21,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 18px;
   backdrop-filter: blur(5px);
   z-index: 10010;
   animation: fadeIn 0.3s ease-out;
@@ -28,7 +29,8 @@
 
 .trade-modal-content {
   width: 95%;
-  max-width: 480px;
+  max-width: 760px;
+  max-height: min(88vh, 720px);
   background: rgba(255, 255, 255, 0.84);
   border-radius: 16px;
   box-shadow:
@@ -36,24 +38,30 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.55);
   overflow: hidden;
   border: 1px solid rgba(148, 163, 184, 0.24);
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: minmax(250px, 0.9fr) minmax(320px, 1.1fr);
+  grid-template-areas:
+    "header header"
+    "wallet details"
+    "decision details"
+    "payment details";
   animation: slideUp 0.4s ease-out;
   backdrop-filter: blur(18px) saturate(140%);
   -webkit-backdrop-filter: blur(18px) saturate(140%);
 }
 
 .trade-modal-header {
+  grid-area: header;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
+  padding: 15px 18px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .trade-modal-title {
   color: var(--text-primary);
-  font-size: 1.5rem;
+  font-size: 1.22rem;
   font-weight: 600;
   margin: 0;
   background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
@@ -84,11 +92,12 @@
 }
 
 .trade-wallet-card {
-  margin: 20px;
-  padding: 20px;
+  grid-area: wallet;
+  margin: 14px 0 12px 14px;
+  padding: 14px;
   background: linear-gradient(135deg, #6FBBA4, #3DAB8E);
   border-radius: 12px;
-  height: 160px;
+  height: 104px;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -116,8 +125,8 @@
 }
 
 .trade-wallet-icon {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.7);
   display: flex;
@@ -144,7 +153,7 @@
 
 .trade-wallet-network {
   color: white;
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 600;
   margin: 4px 0 0 0;
 }
@@ -161,17 +170,19 @@
 }
 
 .trade-panel-details {
-  margin: 0 20px 20px;
-  padding: 20px;
+  grid-area: details;
+  margin: 14px;
+  padding: 14px;
   background: var(--card-bg);
   border-radius: 12px;
   border: 1px solid rgba(148, 163, 184, 0.3);
+  overflow-y: auto;
 }
 
 .trade-section-title {
   color: var(--text-primary);
-  font-size: 1.125rem;
-  margin: 0 0 16px 0;
+  font-size: 1rem;
+  margin: 0 0 10px 0;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -182,20 +193,19 @@
 }
 
 .trade-panel-specs {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  display: grid;
+  gap: 10px;
 }
 
 .trade-spec-item {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: 10px;
 }
 
 .trade-spec-icon {
   color: var(--primary-color);
-  font-size: 1.25rem;
+  font-size: 1rem;
   margin-top: 2px;
 }
 
@@ -214,31 +224,70 @@
 .trade-spec-value {
   color: var(--text-primary);
   margin: 4px 0 0;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   word-break: break-word;
 }
 
 .trade-payment-section {
-  margin: 0 20px 20px;
+  grid-area: payment;
+  margin: 0 0 14px 14px;
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.planner-review-section {
+  grid-area: decision;
+  margin: 0 0 12px 14px;
+  padding: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 12px;
+  background: rgba(248, 250, 252, 0.78);
+}
+
+.planner-decision-buttons {
+  display: grid;
+  grid-template-columns: 1fr 0.7fr;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.planner-decision-buttons button {
+  border: 1px solid rgba(148, 163, 184, 0.34);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--text-primary);
+  font-weight: 700;
+  padding: 9px 10px;
+  cursor: pointer;
+}
+
+.planner-decision-buttons .decision-active {
+  border-color: rgba(15, 118, 110, 0.55);
+  background: #0f766e;
+  color: #ffffff;
+}
+
+.planner-decision-buttons .decision-danger-active {
+  border-color: rgba(220, 38, 38, 0.45);
+  background: #dc2626;
+  color: #ffffff;
 }
 
 .trade-price-tag {
   background: rgba(74, 222, 128, 0.15);
   border: 1px solid rgba(74, 222, 128, 0.3);
-  padding: 8px 20px;
+  padding: 6px 16px;
   border-radius: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
 .trade-price-amount {
   color: var(--accent-color);
-  font-size: 1.5rem;
+  font-size: 1.1rem;
   font-weight: 600;
 }
 
@@ -255,7 +304,7 @@
   color: #ffffff;
   border: none;
   border-radius: 30px;
-  padding: 16px;
+  padding: 12px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
@@ -358,27 +407,59 @@
 }
 
 /* Mobile Responsiveness */
+@media (max-width: 760px) {
+  .trade-modal-overlay {
+    align-items: flex-start;
+    padding: 12px;
+  }
+
+  .trade-modal-content {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "header"
+      "wallet"
+      "details"
+      "decision"
+      "payment";
+    max-height: calc(100vh - 24px);
+    overflow-y: auto;
+  }
+
+  .trade-wallet-card,
+  .trade-panel-details,
+  .planner-review-section,
+  .trade-payment-section {
+    margin-left: 12px;
+    margin-right: 12px;
+  }
+
+  .trade-payment-section {
+    margin-bottom: 12px;
+  }
+}
+
 @media (max-width: 480px) {
   .trade-modal-content {
-    width: 92%;
+    width: 94%;
   }
 
   .trade-wallet-card {
-    height: 140px;
-    padding: 15px;
+    height: 96px;
+    padding: 12px;
   }
 
   .trade-modal-title {
-    font-size: 1.3rem;
+    font-size: 1.05rem;
   }
 
   .trade-panel-details,
   .trade-wallet-card,
-  .trade-payment-section {
-    margin: 15px;
+  .trade-payment-section,
+  .planner-review-section {
+    margin: 10px 12px;
   }
 
   .trade-panel-details {
-    padding: 15px;
+    padding: 12px;
   }
 }

@@ -15,6 +15,7 @@ import { ethers } from "ethers";
 import SolarPanels from "../utils/test/SolarPanels.json";
 import "../style/MapSection.css";
 import axios from "axios";
+import { buildRegistrationEvidence, loadUrbanVerificationData } from "../utils/urbanVerification";
 const contractAddress = contractAddresses.solarPanels;
 const factoryAddress = contractAddresses.factory;
 const FACTORY_ABI = [
@@ -93,6 +94,15 @@ const MapSection = () => {
   const [lastClaimedAt, setLastClaimedAt] = useState(null);
   const [rewardPreview, setRewardPreview] = useState(null);
   const [simulatorStepSeconds, setSimulatorStepSeconds] = useState(null);
+  const [verificationRecords, setVerificationRecords] = useState([]);
+  const [liquidityRecords, setLiquidityRecords] = useState([]);
+  const [selectedVerification, setSelectedVerification] = useState(null);
+  const [auditEvents, setAuditEvents] = useState([]);
+  const [layerVisibility, setLayerVisibility] = useState({
+    samples: true,
+    panels: true,
+    factories: true,
+  });
 
 
   const [stats, setStats] = useState({
@@ -103,6 +113,55 @@ const MapSection = () => {
   });
   const [markers, setMarkers] = useState([]);
   const isClaimable = rewardPreview && ethers.BigNumber.isBigNumber(rewardPreview) && rewardPreview.gt(0);
+  const plannerStats = React.useMemo(() => {
+    const verified = verificationRecords.filter((record) => record.machineStatus === "verified").length;
+    const rejected = verificationRecords.filter((record) => record.machineStatus === "rejected").length;
+    const registered = verificationRecords.filter((record) => record.plannerDecision === "registered").length;
+    const pending = verificationRecords.filter((record) => record.plannerDecision === "pending").length;
+    const marketReadyW = verificationRecords
+      .filter((record) => record.machineStatus === "verified" && record.plannerDecision !== "rejected")
+      .reduce((sum, record) => sum + Math.min(record.pReportedW, record.pMaxW), 0);
+
+    return {
+      verified,
+      rejected,
+      registered,
+      pending,
+      marketReadyMW: marketReadyW / 1000000,
+    };
+  }, [verificationRecords]);
+  const nearestFactory = React.useMemo(() => {
+    if (!selectedVerification || !allFactories.length) return null;
+    return allFactories.reduce((nearest, factory) => {
+      const distance = Math.hypot(
+        selectedVerification.lat - factory.latitude,
+        selectedVerification.lng - factory.longitude
+      );
+      if (!nearest || distance < nearest.distance) {
+        return { ...factory, distance };
+      }
+      return nearest;
+    }, null);
+  }, [selectedVerification, allFactories]);
+
+  const getRecordStage = (record) => {
+    if (record.plannerDecision === "registered") return "on-chain registered";
+    if (record.plannerDecision === "approved") return "approved for signature";
+    if (record.plannerDecision === "rejected") return "planner rejected";
+    if (record.machineStatus === "rejected") return "machine rejected";
+    return "candidate sample";
+  };
+
+  const appendAuditEvent = (event) => {
+    setAuditEvents((previous) => [
+      {
+        timestamp: new Date().toISOString(),
+        actor: currentAccount || "planner-session",
+        ...event,
+      },
+      ...previous,
+    ].slice(0, 12));
+  };
 
   // Connect wallet & contracts
   const connectToBlockchain = async () => {
@@ -284,6 +343,16 @@ const setShowNotification = (msg) => {
       acPower: prediction.acPower,
       sandia_module_name: "Canadian_Solar_CS5P_220M___2009_",
       cec_inverter_name: "ABB__MICRO_0_25_I_OUTD_US_208__208V_",
+      evidence: buildRegistrationEvidence({
+        id: "manual-map-selection",
+        city: "Planner-selected coordinate",
+        timestamp: isoTimestamp,
+        acPower: prediction.acPower,
+        dcPower: prediction.dcPower,
+        pReportedW: prediction.acPower,
+        pMaxW: prediction.dcPower,
+        machineStatus: "verified",
+      }),
     });
 
     setShowTradeScript(true);
@@ -366,6 +435,49 @@ const setShowNotification = (msg) => {
   setPendingPanelLocation(null);
   setShowTradeScript(false);
 };
+
+  const beginRegistrationFromRecord = (record) => {
+    const evidence = buildRegistrationEvidence(record);
+    const updated = { ...record, plannerDecision: "approved" };
+    setSelectedVerification(updated);
+    setPendingPanelLocation({ lat: record.lat, lng: record.lng });
+    setTradeScriptData({
+      lat: record.lat,
+      lng: record.lng,
+      batteryTemp: record.airTemp,
+      dcPower: Math.max(0, record.pMaxW),
+      acPower: Math.max(0, Math.min(record.pReportedW, record.pMaxW || record.pReportedW)),
+      sandia_module_name: `${record.city} DER node ${record.nodeId}`,
+      cec_inverter_name: "Physics-bounded planner verification",
+      evidence,
+    });
+    setShowTradeScript(true);
+    setVerificationRecords((previous) =>
+      previous.map((item) =>
+        item.id === record.id ? updated : item
+      )
+    );
+    appendAuditEvent({
+      type: "planner-reviewed",
+      recordId: record.id,
+      decision: "approved",
+      reason: "Planner approved node for wallet signature",
+    });
+  };
+
+  const rejectVerificationRecord = (record) => {
+    const updated = { ...record, plannerDecision: "rejected" };
+    setVerificationRecords((previous) =>
+      previous.map((item) => item.id === record.id ? updated : item)
+    );
+    setSelectedVerification(updated);
+    appendAuditEvent({
+      type: "planner-reviewed",
+      recordId: record.id,
+      decision: "rejected",
+      reason: "Reported generation exceeds the machine-computed physics boundary",
+    });
+  };
 
 
   // Show notification
@@ -648,8 +760,8 @@ const setShowNotification = (msg) => {
       }
     });
 
-    const panelsToShow = showMyPanels ? myPanels : allPanels;
-    const factoriesToShow = showMyPanels ? myFactories : allFactories;
+    const panelsToShow = layerVisibility.panels ? (showMyPanels ? myPanels : allPanels) : [];
+    const factoriesToShow = layerVisibility.factories ? (showMyPanels ? myFactories : allFactories) : [];
 
     const solarIcon = L.divIcon({
       className: "solar-marker",
@@ -706,7 +818,81 @@ const setShowNotification = (msg) => {
       });
     });
 
-  }, [mapInstance, allPanels, myPanels, allFactories, myFactories, showMyPanels]);
+    const verificationIcon = (record) => {
+      const stageClass = record.plannerDecision === "registered"
+        ? "registered"
+        : record.plannerDecision === "rejected"
+          ? "rejected"
+          : record.riskLevel;
+      const label = record.plannerDecision === "registered"
+        ? "ON"
+        : record.machineStatus === "rejected" || record.riskLevel === "high"
+          ? "!"
+          : "DER";
+
+      return L.divIcon({
+      className: `verification-marker verification-${stageClass}`,
+      html: `<span>${label}</span>`,
+      iconSize: [30, 30],
+      iconAnchor: [15, 15],
+      popupAnchor: [0, -15],
+    });
+    };
+
+    const recordsToShow = layerVisibility.samples ? verificationRecords : verificationRecords.filter((record) => record.plannerDecision === "registered");
+    recordsToShow.forEach((record) => {
+      const marker = L.marker([record.lat, record.lng], { icon: verificationIcon(record) })
+        .addTo(mapInstance);
+
+      marker.on("click", () => {
+        setSelectedVerification(record);
+      });
+    });
+
+  }, [mapInstance, allPanels, myPanels, allFactories, myFactories, showMyPanels, verificationRecords, layerVisibility]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    loadUrbanVerificationData()
+      .then(({ verificationRecords: records, liquidityRecords: liquidity }) => {
+        if (!isMounted) return;
+        setVerificationRecords(records);
+        setLiquidityRecords(liquidity);
+        setSelectedVerification(records[0] || null);
+      })
+      .catch((error) => {
+        console.error("Failed to load urban verification data:", error);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleAuditEvent = (event) => {
+      const detail = event.detail || {};
+      appendAuditEvent(detail);
+      if (detail.recordId) {
+        setVerificationRecords((previous) =>
+          previous.map((record) =>
+            record.id === detail.recordId
+              ? { ...record, plannerDecision: "registered" }
+              : record
+          )
+        );
+        setSelectedVerification((previous) =>
+          previous?.id === detail.recordId
+            ? { ...previous, plannerDecision: "registered" }
+            : previous
+        );
+      }
+    };
+
+    window.addEventListener("plannerAuditEvent", handleAuditEvent);
+    return () => window.removeEventListener("plannerAuditEvent", handleAuditEvent);
+  }, [currentAccount]);
 
 
     // Add panels fetched from blockchain
@@ -726,66 +912,189 @@ const setShowNotification = (msg) => {
       >
         <div className="header-overlay">
           <div className="header-content">
-            <h2 className="header-title">Solar Panel Network</h2>
-            <p className="header-subtitle">Right-click the map to open the creation menu</p>
+            <h2 className="header-title">Planner Decision Console</h2>
+            <p className="header-subtitle">Machine boundary check, planner review, wallet signature, on-chain registration</p>
           </div>
         </div>
 
-        {/* Status bar */}
-        <div className="stats-panel stats-reward-panel">
-          <div className="stats-grid">
-            <div className="stat-item">
-              <div className="stat-value">{stats.totalPanels}</div>
-              <div className="stat-label">Total panels</div>
+        <div className="planner-console">
+          <div className="planner-panel planner-overview">
+            <div className="planner-panel-header">
+              <div>
+                <h3>Planner Workbench</h3>
+                <p>Candidate DER samples become registered solar panels only after expert review.</p>
+              </div>
+              <span className="planner-badge">{liquidityRecords.length} market hours</span>
             </div>
-            <div className="stat-item">
-              <div className="stat-value">{Number(stats.totalPower || 0).toFixed(2)}W</div>
-              <div className="stat-label">Total generation</div>
+            <div className="planner-metrics">
+              <div>
+                <strong>{plannerStats.verified}</strong>
+                <span>Verified DER</span>
+              </div>
+              <div>
+                <strong>{plannerStats.rejected}</strong>
+                <span>Rejected FDIA</span>
+              </div>
+              <div>
+                <strong>{plannerStats.registered}</strong>
+                <span>On-chain</span>
+              </div>
+              <div>
+                <strong>{plannerStats.marketReadyMW.toFixed(3)}</strong>
+                <span>Ready MW</span>
+              </div>
             </div>
-            <div className="stat-item">
-              <div className="stat-value">{stats.myPanelsCount}</div>
-              <div className="stat-label">My panels</div>
+            <div className="layer-controls">
+              <div className="panel-scope-toggle">
+                <button
+                  className={!showMyPanels ? "active" : ""}
+                  onClick={() => setShowMyPanels(false)}
+                >
+                  All assets
+                </button>
+                <button
+                  className={showMyPanels ? "active" : ""}
+                  onClick={() => setShowMyPanels(true)}
+                >
+                  My assets
+                </button>
+              </div>
+              {[
+                ["samples", "Candidate DER Samples"],
+                ["panels", "On-chain Solar Panels"],
+                ["factories", "Factory Demand Nodes"],
+              ].map(([key, label]) => (
+                <label key={key} className="layer-toggle">
+                  <input
+                    type="checkbox"
+                    checked={layerVisibility[key]}
+                    onChange={() => setLayerVisibility((previous) => ({
+                      ...previous,
+                      [key]: !previous[key],
+                    }))}
+                  />
+                  <span>{label}</span>
+                </label>
+              ))}
             </div>
-            <div className="stat-item">
-              <div className="stat-value">{Number(stats.myPanelsPower || 0).toFixed(2)}W</div>
-              <div className="stat-label">My generation</div>
+            <div className="planner-reward-compact">
+              <span>
+                Reward:
+                {cooldownRemaining === null
+                  ? " loading"
+                  : cooldownRemaining > 0
+                    ? ` ${Math.floor(cooldownRemaining / 60)}m ${cooldownRemaining % 60}s`
+                    : " ready"}
+              </span>
+              <button
+                onClick={claimReward}
+                disabled={cooldownRemaining > 0 || !isClaimable}
+              >
+                Claim {rewardPreview ? Number(ethers.utils.formatUnits(rewardPreview, 18)).toFixed(2) : "..."} SOLR
+              </button>
             </div>
           </div>
-          <div className="reward-section">
-            <p className="reward-countdown">
-              Reward countdown:
-              {cooldownRemaining === null
-                ? "Loading..."
-                : cooldownRemaining > 0
-                  ? `${Math.floor(cooldownRemaining / 60)}m ${cooldownRemaining % 60}s`
-                  : "Ready to claim"}
-            </p>
-            <button
-              className="button"
-              onClick={claimReward}
-              disabled={cooldownRemaining > 0 || !isClaimable}
-            >
-              Claim reward ({rewardPreview ? ethers.utils.formatUnits(rewardPreview, 18) : "Loading..."} SOLR)
-            </button>
+
+          <div className="planner-panel planner-queue">
+            <div className="planner-panel-header compact">
+              <div>
+                <h3>Candidate DER Queue</h3>
+                <p>{verificationRecords.length} machine-checked samples</p>
+              </div>
+            </div>
+            <div className="verification-list">
+              {verificationRecords.slice(0, 10).map((record) => (
+                <button
+                  key={record.id}
+                  className={`verification-row ${selectedVerification?.id === record.id ? "active" : ""} ${record.plannerDecision}`}
+                  onClick={() => setSelectedVerification(record)}
+                >
+                  <span className={`risk-dot ${record.riskLevel}`}></span>
+                  <span>
+                    <strong>{record.nodeId}</strong>
+                    <small>{record.city} H{String(record.hour).padStart(2, "0")} · {getRecordStage(record)}</small>
+                  </span>
+                  <span className="verification-values">
+                    {record.pReportedW.toFixed(0)} / {record.pMaxW.toFixed(0)} W
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="planner-panel evidence-panel">
+            <div className="planner-panel-header">
+              <div>
+                <h3>Review & Convert</h3>
+                <p>{selectedVerification ? `${selectedVerification.city} - ${selectedVerification.nodeId} - ${getRecordStage(selectedVerification)}` : "Select a node"}</p>
+              </div>
+              {selectedVerification && (
+                <span className={`status-pill ${selectedVerification.riskLevel}`}>
+                  {selectedVerification.riskLevel} risk
+                </span>
+              )}
+            </div>
+            {selectedVerification ? (
+              <>
+                <div className="evidence-grid">
+                  <div><span>Irradiance</span><strong>{selectedVerification.irradiance.toFixed(1)} W/m2</strong></div>
+                  <div><span>Air Temp</span><strong>{selectedVerification.airTemp.toFixed(1)} C</strong></div>
+                  <div><span>P_max</span><strong>{selectedVerification.pMaxW.toFixed(1)} W</strong></div>
+                  <div><span>Reported</span><strong>{selectedVerification.pReportedW.toFixed(1)} W</strong></div>
+                  <div><span>Residual</span><strong>{selectedVerification.residualW.toFixed(1)} W</strong></div>
+                  <div><span>Machine</span><strong>{selectedVerification.machineStatus}</strong></div>
+                  <div><span>Asset Type</span><strong>Candidate DER Sample</strong></div>
+                  <div><span>Nearest Demand</span><strong>{nearestFactory ? `Factory #${nearestFactory.id}` : "No factory registered"}</strong></div>
+                </div>
+                <div className="lifecycle-strip">
+                  <span className="done">Machine computed</span>
+                  <span className={selectedVerification.plannerDecision !== "pending" ? "done" : ""}>Planner reviewed</span>
+                  <span className={selectedVerification.plannerDecision === "registered" ? "done" : ""}>Wallet signed</span>
+                  <span className={selectedVerification.plannerDecision === "registered" ? "done" : ""}>On-chain panel</span>
+                </div>
+                <div className="review-actions">
+                  <button
+                    className="review-approve"
+                    onClick={() => beginRegistrationFromRecord(selectedVerification)}
+                    disabled={selectedVerification.plannerDecision === "registered"}
+                  >
+                    Approve & convert to solar panel
+                  </button>
+                  <button
+                    className="review-reject"
+                    onClick={() => rejectVerificationRecord(selectedVerification)}
+                  >
+                    Reject FDIA
+                  </button>
+                </div>
+              </>
+            ) : (
+              <p className="planner-empty">Select a queue record or map marker.</p>
+            )}
+          </div>
+
+          <div className="planner-panel audit-panel">
+            <div className="planner-panel-header">
+              <div>
+                <h3>Audit Trail</h3>
+                <p>Shows how a candidate sample becomes a chain-backed asset.</p>
+              </div>
+            </div>
+            <div className="audit-list">
+              {auditEvents.length ? auditEvents.map((event, index) => (
+                <div className="audit-event" key={`${event.timestamp}-${index}`}>
+                  <span className="audit-type">{event.type || "audit"}</span>
+                  <strong>{event.decision || event.recordId}</strong>
+                  <small>{event.recordId} - {new Date(event.timestamp).toLocaleTimeString()}</small>
+                  {event.txHash && <small className="audit-hash">{event.txHash.slice(0, 10)}...{event.txHash.slice(-6)}</small>}
+                </div>
+              )) : (
+                <p className="planner-empty">Review decisions will appear here during this session.</p>
+              )}
+            </div>
           </div>
         </div>
 
-
-        {/* Controls */}
-        <div className="toggle-panel">
-          <button
-            className={`toggle-btn ${!showMyPanels ? "active" : ""}`}
-            onClick={() => setShowMyPanels(false)}
-          >
-            <i className="fas fa-globe"></i> All Solar Panels
-          </button>
-          <button
-            className={`toggle-btn ${showMyPanels ? "active" : ""}`}
-            onClick={() => setShowMyPanels(true)}
-          >
-            <i className="fas fa-user"></i> My Solar Panels
-          </button>
-        </div>
 
         {/* Panel details */}
         {showPanelDetails && selectedPanel && (
@@ -859,6 +1168,7 @@ const setShowNotification = (msg) => {
           acPower={tradeScriptData.acPower}
           sandiaModuleName={tradeScriptData.sandia_module_name}
           cecInverterName={tradeScriptData.cec_inverter_name}
+          evidence={tradeScriptData.evidence}
         />
       )}
       {showFactoryModal && pendingFactoryLocation && (

@@ -2,6 +2,7 @@ export { default as Navbar } from "./Navbar";
 
 export { default as Footer } from "./Footer";
 export { default as Transactions } from "./Transactions";
+export { default as MarketImpact } from "./MarketImpact";
 export { default as MapSection } from "./MapSection";
 export { default as Sidebar } from "./Sidebar";
 export { default as PanelWindows } from "./PanelWindows";
