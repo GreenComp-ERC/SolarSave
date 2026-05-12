@@ -1,5 +1,3 @@
-const DATASET_LIMIT = 120;
-
 const parseCsvLine = (line) => {
   const cells = [];
   let current = "";
@@ -133,18 +131,8 @@ export const loadUrbanVerificationData = async () => {
     baselineSlippagePct: toNumber(row.slippage_baseline_pct),
   }));
 
-  const highRisk = generationRows
-    .map(mapGenerationRow)
-    .filter((record) => record.riskLevel === "high")
-    .slice(0, 24);
-
-  const verified = generationRows
-    .map(mapGenerationRow)
-    .filter((record) => record.machineStatus === "verified" && record.pMaxW > 0)
-    .slice(0, DATASET_LIMIT - highRisk.length);
-
   return {
-    verificationRecords: [...highRisk, ...verified],
+    verificationRecords: generationRows.map(mapGenerationRow),
     liquidityRecords: liquidityRows,
   };
 };

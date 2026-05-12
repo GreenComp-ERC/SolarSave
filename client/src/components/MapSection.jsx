@@ -144,6 +144,33 @@ const MapSection = () => {
     }, null);
   }, [selectedVerification, allFactories]);
 
+  const mapVerificationRecords = React.useMemo(() => {
+    const byNode = new Map();
+
+    verificationRecords.forEach((record) => {
+      const existing = byNode.get(record.nodeId);
+      if (!existing) {
+        byNode.set(record.nodeId, record);
+        return;
+      }
+
+      const existingScore =
+        (existing.plannerDecision === "registered" ? 4 : 0) +
+        (existing.riskLevel === "high" ? 3 : existing.riskLevel === "medium" ? 2 : 1) +
+        Math.min(existing.pMaxW, existing.pReportedW) / 100000;
+      const recordScore =
+        (record.plannerDecision === "registered" ? 4 : 0) +
+        (record.riskLevel === "high" ? 3 : record.riskLevel === "medium" ? 2 : 1) +
+        Math.min(record.pMaxW, record.pReportedW) / 100000;
+
+      if (recordScore > existingScore) {
+        byNode.set(record.nodeId, record);
+      }
+    });
+
+    return Array.from(byNode.values());
+  }, [verificationRecords]);
+
   const getRecordStage = (record) => {
     if (record.plannerDecision === "registered") return "on-chain registered";
     if (record.plannerDecision === "approved") return "approved for signature";
@@ -839,7 +866,9 @@ const setShowNotification = (msg) => {
     });
     };
 
-    const recordsToShow = layerVisibility.samples ? verificationRecords : verificationRecords.filter((record) => record.plannerDecision === "registered");
+    const recordsToShow = layerVisibility.samples
+      ? mapVerificationRecords
+      : mapVerificationRecords.filter((record) => record.plannerDecision === "registered");
     recordsToShow.forEach((record) => {
       const marker = L.marker([record.lat, record.lng], { icon: verificationIcon(record) })
         .addTo(mapInstance);
@@ -849,7 +878,7 @@ const setShowNotification = (msg) => {
       });
     });
 
-  }, [mapInstance, allPanels, myPanels, allFactories, myFactories, showMyPanels, verificationRecords, layerVisibility]);
+  }, [mapInstance, allPanels, myPanels, allFactories, myFactories, showMyPanels, mapVerificationRecords, layerVisibility]);
 
   useEffect(() => {
     let isMounted = true;
@@ -917,93 +946,94 @@ const setShowNotification = (msg) => {
           </div>
         </div>
 
-        <div className="planner-console">
-          <div className="planner-panel planner-overview">
-            <div className="planner-panel-header">
-              <div>
-                <h3>Planner Workbench</h3>
-                <p>Candidate DER samples become registered solar panels only after expert review.</p>
-              </div>
-              <span className="planner-badge">{liquidityRecords.length} market hours</span>
+        <div className="planner-panel planner-overview">
+          <div className="planner-panel-header">
+            <div>
+              <h3>Planner Workbench</h3>
+              <p>Candidate DER samples become registered solar panels only after expert review.</p>
             </div>
-            <div className="planner-metrics">
-              <div>
-                <strong>{plannerStats.verified}</strong>
-                <span>Verified DER</span>
-              </div>
-              <div>
-                <strong>{plannerStats.rejected}</strong>
-                <span>Rejected FDIA</span>
-              </div>
-              <div>
-                <strong>{plannerStats.registered}</strong>
-                <span>On-chain</span>
-              </div>
-              <div>
-                <strong>{plannerStats.marketReadyMW.toFixed(3)}</strong>
-                <span>Ready MW</span>
-              </div>
+            <span className="planner-badge">{liquidityRecords.length} market hours</span>
+          </div>
+          <div className="planner-metrics">
+            <div>
+              <strong>{plannerStats.verified}</strong>
+              <span>Verified DER</span>
             </div>
-            <div className="layer-controls">
-              <div className="panel-scope-toggle">
-                <button
-                  className={!showMyPanels ? "active" : ""}
-                  onClick={() => setShowMyPanels(false)}
-                >
-                  All assets
-                </button>
-                <button
-                  className={showMyPanels ? "active" : ""}
-                  onClick={() => setShowMyPanels(true)}
-                >
-                  My assets
-                </button>
-              </div>
-              {[
-                ["samples", "Candidate DER Samples"],
-                ["panels", "On-chain Solar Panels"],
-                ["factories", "Factory Demand Nodes"],
-              ].map(([key, label]) => (
-                <label key={key} className="layer-toggle">
-                  <input
-                    type="checkbox"
-                    checked={layerVisibility[key]}
-                    onChange={() => setLayerVisibility((previous) => ({
-                      ...previous,
-                      [key]: !previous[key],
-                    }))}
-                  />
-                  <span>{label}</span>
-                </label>
-              ))}
+            <div>
+              <strong>{plannerStats.rejected}</strong>
+              <span>Rejected FDIA</span>
             </div>
-            <div className="planner-reward-compact">
-              <span>
-                Reward:
-                {cooldownRemaining === null
-                  ? " loading"
-                  : cooldownRemaining > 0
-                    ? ` ${Math.floor(cooldownRemaining / 60)}m ${cooldownRemaining % 60}s`
-                    : " ready"}
-              </span>
-              <button
-                onClick={claimReward}
-                disabled={cooldownRemaining > 0 || !isClaimable}
-              >
-                Claim {rewardPreview ? Number(ethers.utils.formatUnits(rewardPreview, 18)).toFixed(2) : "..."} SOLR
-              </button>
+            <div>
+              <strong>{plannerStats.registered}</strong>
+              <span>On-chain</span>
+            </div>
+            <div>
+              <strong>{plannerStats.marketReadyMW.toFixed(3)}</strong>
+              <span>Ready MW</span>
             </div>
           </div>
+          <div className="layer-controls">
+            <div className="panel-scope-toggle">
+              <button
+                className={!showMyPanels ? "active" : ""}
+                onClick={() => setShowMyPanels(false)}
+              >
+                All assets
+              </button>
+              <button
+                className={showMyPanels ? "active" : ""}
+                onClick={() => setShowMyPanels(true)}
+              >
+                My assets
+              </button>
+            </div>
+            {[
+              ["samples", "Candidate DER Samples"],
+              ["panels", "On-chain Solar Panels"],
+              ["factories", "Factory Demand Nodes"],
+            ].map(([key, label]) => (
+              <label key={key} className="layer-toggle">
+                <input
+                  type="checkbox"
+                  checked={layerVisibility[key]}
+                  onChange={() => setLayerVisibility((previous) => ({
+                    ...previous,
+                    [key]: !previous[key],
+                  }))}
+                />
+                <span>{label}</span>
+              </label>
+            ))}
+          </div>
+          <div className="planner-reward-compact">
+            <span>
+              Reward:
+              {cooldownRemaining === null
+                ? " loading"
+                : cooldownRemaining > 0
+                  ? ` ${Math.floor(cooldownRemaining / 60)}m ${cooldownRemaining % 60}s`
+                  : " ready"}
+            </span>
+            <button
+              onClick={claimReward}
+              disabled={cooldownRemaining > 0 || !isClaimable}
+            >
+              Claim {rewardPreview ? Number(ethers.utils.formatUnits(rewardPreview, 18)).toFixed(2) : "..."} SOLR
+            </button>
+          </div>
+        </div>
+
+        <div className="planner-console">
 
           <div className="planner-panel planner-queue">
             <div className="planner-panel-header compact">
               <div>
                 <h3>Candidate DER Queue</h3>
-                <p>{verificationRecords.length} machine-checked samples</p>
+                <p>{verificationRecords.length} hourly samples across {mapVerificationRecords.length} DER nodes</p>
               </div>
             </div>
             <div className="verification-list">
-              {verificationRecords.slice(0, 10).map((record) => (
+              {verificationRecords.map((record) => (
                 <button
                   key={record.id}
                   className={`verification-row ${selectedVerification?.id === record.id ? "active" : ""} ${record.plannerDecision}`}
