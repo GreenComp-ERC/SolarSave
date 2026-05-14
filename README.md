@@ -2,9 +2,9 @@
 
 ## **Overview**
 
-**SolarChain** is an open-source platform for optimizing distributed solar energy with blockchain, geospatial interaction, and AI-powered forecasting. It combines on-chain asset management, factory-side energy demand, and a simulator-driven market update flow.
+**SolarChain** is an open-source platform for urban distributed-energy verification and blockchain-backed solar asset registration. It combines geospatial interaction, physics-bounded solar modeling, planner review, wallet-signed on-chain registration, factory-side energy demand, and a simulator-driven market update flow.
 
-SolarChain is designed for individuals, communities, and organizations that want transparent energy data, tokenized incentives, and a practical local testbed for renewable energy coordination.
+SolarChain is designed as an interactive decision-support tool for urban planners, energy communities, and researchers. The machine computes physical generation boundaries; the human reviews candidate distributed-energy-resource (DER) samples; approved candidates are cryptographically signed through MetaMask before becoming on-chain solar panels.
 
 Project naming note: the product name is **SolarChain**, while the repository/folder name remains `SolarSave`.
 
@@ -15,19 +15,27 @@ https://github.com/user-attachments/assets/958c321f-7562-49f2-bd08-97209db8f078
 
 ## **Key Features**
 
-### **Interactive Map and Asset Creation**
-- **Solar Panel Registration**: Create and manage solar panels directly from map coordinates.
-- **Factory Registration**: Register factories with location and power consumption to model energy demand on-chain.
-- **Map-Based Discovery**: Browse global and personal assets (panels/factories) with interactive detail views.
+### **Planner Decision Console**
+- **Candidate DER Queue**: Load hourly urban solar samples from CSV and review machine-checked records in a planner-facing queue.
+- **Human-in-the-Loop Verification**: Compare reported power against the physics maximum (`P_max_W`) before approving or rejecting a candidate.
+- **Audit Trail**: Track machine computation, planner review, wallet signature, and on-chain registration in one workflow.
 
-### **AI-Assisted Generation Forecast**
+### **Interactive Map and Asset Creation**
+- **Candidate DER Samples**: Display imported DER records as map markers grouped by `node_id`.
+- **Solar Panel Registration**: Convert approved candidates, or manually selected coordinates, into on-chain solar panels.
+- **Factory Registration**: Register factories with location and power consumption to model energy demand on-chain.
+- **Layer Controls**: Toggle candidate DER samples, on-chain solar panels, and factory demand nodes.
+
+### **Physics-Bounded Generation Verification**
 - **Prediction API Integration**: Uses the simulator API to predict panel values such as battery temperature, DC power, and AC power for selected locations.
-- **Pre-Submission Validation**: Prediction data is shown before panel confirmation to improve data quality.
+- **Boundary-Based Validation**: Imported records include `P_max_W`, `P_reported_W`, FDIA labels, and verification status.
+- **Planner Review Before Submission**: Panel registration requires explicit planner approval before the MetaMask signature and on-chain transaction.
 
 ### **On-Chain Energy Market**
 - **Supply and Demand Tracking**: Maintains global supply energy and total market demand on-chain.
 - **Factory Energy Purchase**: Buy energy for a selected factory using SOLR, with on-chain cost preview.
 - **Factory Energy Balances**: Track per-factory energy balance and deficits in the UI.
+- **Market Impact View**: Compare verified SolarChain liquidity against a no-split baseline and inspect slippage reduction.
 
 ### **Rewards and Cooldown Logic**
 - **Personal Reward Accrual**: Rewards accumulate from simulator market steps.
@@ -73,6 +81,30 @@ Generate the reviewer and canonical research figures:
 ```bash
 conda run -n SolarSave python Simulator/data/visualizations.py
 ```
+
+### **Frontend Dataset Import**
+
+The planner workbench reads static CSV files from `client/public/datasets/`:
+
+| Frontend File | Used For |
+|---------------|----------|
+| `client/public/datasets/spatiotemporal_generation.csv` | Candidate DER queue, map markers, physics-boundary review, FDIA status |
+| `client/public/datasets/market_liquidity.csv` | Market Impact view and SolarChain-vs-baseline liquidity comparison |
+
+To update the client-side candidate data, replace those CSV files and refresh the frontend.
+The queue displays all hourly records from `spatiotemporal_generation.csv`; the map groups
+those records by `node_id`, so 24 hourly samples for one DER node appear as one location
+marker. Approved candidates can be converted into on-chain solar panels through the
+planner review and MetaMask signature workflow.
+
+Important planner metrics:
+
+| Metric | Meaning |
+|--------|---------|
+| **Verified DER** | Candidate records whose machine verification status is `verified`. |
+| **Rejected FDIA** | Candidate records rejected by the physics-boundary check. |
+| **On-chain** | Candidates registered as blockchain solar panels during the current client session. |
+| **Ready MW** | Verified, non-rejected generation estimate, computed from `min(P_reported_W, P_max_W)` and converted from W to MW. |
 
 ### **Dataset Dictionary and Metadata**
 
@@ -334,6 +366,19 @@ Local development fallback (Hardhat):
    - Ensure simulator is running on `127.0.0.1:8000`.
    - Client components call `http://127.0.0.1:8000/run_model/`; if you change backend host/port, update frontend API URLs accordingly.
 
+- **Candidate DER Queue is empty**:
+   - Ensure `client/public/datasets/spatiotemporal_generation.csv` exists.
+   - Confirm the CSV header matches the documented dataset fields.
+   - Refresh the frontend after replacing CSV files.
+
+- **Map shows fewer candidate markers than queue rows**:
+   - This is expected: the queue shows hourly samples, while the map groups samples by `node_id`.
+   - For the bundled dataset, 1,200 hourly records become 50 DER node markers.
+
+- **Approve opens registration but MetaMask does not sign**:
+   - Ensure MetaMask is connected to the expected local/private chain.
+   - Ensure the connected account has enough native gas token and SOLR for the local registration flow.
+
 - **Global Supply / Global Demand is 0**: make sure the simulator is running and that at least one solar panel and factory are created on-chain.
 - **Rewards are 0**: the energy simulator must run at least one step to update the market and reward balances.
 - **Next update stuck at 0m 0s or countdown jumps**:
@@ -348,6 +393,7 @@ Local development fallback (Hardhat):
 ```
 SolarSave/
 ├── client/                         # Frontend code
+│   ├── public/datasets/             # Static CSVs loaded by Planner Workbench
 │   ├── src/                        # Frontend source
 │   │   ├── components/             # Shared React components
 │   │   ├── style/                  # CSS and style files
@@ -382,19 +428,31 @@ SolarSave/
    - Open the frontend application.
    - Connect MetaMask to the local Hardhat network.
 
-2. **Create Solar Panels and Factories**:
-   - Open the frontend application.
-   - Select coordinates on the map and register a solar panel or a factory.
+2. **Review Candidate DER Samples**:
+   - Open the Planner Decision Console.
+   - Use the left-side Planner Workbench to inspect verification metrics and toggle data layers.
+   - Select an hourly record from Candidate DER Queue or click a DER marker on the map.
 
-3. **Run Market Updates with Simulator**:
+3. **Approve, Reject, or Convert a Candidate**:
+   - Review irradiance, air temperature, `P_max_W`, reported power, residual, and risk status.
+   - Reject suspicious FDIA records without sending an on-chain transaction.
+   - Approve trusted candidates and use the Planner Review & Registration window to sign and register them as on-chain solar panels.
+
+4. **Create Manual Solar Panels and Factories**:
+   - Right-click the map to manually create a solar panel or register a factory.
+   - Manual panel creation still uses simulator prediction data and now passes through planner review before wallet signature.
+   - Factory registration saves location and consumption for demand-side market modeling.
+
+5. **Run Market Updates with Simulator**:
    - Start the simulator to generate/update panel output.
    - Let the simulator update market supply, demand, and personal rewards.
 
-4. **Trade and Allocate Energy**:
+6. **Trade and Allocate Energy**:
    - Use the market dashboard to inspect global supply/demand.
    - Purchase energy for factories and monitor factory balances.
+   - Use Market Impact to compare verified SolarChain liquidity with the no-split baseline.
 
-5. **Claim Rewards and Manage SOLR**:
+7. **Claim Rewards and Manage SOLR**:
    - Claim personal rewards when cooldown allows.
    - Manage SOLR balances and transfers through wallet UI.
 
@@ -432,7 +490,9 @@ This project is licensed under the [MIT License](LICENSE).
 
 ## **Future Plans**
 
-- **Machine Learning Integration**: Improve the accuracy of efficiency predictions.
+- **Dataset Upload UI**: Add browser-side CSV upload for candidate DER and market-liquidity records.
+- **Machine Learning Integration**: Improve FDIA detection and generation-boundary confidence scoring.
+- **Planner Collaboration**: Support multi-reviewer approval policies and persistent audit logs.
 - **Cross-chain Support**: Extend to other blockchain platforms.
 - **Advanced Market Strategy**: Improve matching between distributed generation and factory demand.
 
