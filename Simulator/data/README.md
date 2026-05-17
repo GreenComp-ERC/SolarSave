@@ -45,3 +45,13 @@ following English-language PNG figures to `visualizations/`:
 - `canonical_04_geospatial_der_distribution.png`
 - `canonical_05_digital_physical_correlation.png`
 - `canonical_06_intra_city_generation_boxplots.png`
+
+GeoJSON-based map figures can be generated separately:
+
+```powershell
+conda run -n SolarSave python Simulator\data\generate_map_figures.py
+```
+
+This writes China-wide, FDIA pie-map, and city-inset map figures to
+`visualizations/` and caches the downloaded China boundary in
+`assets/china_map/`.
